@@ -1,80 +1,57 @@
-import React, { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+// import React, { useState } from "react";
+// import { Routes, Route, Navigate } from "react-router-dom";
 
-import Sidebar from "./components/Sidebar";
-import Topbar from "./components/Topbar";
-import Supplier from "./pages/Supplier";
-import Agent from "./pages/Agent";
-// import Login from "./pages/Login"; // ✅ path apne project ke hisaab se
+// import React, { useState } from 'react';
+// import Sidebar from './components/Sidebar';
+// import Topbar from './components/Topbar';
+// import EmployeeTypeCard from './components/EmployeeTypeCard';
 
-function ProtectedRoute({ isAuth, children }) {
-  // if (!isAuth) return <Navigate to="/login" replace />;
-  return children;
-}
+// function App() {
+//   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
+//   return (
+//     <div className="flex h-screen bg-gray-50">
+//       {/* Sidebar */}
+//       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300`}>
+//         <Sidebar isOpen={sidebarOpen} />
+//       </div>
 
-  // ✅ dashboard layout (only when logged in)
-  const DashboardLayout = ({ children }) => (
-    <div className="flex h-screen bg-gray-50">
-      <div className={`${sidebarOpen ? "w-64" : "w-20"} transition-all duration-300`}>
-        <Sidebar isOpen={sidebarOpen} />
-      </div>
+//       {/* Main Content */}
+//       <div className="flex-1 flex flex-col overflow-hidden">
+//         {/* Topbar */}
+//         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isSidebarOpen={sidebarOpen} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-          isSidebarOpen={sidebarOpen}
-        />
+//         {/* Main Content Area */}
+//         <main className="flex-1 overflow-y-auto  bg-gray-50">
 
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
 
+
+//         </main>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default App;
+
+
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './components/Login/Login';
+import Dashboard from './Dashboard';
+import { ToastContainer } from 'react-toastify';
+
+
+function App() {
   return (
-    <Routes>
-      <Route path="/login" element={isAuth ? (<Navigate to="/supplier" replace />) : (
-        <Login onLogin={() => setIsAuth(true)} />
-      )
-      }
-      />
-
-      {/* ✅ Protected Routes */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute isAuth={isAuth}>
-            <Navigate to="/supplier" replace />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/supplier"
-        element={
-          <ProtectedRoute isAuth={isAuth}>
-            <DashboardLayout>
-              <Supplier />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/agent"
-        element={
-          <ProtectedRoute isAuth={isAuth}>
-            <DashboardLayout>
-              <Agent />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+      <ToastContainer />
+    </BrowserRouter>
   );
 }
+
+export default App;
