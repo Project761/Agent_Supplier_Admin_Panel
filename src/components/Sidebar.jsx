@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  FiChevronDown,
-  FiTruck,
-  FiUserCheck,
-  FiCircle,
-} from "react-icons/fi";
+import { FiChevronDown, FiTruck, FiUserCheck, FiCircle, } from "react-icons/fi";
 
 const items = [
   {
@@ -25,8 +20,10 @@ const items = [
   },
 ];
 
-export default function Sidebar({ isOpen }) {
-  const [openKey, setOpenKey] = useState("Supplier"); // default open
+const Sidebar = ({ isOpen }) => {
+
+  const UserData = JSON.parse(localStorage.getItem("UserData"));
+  const [openKey, setOpenKey] = useState("Supplier");
 
   const toggle = (label) => {
     setOpenKey((prev) => (prev === label ? null : label));
@@ -34,9 +31,8 @@ export default function Sidebar({ isOpen }) {
 
   return (
     <aside
-      className={`h-full bg-white border-r border-slate-200 flex flex-col ${
-        isOpen ? "w-64" : "w-20"
-      } transition-all duration-300`}
+      className={`h-full bg-white border-r border-slate-200 flex flex-col ${isOpen ? "w-64" : "w-20"
+        } transition-all duration-300`}
     >
       <div className="flex items-center justify-center h-16 border-b border-slate-200">
         <h1 className={`font-semibold ${isOpen ? "text-xl" : "text-lg"}`}>
@@ -55,11 +51,10 @@ export default function Sidebar({ isOpen }) {
               <button
                 type="button"
                 onClick={() => toggle(item.label)}
-                className={`w-full flex items-center gap-3 rounded-lg p-3 text-sm font-medium transition-colors ${
-                  isExpanded
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
+                className={`w-full flex items-center gap-3 rounded-lg p-3 text-sm font-medium transition-colors ${isExpanded
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-slate-600 hover:bg-slate-100"
+                  }`}
                 title={!isOpen ? item.label : undefined}
               >
                 <Icon className="text-lg flex-shrink-0" />
@@ -71,9 +66,8 @@ export default function Sidebar({ isOpen }) {
                     </span>
 
                     <FiChevronDown
-                      className={`text-lg transition-transform ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
+                      className={`text-lg transition-transform ${isExpanded ? "rotate-180" : ""
+                        }`}
                     />
                   </>
                 )}
@@ -117,3 +111,4 @@ export default function Sidebar({ isOpen }) {
     </aside>
   );
 }
+export default Sidebar;

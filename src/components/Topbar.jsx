@@ -1,7 +1,25 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FiMenu, FiSearch, FiBell, FiMail, FiSun } from "react-icons/fi";
+import ProfileCard from "./ProfileCard";
 
-export default function Topbar({ onMenuClick, isSidebarOpen }) {
+const Topbar = ({ onMenuClick, isSidebarOpen }) => {
+
+    const [showProfile, setShowProfile] = useState(false);
+    const profileRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setShowProfile(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+
+
     return (
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:px-6">
             <div className="flex items-center">
@@ -51,9 +69,27 @@ export default function Topbar({ onMenuClick, isSidebarOpen }) {
                     <span className="sr-only">View messages</span>
                 </button>
 
-                <div className="ml-2 hidden h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-blue-100 shadow-sm sm:block">
-                    <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600">JD</div>
+                <div className="relative" ref={profileRef}>
+                    {/* Avatar */}
+                    <div
+                        className="ml-2 h-10 w-10 cursor-pointer overflow-hidden rounded-full border-2 border-white bg-blue-100 shadow-sm"
+                        onClick={() => setShowProfile(prev => !prev)}
+                    >
+                        <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600">
+                            JD
+                        </div>
+                    </div>
+
+                    {/* Dropdown */}
+                    {showProfile && (
+                        <div className="absolute right-0 top-12 z-50">
+                            <ProfileCard />
+                        </div>
+                    )}
                 </div>
+
+
+
             </div>
         </header>
     );
@@ -67,3 +103,6 @@ function IconBtn({ children, dot }) {
         </button>
     );
 }
+
+
+export default Topbar;
