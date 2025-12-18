@@ -2,9 +2,9 @@ import React, { useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { FiTrash2 } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
-import SupplierModal from "../components/SupplierModal";
+import AgentModal from "../components/AgentModal";
 
-export default function Supplier() {
+export default function Agent() {
     const [supplierForm, setSupplierForm] = useState({
         fullName: "",
         email: "",
@@ -203,7 +203,7 @@ export default function Supplier() {
                             }}
                             className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer"
                         >
-                            Add Supplier
+                            Add Agent
                         </button>
                     </div>
 
@@ -224,7 +224,7 @@ export default function Supplier() {
                 
 
                 {/* ✅ Modal */}
-                <SupplierModal
+                <AgentModal
                     open={open}
                     onClose={() => setOpen(false)}
                     onSave={handleSaveItem}
