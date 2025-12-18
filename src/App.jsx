@@ -1,33 +1,80 @@
+import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
-import EmployeeTypeCard from './components/EmployeeTypeCard';
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import Supplier from "./pages/Supplier";
+import Agent from "./pages/Agent";
+// import Login from "./pages/Login"; // ✅ path apne project ke hisaab se
 
-function App() {
+function ProtectedRoute({ isAuth, children }) {
+  // if (!isAuth) return <Navigate to="/login" replace />;
+  return children;
+}
+
+export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
 
-  return (
+  // ✅ dashboard layout (only when logged in)
+  const DashboardLayout = ({ children }) => (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300`}>
+      <div className={`${sidebarOpen ? "w-64" : "w-20"} transition-all duration-300`}>
         <Sidebar isOpen={sidebarOpen} />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar */}
-        <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isSidebarOpen={sidebarOpen} />
+        <Topbar
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          isSidebarOpen={sidebarOpen}
+        />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto  bg-gray-50">
-
-
-
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
+          {children}
         </main>
       </div>
     </div>
   );
-}
 
-export default App;
+  return (
+    <Routes>
+      <Route path="/login" element={isAuth ? (<Navigate to="/supplier" replace />) : (
+        <Login onLogin={() => setIsAuth(true)} />
+      )
+      }
+      />
+
+      {/* ✅ Protected Routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute isAuth={isAuth}>
+            <Navigate to="/supplier" replace />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/supplier"
+        element={
+          <ProtectedRoute isAuth={isAuth}>
+            <DashboardLayout>
+              <Supplier />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/agent"
+        element={
+          <ProtectedRoute isAuth={isAuth}>
+            <DashboardLayout>
+              <Agent />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
