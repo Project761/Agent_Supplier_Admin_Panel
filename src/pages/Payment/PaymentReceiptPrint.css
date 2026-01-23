@@ -1,0 +1,175 @@
+/* =========================
+   COMMON STYLES (UI + PRINT)
+========================= */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.invoice-page {
+    width: 100%;
+}
+
+.print-area {
+    padding: 10px;
+}
+
+.receipt-wrapper {
+    max-width: 700px;
+    margin: auto;
+}
+
+.receipt-header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.receipt-header .annexure {
+    color: #0284c7;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.receipt-header .title {
+    color: #f97316;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* 🔥 MAIN TITLE */
+.print-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+/* =========================
+   RECEIPT BOX
+========================= */
+
+.receipt-box {
+    border: 2px solid #4b5563;
+    padding: 20px;
+}
+
+/* ROW STRUCTURE */
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.row.full {
+    justify-content: flex-start;
+}
+
+/* COLUMN */
+.col {
+    width: 48%;
+    display: flex;
+    align-items: center;
+}
+
+/* LABEL / VALUE */
+.label {
+    min-width: 150px;
+    font-size: 14px;
+}
+
+.colon {
+    margin: 0 6px;
+}
+
+.value {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* 🔥 DATE FIX */
+.date-value {
+    white-space: nowrap;
+}
+
+/* DIVIDER */
+.divider {
+    border-top: 1px solid #6b7280;
+    margin: 18px 0;
+}
+
+/* SIGNATURE */
+.signature-row {
+    display: flex;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.signature-line {
+    flex: 1;
+    border-bottom: 1px solid #4b5563;
+    margin-left: 10px;
+}
+
+/* =========================
+   PRINT STYLES
+========================= */
+
+@media print {
+
+    body {
+        margin: 0;
+    }
+
+    /* Hide Buttons */
+    .print-button-container {
+        display: none !important;
+    }
+
+    .print-area {
+        padding: 0;
+    }
+
+    .receipt-wrapper {
+        max-width: 100%;
+        margin: auto;
+    }
+
+    .print-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .receipt-box {
+        border: 2px solid #000;
+        padding: 18px;
+    }
+
+    .row {
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .col {
+        display: flex;
+        align-items: center;
+    }
+
+    .label {
+        min-width: 140px;
+        font-size: 13px;
+    }
+
+    .value {
+        font-size: 13px;
+    }
+
+    .date-value {
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .divider {
+        border-top: 1px solid #000;
+    }
+}

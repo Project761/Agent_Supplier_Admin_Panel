@@ -1,37 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import DataTable from "react-data-table-component";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
+import { PostWithToken } from "../ApiMethods/ApiMethods";
+import { toastifySuccess } from "../Utility/Utility";
 
-/**
- * Props:
- * open: boolean
- * onClose: () => void
- * onSave: (itemPayload) => void              // item save (table)
- * editData?: item row to edit (optional)
- * onSaveSupplier?: (supplierPayload) => void // optional (top form)
- */
-export default function SupplierModal({
-    open,
-    onClose,
-    onSave,
-    editData,
-    onSaveSupplier,
-}) {
-    const inputCls =
-        "w-full rounded-sm border border-slate-200 px-4 py-2.5 text-sm " +
-        "outline-none transition " +
-        "focus:border-[#2563eb] focus:shadow-[0_0_0_1px_#2563eb]";
+const AgentModal = ({ open, onClose, onSave, editData, onSuccess }) => {
+    const inputCls = "w-full rounded-sm border border-slate-200 px-4 py-2.5 text-sm " + "outline-none transition " + "focus:border-[#2563eb] focus:shadow-[0_0_0_1px_#2563eb]";
 
-    /* ---------------- Supplier Form (TOP) ---------------- */
-    const [supplierForm, setSupplierForm] = useState({
-        fullName: "",
-        mobile: "",
+
+    const [value, setvalue] = useState({
+        ReferenceName: "",
+        MobileNo: "",
         firmName: "",
         email: "",
         gst: "",
         address: "",
+        commission: "",
     });
 
     const [rows, setRows] = useState([
@@ -55,40 +41,16 @@ export default function SupplierModal({
 
     const handleSupplierChange = (key) => (e) => {
         let v = e.target.value;
-
-        if (key === "mobile") {
+        if (key === "MobileNo") {
             v = v.replace(/\D/g, "").slice(0, 10);
         }
-
-        setSupplierForm((p) => ({ ...p, [key]: v }));
+        if (key === "commission") {
+            v = v.replace(/\D/g, "");
+        }
+        setvalue((p) => ({ ...p, [key]: v }));
     };
 
-    const clearSupplier = () =>
-        setSupplierForm({
-            fullName: "",
-            mobile: "",
-            firmName: "",
-            email: "",
-            gst: "",
-            address: "",
-        });
 
-    const saveSupplier = () => {
-        if (!supplierForm.fullName.trim()) return alert("Name required");
-        if (!supplierForm.mobile.trim()) return alert("Mobile required");
-        if (supplierForm.mobile.length !== 10) return alert("Mobile must be 10 digits");
-
-        onSaveSupplier?.({
-            fullName: supplierForm.fullName.trim(),
-            mobile: supplierForm.mobile.trim(),
-            firmName: supplierForm.firmName.trim(),
-            email: supplierForm.email.trim(),
-            gst: supplierForm.gst.trim(),
-            address: supplierForm.address.trim(),
-        });
-    };
-
-    /* ---------------- Item Form + Table (BOTTOM) ---------------- */
     const [localEdit, setLocalEdit] = useState(null);
     const activeEdit = editData ?? localEdit;
 
@@ -128,11 +90,6 @@ export default function SupplierModal({
         }
     }, [open]);
 
-    const itemOptions = [
-        { value: "Cement", label: "Cement" },
-        { value: "Steel", label: "Steel" },
-        { value: "Sand", label: "Sand" },
-    ];
 
     const companyOptions = [
         { value: "UltraTech", label: "UltraTech" },
@@ -278,231 +235,217 @@ export default function SupplierModal({
         cells: { style: { padding: "12px" } },
     };
 
+
+    const [errors, setErrors] = useState({});
+
+    const Check_validate = () => {
+        const newErrors = {};
+        if (!value.ReferenceName.trim()) {
+            newErrors.ReferenceName = "ReferenceName is required";
+        }
+        if (!value.commission) {
+            newErrors.commission = "commission is required";
+        }
+        if (!value.MobileNo.trim()) {
+            newErrors.MobileNo = "MobileNo is required";
+        }
+        else if (value.MobileNo.length < 10) {
+            newErrors.MobileNo = "Check MobileNo";
+        }
+        setErrors(newErrors);
+        if (Object.keys(newErrors)?.length === 0) {
+            if (editData?.ReferenceID) {
+                Update_Reference(editData?.ReferenceID)
+            } else {
+                Insert_Reference();
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (!open) return;
+
+        if (editData) {
+            setvalue({
+                ReferenceName: editData.ReferenceName ?? "",
+                MobileNo: editData.MobileNo ?? "",
+                commission: editData.commission ?? "",
+            });
+            setErrors({});
+        } else {
+            setErrors({});
+        }
+    }, [editData, open]);
+
+    const Insert_Reference = async () => {
+        try {
+            const res = await PostWithToken('Reference/Insert_Reference', value)
+            if (res) {
+                onClose?.();
+                onSuccess?.();
+                toastifySuccess('Reference inserted successfully');
+                setvalue({
+                    ReferenceName: "",
+                    MobileNo: "",
+                });
+                setErrors({});
+            }
+        } catch (error) {
+            console.log(error, 'error')
+        }
+    }
+
+    const Update_Reference = async (ReferenceID) => {
+        try {
+            const { ReferenceName, MobileNo, commission } = value;
+            const val = {
+                ReferenceID: ReferenceID,
+                ReferenceName: ReferenceName,
+                MobileNo: MobileNo,
+                commission: commission,
+
+            }
+            const res = await PostWithToken('Reference/Update_Reference', val)
+            if (res) {
+                onClose?.();
+                onSuccess?.();
+                toastifySuccess('Reference Update successfully');
+                setvalue({
+                    ReferenceName: "",
+                    MobileNo: "",
+                });
+                setErrors({});
+            }
+        } catch (error) {
+            console.log(error, 'error')
+        }
+    }
+
+
+
+
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
 
-            <div className="relative mx-auto flex min-h-screen items-center justify-center">
-                <div className="w-full max-w-6xl rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
-
-                    {/* content */}
-
-                    {/* ===== TOP BOX ===== */}
-                    <div className="p-2 mt-2">
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
-                            <div className="grid grid-cols-6 items-center gap-3">
-                                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                    Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={supplierForm.fullName}
-                                    onChange={handleSupplierChange("fullName")}
-                                    placeholder="Enter full name"
-                                    className={inputCls + " col-span-4"}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-6 items-center gap-3">
-                                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                    Mobile <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={supplierForm.mobile}
-                                    onChange={handleSupplierChange("mobile")}
-                                    placeholder="Enter mobile number"
-                                    className={inputCls + " col-span-4"}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-6 items-center gap-3">
-                                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                    Firm Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={supplierForm.firmName}
-                                    onChange={handleSupplierChange("firmName")}
-                                    placeholder="Enter firm name"
-                                    className={inputCls + " col-span-4"}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-6 items-center gap-3">
-                                <label className="col-span-2 text-right text-sm font-medium text-slate-600 whitespace-nowrap">
-                                    GST No.
-                                </label>
-                                <input
-                                    type="text"
-                                    value={supplierForm.gst}
-                                    onChange={handleSupplierChange("gst")}
-                                    placeholder="Enter GST number"
-                                    className={inputCls + " col-span-4"}
-                                />
-                            </div>
-
-                            <div className="sm:col-span-2 grid grid-cols-12 items-start gap-3">
-                                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right pt-2">
-                                    Address
-                                </label>
-                                <textarea
-                                    rows={1}
-                                    value={supplierForm.address}
-                                    onChange={handleSupplierChange("address")}
-                                    placeholder="Enter address"
-                                    className={inputCls + " col-span-10 resize-none"}
-                                />
-                            </div>
-                        </div>
-
-
-                        {/* ===== BOTTOM BOX ===== */}
-                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm mt-2">
-                            <form onSubmit={handleAddOrUpdate} className="space-y-4">
-                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
-                                    {/* Item */}
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            Name
-                                        </label>
-                                        <div className="col-span-4">
-                                            <input
-                                                type="text"
-                                                inputMode="decimal"
-                                                value={form.name}
-                                                onChange={handleChange("rate")}
-                                                placeholder="Enter rate"
-                                                className={inputCls + " col-span-4"}
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* Company Name */}
-
-
-                                    {/* Rate */}
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            Serial No.
-                                        </label>
-                                        <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            value={form.rate}
-                                            onChange={handleChange("rate")}
-                                            placeholder="Enter rate"
-                                            className={inputCls + " col-span-4"}
-                                        />
-                                    </div>
-
-                                    {/* Model No (row 2 col 1) */}
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            Model No.
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={form.modelNo}
-                                            onChange={handleChange("modelNo")}
-                                            placeholder="Enter model no."
-                                            className={inputCls + " col-span-4"}
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            SHN Code
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={form.description}
-                                            onChange={handleChange("description")}
-                                            placeholder="Enter description"
-                                            className={inputCls + " col-span-4"}
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            Company
-                                        </label>
-                                        <div className="col-span-4">
-                                            <Select
-                                                isMulti
-                                                value={form.company}
-                                                onChange={(opts) => setForm((p) => ({ ...p, company: opts || [] }))}
-                                                options={companyOptions}
-                                                placeholder="Select..."
-                                                styles={selectStyles}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Description (row 2 col 2) ✅ */}
-                                    <div className="grid grid-cols-6 items-center gap-3">
-                                        <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                                            Specification
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={form.description}
-                                            onChange={handleChange("description")}
-                                            placeholder="Enter description"
-                                            className={inputCls + " col-span-4"}
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-2 flex justify-end">
-                                        <button
-                                            type="button"
-                                            onClick={handleAddOrUpdate}
-                                            className="rounded-xl py-2 bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700"
-                                        >
-                                            Add Item
-                                        </button>
-                                    </div>
-
-
-
-
-                                </div>
-
-
-
-                            </form>
-
-                            <div className="mt-4">
-                                <DataTable
-                                    columns={columns}
-                                    data={tableData}
-                                    pagination={filteredItems?.length > 0}
-                                    highlightOnHover={filteredItems?.length > 0}
-                                    striped
-                                    fixedHeader
-                                    fixedHeaderScrollHeight="320px"
-                                    responsive
-                                    customStyles={tableStyles}
-                                    noDataComponent={null}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end gap-3 mt-3">
+            <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
+                <div className="w-full max-w-6xl rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 my-4 max-h-[95vh] overflow-y-auto">
+                    <div className="p-3 sm:p-4 md:p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg sm:text-xl font-semibold text-slate-800">
+                                {editData ? "Update Agent" : "Add Agent"}
+                            </h2>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="rounded-xl border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
+                                title="Close"
                             >
-                                Cancel
+                                <FiX className="w-5 h-5" />
                             </button>
+                        </div>
 
-                            <button
-                                type="submit"
-                                className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                            >
-                                Save
-                            </button>
+                        <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
+
+                            <input
+                                type="text"
+                                name="fake_name"
+                                autoComplete="name"
+                                style={{ position: "absolute", opacity: 0, height: 0 }}
+                            />
+                            <input
+                                type="tel"
+                                name="fake_phone"
+                                autoComplete="tel"
+                                style={{ position: "absolute", opacity: 0, height: 0 }}
+                            />
+
+                            <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+                                <div className="flex flex-col sm:col-span-2 lg:col-span-1">
+                                    <label className="mb-1 text-sm font-medium text-slate-600">
+                                        Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="space-y-1">
+                                        <input
+                                            type="text"
+                                            value={value.ReferenceName}
+                                            onChange={handleSupplierChange("ReferenceName")}
+                                            autoComplete="off-district"
+
+                                            placeholder="Enter full name"
+                                            className={inputCls}
+                                        />
+                                        {errors.ReferenceName && (
+                                            <p className="text-red-500 text-xs">{errors.ReferenceName}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col sm:col-span-2 lg:col-span-1">
+                                    <label className="mb-1 text-sm font-medium text-slate-600">
+                                        MobileNo <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="space-y-1">
+                                        <input
+                                            type="text"
+                                            value={value.MobileNo}
+                                            onChange={handleSupplierChange("MobileNo")}
+                                            autoComplete="off-district"
+
+                                            placeholder="Enter mobile number"
+                                            className={inputCls}
+                                        />
+                                        {errors.MobileNo && (
+                                            <p className="text-red-500 text-xs">{errors.MobileNo}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col sm:col-span-2 lg:col-span-1">
+                                    <label className="mb-1 text-sm font-medium text-slate-600">
+                                        commission <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="space-y-1">
+                                        <input
+                                            type="text"
+                                            value={value.commission}
+                                            onChange={handleSupplierChange("commission")}
+                                            autoComplete="off-district"
+
+                                            placeholder="Enter Commission"
+                                            className={inputCls}
+                                        />
+                                        {errors.commission && (
+                                            <p className="text-red-500 text-xs">{errors.commission}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+
+
+                        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
+                            {editData ? (
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                    onClick={Check_validate}
+                                >
+                                    Update
+                                </button>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                    onClick={Check_validate}
+                                >
+                                    Save
+                                </button>
+                            )}
                         </div>
 
 
@@ -513,3 +456,5 @@ export default function SupplierModal({
         </div>
     );
 }
+
+export default AgentModal;

@@ -1,96 +1,53 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import DataTable from "react-data-table-component";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
+import { Comman_changeArrayFormat, PostWithToken } from "../ApiMethods/ApiMethods";
+import { toastifySuccess } from "../Utility/Utility";
 
-/**
- * Props:
- * open: boolean
- * onClose: () => void
- * onSave: (itemPayload) => void              // item save (table)
- * editData?: item row to edit (optional)
- * onSaveSupplier?: (supplierPayload) => void // optional (top form)
- */
-export default function SupplierModal({
-  open,
-  onClose,
-  onSave,
-  editData,
-  onSaveSupplier,
-}) {
+
+
+const SupplierModal = ({ open, onClose, onSave, editData, onSaveSupplier, onSuccess }) => {
   const inputCls =
     "w-full rounded-sm border border-slate-200 px-4 py-2.5 text-sm " +
     "outline-none transition " +
     "focus:border-[#2563eb] focus:shadow-[0_0_0_1px_#2563eb]";
 
-  /* ---------------- Supplier Form (TOP) ---------------- */
+  const [localEdit, setLocalEdit] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [itemOptions, setItemOptions] = useState([]);
+  const [companyOptions, setCompanyOptions] = useState([]);
+  const [tableError, setTableError] = useState("");
+  const [deleteItemTarget, setDeleteItemTarget] = useState(null);
+
+
+
+  const activeEdit = editData ?? localEdit;
   const [supplierForm, setSupplierForm] = useState({
     fullName: "",
     mobile: "",
     firmName: "",
     email: "",
     gst: "",
-    address: "",
+    Address: "",
   });
 
-  const [rows, setRows] = useState([
-    {
-      id: "1",
-      item: "Cement",
-      rate: 420,
-      company: "UltraTech, ACC",
-      modelNo: "CM-101",
-      description: "OPC 53 Grade",
-    },
-    {
-      id: "2",
-      item: "Steel",
-      rate: 61000,
-      company: "Tata",
-      modelNo: "ST-500",
-      description: "TMT Bars 500D",
-    },
-  ]);
+
 
   const handleSupplierChange = (key) => (e) => {
     let v = e.target.value;
-
     if (key === "mobile") {
       v = v.replace(/\D/g, "").slice(0, 10);
+    }
+    if (key === "gst") {
+      v = v.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 15);
     }
 
     setSupplierForm((p) => ({ ...p, [key]: v }));
   };
 
-  const clearSupplier = () =>
-    setSupplierForm({
-      fullName: "",
-      mobile: "",
-      firmName: "",
-      email: "",
-      gst: "",
-      address: "",
-    });
-
-  const saveSupplier = () => {
-    if (!supplierForm.fullName.trim()) return alert("Name required");
-    if (!supplierForm.mobile.trim()) return alert("Mobile required");
-    if (supplierForm.mobile.length !== 10) return alert("Mobile must be 10 digits");
-
-    onSaveSupplier?.({
-      fullName: supplierForm.fullName.trim(),
-      mobile: supplierForm.mobile.trim(),
-      firmName: supplierForm.firmName.trim(),
-      email: supplierForm.email.trim(),
-      gst: supplierForm.gst.trim(),
-      address: supplierForm.address.trim(),
-    });
-  };
-
-  /* ---------------- Item Form + Table (BOTTOM) ---------------- */
-  const [localEdit, setLocalEdit] = useState(null);
-  const activeEdit = editData ?? localEdit;
 
   const initialForm = useMemo(
     () => ({
@@ -103,16 +60,15 @@ export default function SupplierModal({
           .filter(Boolean)
           .map((x) => ({ value: x, label: x }))
         : [],
-      modelNo: activeEdit?.modelNo ?? "",
+      ModelNo: activeEdit?.ModelNo ?? "",
       description: activeEdit?.description ?? "",
     }),
     [activeEdit]
   );
 
-  const [form, setForm] = useState(initialForm);
-  const [search, setSearch] = useState("");
 
   useEffect(() => setForm(initialForm), [initialForm]);
+  const [form, setForm] = useState(initialForm);
 
   useEffect(() => {
     if (!open) return;
@@ -124,22 +80,157 @@ export default function SupplierModal({
   useEffect(() => {
     if (!open) {
       setLocalEdit(null);
-      setSearch("");
+      setSupplierForm({
+        fullName: "",
+        mobile: "",
+        firmName: "",
+        email: "",
+        gst: "",
+        Address: "",
+      });
+      setRows([]);
+      setForm({ item: null, rate: "", company: [], ModelNo: "", description: "" });
+    } else if (open && editData) {
+      setSupplierForm({
+        fullName: editData?.Table[0]?.FullName || editData?.Table[0]?.fullName || "",
+        mobile: editData?.Table[0]?.MobileNo || editData?.Table[0]?.mobile || "",
+        firmName: editData?.Table[0]?.FirmName || editData?.Table[0]?.firmName || "",
+        email: editData?.Table[0]?.EmailId || editData?.Table[0]?.Email || editData?.Table[0]?.email || "",
+        gst: editData?.Table[0]?.GSTNo || editData?.Table[0]?.gst || "",
+        Address: editData?.Table[0]?.Address || editData?.Table[0]?.Address || "",
+      });
+
+      if (editData?.Table1) {
+        const formattedRows = editData.Table1.map((item, index) => ({
+          id: String(item.ID || index + 1),
+          item: item.ItemName || "",
+          rate: item.Rate || 0,
+          company: item.CompanyName || "",
+          ModelNo: item.ModelNo || "",
+          description: item.Description || "",
+          ItemID: item.ItemID || "",
+          CompanyID: item.CompanyID || "",
+        }));
+        setRows(formattedRows);
+      }
     }
-  }, [open]);
+  }, [open, editData]);
 
-  const itemOptions = [
-    { value: "Cement", label: "Cement" },
-    { value: "Steel", label: "Steel" },
-    { value: "Sand", label: "Sand" },
-  ];
 
-  const companyOptions = [
-    { value: "UltraTech", label: "UltraTech" },
-    { value: "Ambuja", label: "Ambuja" },
-    { value: "ACC", label: "ACC" },
-    { value: "Tata", label: "Tata" },
-  ];
+
+
+
+  useEffect(() => {
+    if (form?.item?.value) {
+      GetDropDownData_CompanyItem(form?.item?.value)
+    }
+  }, [form?.item?.value])
+
+  useEffect(() => {
+    if (localEdit && itemOptions.length > 0) {
+      let selectedItem = null;
+
+      if (localEdit.ItemID) {
+        selectedItem = itemOptions.find((opt) => String(opt.value) === String(localEdit.ItemID));
+      }
+
+      if (!selectedItem && localEdit.item) {
+        selectedItem = itemOptions.find((opt) => {
+          const optLabel = String(opt.label || "").toLowerCase();
+          const optValue = String(opt.value || "").toLowerCase();
+          const editItem = String(localEdit.item || "").toLowerCase();
+          return optLabel === editItem || optValue === editItem;
+        });
+      }
+
+      if (selectedItem) {
+        setForm((prev) => ({
+          ...prev,
+          item: selectedItem,
+          rate: String(localEdit.rate || ""),
+          ModelNo: localEdit.ModelNo || "",
+          description: localEdit.description || "",
+        }));
+
+        if (localEdit.ItemID) {
+          GetDropDownData_CompanyItem(localEdit.ItemID);
+        } else if (selectedItem.value) {
+          GetDropDownData_CompanyItem(selectedItem.value);
+        }
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          item: null,
+          rate: String(localEdit.rate || ""),
+          ModelNo: localEdit.ModelNo || "",
+          description: localEdit.description || "",
+          company: [],
+        }));
+      }
+    }
+  }, [localEdit, itemOptions]);
+
+
+  useEffect(() => {
+    if (localEdit && companyOptions.length > 0) {
+      let selectedCompanies = [];
+
+      if (localEdit.CompanyID) {
+        selectedCompanies = companyOptions.filter((opt) =>
+          String(opt.value) === String(localEdit.CompanyID)
+        );
+      }
+
+      if (selectedCompanies.length === 0 && localEdit.company) {
+        const companyName = typeof localEdit.company === "string"
+          ? localEdit.company.split(",")[0].trim()
+          : String(localEdit.company || "");
+
+        const companyNameLower = companyName.toLowerCase();
+
+        selectedCompanies = companyOptions.filter((opt) => {
+          const optLabel = String(opt.label || "").toLowerCase();
+          const optValue = String(opt.value || "").toLowerCase();
+          return optLabel === companyNameLower || optValue === companyNameLower;
+        });
+      }
+
+      if (selectedCompanies.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          company: selectedCompanies,
+        }));
+      }
+    }
+  }, [companyOptions, localEdit]);
+
+  useEffect(() => {
+    if (!open) return;
+    GetDropDown_Item()
+  }, [open])
+
+  const GetDropDown_Item = async () => {
+    try {
+      const res = await PostWithToken('Item/GetDropDown_Item');
+      if (res) {
+        setItemOptions(Comman_changeArrayFormat(res, 'ItemID', 'Description'))
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const GetDropDownData_CompanyItem = async (ItemID) => {
+    const val = { 'ItemID': ItemID }
+    try {
+      const res = await PostWithToken('CompanyItem/GetDropDownData_CompanyItem', val);
+      if (res) {
+        setCompanyOptions(Comman_changeArrayFormat(res, 'CompanyID', 'Description'))
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const selectStyles = {
     control: (base, state) => ({
@@ -176,57 +267,86 @@ export default function SupplierModal({
     setForm((p) => ({ ...p, [key]: value }));
   };
 
+  const [error2, seterror2] = useState({})
+
   const handleAddOrUpdate = (e) => {
     e.preventDefault();
 
-    if (!form.item) return alert("Item required");
-    if (!form.rate.trim()) return alert("Rate required");
-    if (Number(form.rate) <= 0) return alert("Rate must be greater than 0");
+    let newErr = {};
 
-    const id = activeEdit?.id ?? String(Date.now());
+    if (!form.item) {
+      newErr.item = "Item is required";
+    }
 
+    if (!form.rate.trim()) {
+      newErr.rate = "Rate is required";
+    } else if (Number(form.rate) <= 0) {
+      newErr.rate = "Rate must be greater than 0";
+    }
+
+    if (!form.company || form.company.length === 0) {
+      newErr.company = "Company is required";
+    }
+
+    if (!form.ModelNo.trim()) {
+      newErr.ModelNo = "Model No is required";
+    }
+
+    if (!form.description.trim()) {
+      newErr.description = "Description is required";
+    }
+
+    seterror2(newErr);
+
+    if (Object.keys(newErr).length > 0) return;
+    const id =
+      localEdit?.id ||
+      activeEdit?.id ||
+      String(Date.now());
     const payload = {
       id,
       item: form.item.label,
       rate: Number(form.rate),
-      company: (form.company || []).map((c) => c.label).join(", "),
-      modelNo: form.modelNo.trim(),
+      company: form.company.map((c) => c.label).join(", "),
+      ModelNo: form.ModelNo.trim(),
       description: form.description.trim(),
     };
-
     setRows((prev) => {
       const exists = prev.some((r) => r.id === id);
-      if (exists) return prev.map((r) => (r.id === id ? payload : r));
-      return [payload, ...prev];
+      if (exists) {
+        return prev.map((r) => (r.id === id ? payload : r));
+      }
+      return [...prev, payload];
+    });
+    setLocalEdit(null);
+    setForm({
+      item: null,
+      rate: "",
+      company: [],
+      ModelNo: "",
+      description: "",
     });
 
-    onSave?.(payload);
-
-    setLocalEdit(null);
-    setForm({ item: null, rate: "", company: [], modelNo: "", description: "" });
+    seterror2({});
   };
 
-  const handleEdit = useCallback((row) => setLocalEdit(row), []);
+  const handleEdit = useCallback((row) => {
+    setLocalEdit(row);
+  }, []);
+
   const handleDelete = useCallback((row) => {
     if (!window.confirm("Delete this item?")) return;
     setRows((p) => p.filter((x) => x.id !== row.id));
   }, []);
 
-  const filteredItems = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => {
-      const hay = `${r.item} ${r.rate} ${r.company} ${r.modelNo} ${r.description}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }, [rows, search]);
+
 
   const columns = useMemo(
     () => [
       { name: "Item", selector: (r) => r?.item || "", sortable: true, },
       { name: "Rate", selector: (r) => (r?.rate ?? ""), sortable: true, },
       { name: "Company", selector: (r) => r?.company || "", },
-      { name: "Model No.", selector: (r) => r?.modelNo || "", },
+      { name: "Model No.", selector: (r) => r?.ModelNo || "", },
       { name: "Description", selector: (r) => r?.description || "", },
       {
         name: "Action",
@@ -246,20 +366,18 @@ export default function SupplierModal({
               </button>
               <button
                 type="button"
-                onClick={() => handleDelete(row)}
+                onClick={() => { setDeleteItemTarget(row); }}
                 className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
                 title="Delete"
               >
                 <FiTrash2 />
               </button>
-            </div>
+            </div >
           ) : null,
       },
     ],
     [handleDelete, handleEdit]
   );
-
-  const tableData = (filteredItems && filteredItems.length > 0) ? filteredItems : [{}];
 
   const tableStyles = {
     headRow: { style: { backgroundColor: "#2563eb", minHeight: "44px" } },
@@ -278,205 +396,382 @@ export default function SupplierModal({
     cells: { style: { padding: "12px" } },
   };
 
+
+  const [errors, setErrors] = useState({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  const gstRegex = /^[0-9A-Z]{15}$/;
+
+  const validateAndSubmit = () => {
+    const newErrors = {};
+
+    if (!supplierForm.fullName?.trim()) {
+      newErrors.fullName = "Name is required";
+    }
+
+    if (!supplierForm.Address?.trim()) {
+      newErrors.Address = "Address is required";
+    }
+
+    if (!supplierForm.firmName?.trim()) {
+      newErrors.firmName = "Firm name is required";
+    }
+
+    if (!supplierForm.gst?.trim()) {
+      newErrors.gst = "GST is required";
+    } else if (!gstRegex.test(supplierForm.gst.trim().toUpperCase())) {
+      newErrors.gst = "Please enter a valid GST number";
+    }
+
+    if (!supplierForm.email?.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(supplierForm.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!supplierForm.mobile?.trim()) {
+      newErrors.mobile = "Mobile is required";
+    } else if (supplierForm.mobile.length !== 10) {
+      newErrors.mobile = "Mobile number must be 10 digits";
+    }
+
+    if (!rows || rows.length === 0) {
+      setTableError("Please add at least one item");
+    } else {
+      setTableError("");
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0 && rows && rows.length > 0) {
+      InsertSupply(editData?.Table?.[0]?.SupplyId || "");
+    }
+  };
+
+
+
+  const InsertSupply = async (SupplyID) => {
+    try {
+      const val = {
+        FullName: supplierForm.fullName,
+        MobileNo: supplierForm.mobile,
+        FirmName: supplierForm.firmName,
+        EmailId: supplierForm.email,
+        Address: supplierForm.Address,
+        GSTNo: supplierForm.gst,
+        SupplyID: SupplyID || "",
+        SupplyDetailslists: rows.map((r) => ({
+          ItemName: r.item || "",
+          ItemID: r.ItemID || "",
+          CompanyName: r.company || "",
+          ModelNo: r.ModelNo || "",
+          Rate: String(r.rate || ""),
+          Description: r.description || "",
+        })),
+      };
+      const res = await PostWithToken("Supply/InsertSupply", val);
+      if (res) {
+        toastifySuccess("Supplier inserted successfully");
+        setSupplierForm({ fullName: "", mobile: "", firmName: "", email: "", gst: "", Address: "", });
+        setRows([]);
+        setForm({ item: null, rate: "", company: [], ModelNo: "", description: "" });
+        onClose?.();
+        onSuccess?.();
+      }
+    } catch (error) {
+      console.error("InsertSupply error:", error);
+    }
+  };
+
+
+
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
 
-      <div className="relative mx-auto flex min-h-screen items-center justify-center">
-        <div className="w-full max-w-6xl rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
+      <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
+        <div className="w-full max-w-6xl rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 my-2 sm:my-4 max-h-[98vh] sm:max-h-[95vh] overflow-y-auto">
 
-          {/* content */}
+          <div className="p-3 sm:p-4 md:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-slate-800">
+                {editData ? "Update Supplier" : "Add Supplier"}
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
+                title="Close"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-          {/* ===== TOP BOX ===== */}
-          <div className="p-2 mt-2">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
-              <div className="grid grid-cols-6 items-center gap-3">
-                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
                   Name <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={supplierForm.fullName}
-                  onChange={handleSupplierChange("fullName")}
-                  placeholder="Enter full name"
-                  className={inputCls + " col-span-4"}
-                />
+                <div className="sm:col-span-4 flex flex-col">
+                  <input
+                    type="text"
+                    value={supplierForm.fullName}
+                    onChange={handleSupplierChange("fullName")}
+                    placeholder="Enter full name"
+                    className={inputCls}
+
+
+                    autoComplete="off-district"
+
+                  />
+                  <p className="text-red-500 text-xs mt-1 min-h-[14px]">
+                    {errors.fullName || ""}
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-6 items-center gap-3">
-                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
+              <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
                   Mobile <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={supplierForm.mobile}
-                  onChange={handleSupplierChange("mobile")}
-                  placeholder="Enter mobile number"
-                  className={inputCls + " col-span-4"}
-                />
+                <div className="sm:col-span-4 flex flex-col">
+                  <input
+                    type="text"
+                    value={supplierForm.mobile}
+                    onChange={handleSupplierChange("mobile")}
+                    placeholder="Enter mobile number"
+                    className={inputCls}
+                    autoComplete="off-district"
+
+                  />
+                  {errors.mobile && (
+                    <p className="text-red-500 text-xs mt-1 min-h-[14px]">{errors.mobile}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-6 items-center gap-3">
-                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                  Firm Name
+              <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
+                  Firm Name<span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={supplierForm.firmName}
-                  onChange={handleSupplierChange("firmName")}
-                  placeholder="Enter firm name"
-                  className={inputCls + " col-span-4"}
-                />
+                <div className="sm:col-span-4 flex flex-col">
+                  <input
+                    type="text"
+                    value={supplierForm.firmName}
+                    onChange={handleSupplierChange("firmName")}
+                    placeholder="Enter firm name"
+                    className={inputCls}
+                    autoComplete="off-district"
+
+                  />
+                  {errors.firmName && (
+                    <p className="text-red-500 text-xs mt-1 min-h-[14px]">{errors.firmName}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-6 items-center gap-3">
-                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                  Email
+              <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
+                  Email<span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="email"
-                  value={supplierForm.email}
-                  onChange={handleSupplierChange("email")}
-                  placeholder="example@email.com"
-                  className={inputCls + " col-span-4"}
-                />
+                <div className="sm:col-span-4 flex flex-col">
+                  <input
+                    type="email"
+                    value={supplierForm.email}
+                    onChange={handleSupplierChange("email")}
+                    placeholder="example@email.com"
+                    className={inputCls}
+                    autoComplete="off-district"
+
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1 min-h-[14px]">{errors.email}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-6 items-center gap-3">
-                <label className="col-span-2 text-right text-sm font-medium text-slate-600 whitespace-nowrap">
-                  GST No.
+              <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
+                  GST No.<span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={supplierForm.gst}
-                  onChange={handleSupplierChange("gst")}
-                  placeholder="Enter GST number"
-                  className={inputCls + " col-span-4"}
-                />
+                <div className="sm:col-span-4 flex flex-col">
+                  <input
+                    type="text"
+                    value={supplierForm.gst}
+                    onChange={handleSupplierChange("gst")}
+                    placeholder="Enter GST number"
+                    className={inputCls}
+                    autoComplete="off-district"
+
+                  />
+                  {errors.gst && (
+                    <p className="text-red-500 text-xs mt-1 min-h-[14px]">{errors.gst}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="sm:col-span-2 grid grid-cols-12 items-start gap-3">
-                <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right pt-2">
-                  Address
+              <div className="flex flex-col sm:grid sm:grid-cols-6 sm:col-span-2  gap-2 sm:gap-3 sm:items-start">
+                <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap sm:pt-2">
+                  Address<span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  rows={1}
-                  value={supplierForm.address}
-                  onChange={handleSupplierChange("address")}
-                  placeholder="Enter address"
-                  className={inputCls + " col-span-10 resize-none"}
-                />
+                <div className="sm:col-span-4 flex flex-col w-full">
+                  <textarea
+                    rows={2}
+                    value={supplierForm.Address}
+                    autoComplete="off-district"
+
+                    onChange={handleSupplierChange("Address")}
+                    placeholder="Enter Address"
+                    className={inputCls + " resize-none"}
+                  />
+                  {errors.Address && (
+                    <p className="text-red-500 text-xs mt-1 min-h-[14px]">{errors.Address}</p>
+                  )}
+                </div>
               </div>
             </div>
 
+            <div className="rounded-lg sm:rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm mt-3 sm:mt-4">
+              <h3 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800 mb-3">Items</h3>
+              <form onSubmit={handleAddOrUpdate} className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
-            {/* ===== BOTTOM BOX ===== */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm mt-2">
-              <form onSubmit={handleAddOrUpdate} className="space-y-4">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {/* Item */}
-                  <div className="grid grid-cols-6 items-center gap-3">
-                    <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                    <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
                       Item
                     </label>
-                    <div className="col-span-4">
-                      <Select
+                    <div className="sm:col-span-4">
+                      <CreatableSelect
                         value={form.item}
                         onChange={(opt) => setForm((p) => ({ ...p, item: opt }))}
                         options={itemOptions}
-                        placeholder="Select item..."
+                        placeholder="Select or create item..."
                         styles={selectStyles}
+                        isClearable
+                        formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
                       />
+                      {error2.item && (
+                        <p className="text-red-500 text-xs mt-1 min-h-[14px]">{error2.item}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Rate */}
-                  <div className="grid grid-cols-6 items-center gap-3">
-                    <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                    <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
                       Rate <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={form.rate}
-                      onChange={handleChange("rate")}
-                      placeholder="Enter rate"
-                      className={inputCls + " col-span-4"}
-                    />
+                    <div className="sm:col-span-4 flex flex-col">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={form.rate}
+                        onChange={handleChange("rate")}
+                        placeholder="Enter rate"
+                        className={inputCls}
+                        autoComplete="off-district"
+
+                      />
+                      {error2.rate && (
+                        <p className="text-red-500 text-xs mt-1 min-h-[14px]">{error2.rate}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Company Name */}
-                  <div className="grid grid-cols-6 items-center gap-3">
-                    <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                    <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
                       Company Name
                     </label>
-                    <div className="col-span-4">
-                      <Select
+                    <div className="sm:col-span-4">
+                      <CreatableSelect
                         isMulti
                         value={form.company}
                         onChange={(opts) => setForm((p) => ({ ...p, company: opts || [] }))}
                         options={companyOptions}
-                        placeholder="Select companies..."
+                        placeholder="Select or create companies..."
                         styles={selectStyles}
+                        isClearable
+                        isDisabled={!form.item}
+                        formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
                       />
+                      {error2.company && (
+                        <p className="text-red-500 text-xs mt-1 min-h-[14px]">{error2.company}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Model No (row 2 col 1) */}
-                  <div className="grid grid-cols-6 items-center gap-3">
-                    <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                      Model No.
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                    <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
+                      Model No.<span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={form.modelNo}
-                      onChange={handleChange("modelNo")}
-                      placeholder="Enter model no."
-                      className={inputCls + " col-span-4"}
-                    />
+                    <div className="sm:col-span-4 flex flex-col">
+                      <input
+                        type="text"
+                        value={form.ModelNo}
+                        onChange={handleChange("ModelNo")}
+                        placeholder="Enter model no."
+                        className={inputCls}
+                        autoComplete="off-district"
+
+                      />
+                      {error2.ModelNo && (
+                        <p className="text-red-500 text-xs mt-1 min-h-[14px]">{error2.ModelNo}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Description (row 2 col 2) ✅ */}
-                  <div className="grid grid-cols-6 items-center gap-3">
-                    <label className="col-span-2 text-sm font-medium text-slate-600 whitespace-nowrap text-right">
-                      Description
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3">
+                    <label className="text-sm font-medium text-slate-600 sm:col-span-2 sm:text-right sm:whitespace-nowrap">
+                      Description<span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={form.description}
-                      onChange={handleChange("description")}
-                      placeholder="Enter description"
-                      className={inputCls + " col-span-4"}
-                    />
-                  </div>
+                    <div className="sm:col-span-4 flex flex-col">
+                      <input
+                        type="text"
+                        value={form.description}
+                        onChange={handleChange("description")}
+                        placeholder="Enter description"
+                        className={inputCls}
+                        autoComplete="off-district"
 
-                  {/* Button (row 2 col 3) ✅ */}
-                  <div className="flex items-end justify-end">
-                    <button
-                      type="button"
-                      onClick={handleAddOrUpdate}
-                      className="rounded-xl py-2 bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"
-                    >
-                      Add Item
-                    </button>
+                      />
+                      {error2.description && (
+                        <p className="text-red-500 text-xs mt-1 min-h-[14px]">{error2.description}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    onClick={handleAddOrUpdate}
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                  >
+                    {localEdit ? "Update Item" : "Add Item"}
+                  </button>
+                </div>
+                {tableError && (
+                  <p className="mb-2 text-sm text-red-600 font-medium">
+                    {tableError}
+                  </p>
+                )}
 
 
 
               </form>
 
-              <div className="mt-4">
+              <div className="mt-3 sm:mt-4 overflow-x-auto">
                 <DataTable
                   columns={columns}
-                  data={tableData}
-                  pagination={filteredItems?.length > 0}
-                  highlightOnHover={filteredItems?.length > 0}
+                  data={rows}
+                  pagination={rows?.length > 0}
+                  highlightOnHover={rows?.length > 0}
                   striped
                   fixedHeader
-                  fixedHeaderScrollHeight="320px"
+                  fixedHeaderScrollHeight="200px"
                   responsive
                   customStyles={tableStyles}
                   noDataComponent={null}
@@ -484,21 +779,24 @@ export default function SupplierModal({
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-              >
-                Save
-              </button>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
+              {editData ? (
+                <button
+                  type="button"
+                  onClick={validateAndSubmit}
+                  className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Update
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={validateAndSubmit}
+                  className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Save
+                </button>
+              )}
             </div>
 
 
@@ -506,6 +804,45 @@ export default function SupplierModal({
           </div>
         </div>
       </div>
+
+      {deleteItemTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-slate-900/40"
+            onClick={() => setDeleteItemTarget(null)}
+          />
+          <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xl">
+            <h2 className="text-lg font-semibold text-slate-800">Delete Item</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Are you sure you want to delete this item?
+              {deleteItemTarget.item && (
+                <span className="font-semibold"> ({deleteItemTarget.item})</span>
+              )}
+            </p>
+            <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteItemTarget(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setRows((p) => p.filter((item) => item?.id !== deleteItemTarget?.id));
+                  setDeleteItemTarget(null);
+                }}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default SupplierModal;
