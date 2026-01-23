@@ -1,10 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { FiTrash2 } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
 import SupplierModal from "../components/SupplierModal";
+import { getPostData, GetWithToken, PostWithToken } from "../ApiMethods/ApiMethods";
+import { toastifySuccess } from "../Utility/Utility";
 
-export default function Supplier() {
+const Supplier = () => {
+
     const [supplierForm, setSupplierForm] = useState({
         fullName: "",
         email: "",
@@ -13,89 +16,94 @@ export default function Supplier() {
         gst: "",
         address: "",
     });
+    const [items, setItems] = useState([]);
 
-    // ✅ Items list (modal se yahi update hoga)
-    const [items, setItems] = useState([
-        {
-            id: "1",
-            item: "Cement",
-            rate: 350,
-            company: "UltraTech",
-            modelNo: "UT-101",
-            description: "Test description",
-        },
-    ]);
+    useEffect(() => {
+        GetData_Party()
+    }, [])
+
+
+    const GetData_Party = async () => {
+        const val = {
+            IsActive: "1",
+        };
+        try {
+            const res = await PostWithToken("Supply/GetData_Supply", val);
+            if (res) {
+                setItems(res);
+            } else {
+                setItems([]);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
-
-    // ✅ item edit support
     const [editItemId, setEditItemId] = useState(null);
+    const [editRow, setEditRow] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
-    const inputCls =
-        "w-full rounded-sm border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm " +
-        "focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
 
     const makeId = () =>
         typeof crypto !== "undefined" && crypto.randomUUID
             ? crypto.randomUUID()
             : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    const handleSupplierChange = (field) => (e) => {
-        setSupplierForm((p) => ({ ...p, [field]: e.target.value }));
-    };
 
-    const resetAll = () => {
-        setSupplierForm({
-            fullName: "",
-            email: "",
-            mobile: "",
-            phone: "",
-            gst: "",
-            address: "",
-        });
-        setItems([]);
-        setEditItemId(null);
-    };
-
-    // ✅ Save supplier (ab real submit)
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!supplierForm.fullName.trim()) return alert("Name required");
-        if (!supplierForm.mobile.trim()) return alert("Mobile required");
-
-        alert("Supplier Saved ✅ (ab aap yaha API call bhi kar sakte ho)");
-        // yaha backend save / API call
-    };
-
-    // ✅ Modal se item add/update
     const handleSaveItem = (payload) => {
         if (payload.id) {
-            // edit mode
+
             setItems((prev) => prev.map((x) => (x.id === payload.id ? payload : x)));
         } else {
-            // add mode
+
             setItems((prev) => [{ ...payload, id: makeId() }, ...prev]);
         }
     };
 
-    const onEditItem = (row) => {
-        setEditItemId(row.id);
-        setOpen(true);
+    const onEditItem = async (row) => {
+        try {
+            const val = {
+                SupplyID: row.SupplyId,
+            };
+            const res = await PostWithToken("Supply/GetSingleData_Supply", val);
+            if (res) {
+                setEditRow(res);
+                setEditItemId(row.SupplyId);
+                setOpen(true);
+            }
+        } catch (error) {
+            console.error("Error fetching supplier data:", error);
+        }
     };
 
-    const onDeleteItem = (id) => {
-        if (!confirm("Delete this item?")) return;
-        setItems((prev) => prev.filter((x) => x.id !== id));
-        if (editItemId === id) setEditItemId(null);
+    const onDeleteRequest = (row) => {
+        setDeleteTarget(row);
+    };
+
+    const Delete_Supply = async (SupplyID) => {
+        try {
+            const val = {
+                DeleteByUser: "1",
+                IsActive: "0",
+                SupplyID: SupplyID,
+            };
+            const res = await PostWithToken("Supply/Delete_Supply", val);
+            if (res) {
+                toastifySuccess("Supplier successfully Deleted");
+                await GetData_Party();
+            }
+        } catch (error) {
+            console.error("Delete_Supply error:", error);
+        }
     };
 
     const filteredItems = useMemo(() => {
         const q = search.trim().toLowerCase();
         if (!q) return items;
         return items.filter((r) => {
-            const hay = `${r.item} ${r.rate} ${r.company} ${r.modelNo} ${r.description}`.toLowerCase();
+            const hay = `${r.FullName} ${r.FirmName} ${r.MobileNo} ${r.Address}`.toLowerCase();
             return hay.includes(q);
         });
     }, [items, search]);
@@ -104,38 +112,53 @@ export default function Supplier() {
         () => [
             {
                 name: <span className="font-semibold">Name</span>,
-                selector: (row) => row.Name,
+                selector: (row) => row.FullName,
                 sortable: true,
-                cell: (row) => <div className="font-medium text-slate-800">{row.Name}</div>,
+                cell: (row) => <div className="font-medium text-slate-800">{row.FullName}</div>,
             },
+
+
+
+
+
+
+
+
+
+
             {
-                name: <span className="font-semibold">Company Name</span>,
-                selector: (row) => row.company || "-",
+                name: <span className="font-semibold">Firm Name</span>,
+                selector: (row) => row.FirmName || "-",
                 sortable: true,
             },
 
             {
-                name: <span className="font-semibold">Model No.</span>,
-                selector: (row) => row.modelNo || "-",
+                name: <span className="font-semibold">Mobile No.</span>,
+                selector: (row) => row.MobileNo || "-",
                 sortable: true,
             },
             {
-                name: <span className="font-semibold">Rate</span>,
-                selector: (row) => row.rate,
+                name: <span className="font-semibold">Email</span>,
+                selector: (row) => row.EmailId,
                 sortable: true,
             },
             {
-                name: <span className="font-semibold">Description</span>,
-                selector: (row) => row.description || "-",
-                cell: (row) => (
-                    <div className="truncate max-w-xs" title={row.description}>
-                        {row.description || "-"}
-                    </div>
-                ),
+                name: <span className="font-semibold">Address</span>,
+                selector: (row) => row.Address || "-",
+                sortable: true,
             },
+
+
+
+
+
+
+
+
+
             {
                 name: "Actions",
-                button: true,
+
                 cell: (r) => (
                     <div className="flex gap-2">
                         <button
@@ -149,7 +172,7 @@ export default function Supplier() {
 
                         <button
                             className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-                            onClick={() => onDeleteItem(r.id)}
+                            onClick={() => onDeleteRequest(r)}
                             type="button"
                             title="Delete"
                         >
@@ -179,58 +202,97 @@ export default function Supplier() {
         cells: { style: { padding: "1rem 0.75rem" } },
     };
 
-    const editingItem = editItemId ? items.find((x) => x.id === editItemId) : null;
-
     return (
         <div className="flex-1 space-y-3 overflow-y-auto px-2 py-3">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            
-
-                {/* ✅ Items Table */}
                 <div className="">
-                    <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mb-2 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search item..."
-                            className="w-full sm:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Search supplier..."
+                            className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
 
                         <button
                             onClick={() => {
                                 setEditItemId(null);
+                                setEditRow(null);
                                 setOpen(true);
                             }}
-                            className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer"
+                            className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap"
                         >
                             Add Supplier
                         </button>
                     </div>
 
-                    <DataTable
-                        columns={columns}
-                        data={filteredItems}
-                        pagination
-                        paginationRowsPerPageOptions={[5, 10, 25, 50]}
-                        paginationPerPage={5}
-                        highlightOnHover
-                        striped
-                        fixedHeader
-                        fixedHeaderScrollHeight="400px"
-                        responsive
-                        customStyles={tableStyles}
-                    />
+                    <div className="overflow-x-auto">
+                        <DataTable
+                            columns={columns}
+                            data={filteredItems}
+                            pagination
+                            paginationRowsPerPageOptions={[5, 10, 25, 50]}
+                            paginationPerPage={5}
+                            highlightOnHover
+                            striped
+                            fixedHeader
+                            fixedHeaderScrollHeight="400px"
+                            responsive
+                            customStyles={tableStyles}
+                        />
+                    </div>
                 </div>
-                
 
-                {/* ✅ Modal */}
+
                 <SupplierModal
                     open={open}
-                    onClose={() => setOpen(false)}
+                    onClose={() => {
+                        setOpen(false);
+                        setEditRow(null);
+                        setEditItemId(null);
+                    }}
                     onSave={handleSaveItem}
-                    editData={editingItem} // null = add mode
+                    editData={editRow}
+                    onSuccess={GetData_Party}
                 />
+
+                {deleteTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                        <div
+                            className="absolute inset-0 bg-slate-900/40"
+                            onClick={() => setDeleteTarget(null)}
+                        />
+                        <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xl">
+                            <h2 className="text-lg font-semibold text-slate-800">Delete Supplier</h2>
+                            <p className="mt-2 text-sm text-slate-600">
+                                Are you sure you want to delete{" "}
+                                <span className="font-semibold">{deleteTarget.Name || deleteTarget.FullName}</span>?
+                            </p>
+                            <div className="mt-4 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteTarget(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                >
+                                    No
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        await Delete_Supply(deleteTarget.SupplyId);
+                                        setDeleteTarget(null);
+                                    }}
+                                    className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
+
+export default Supplier;
