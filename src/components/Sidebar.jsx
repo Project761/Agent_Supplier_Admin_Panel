@@ -27,10 +27,15 @@ const items = [
     children: [{ label: "Add Agent", to: "/dashboard/agent" }],
   },
   {
-    label: "Contact",
-    icon: FiPhone,
-    children: [{ label: "Add Contact", to: "/dashboard/contact" }],
+    label: "Mobile List",
+    icon: FiUserCheck,
+    children: [{ label: "Add Mobile List", to: "/dashboard/MobileList" }],
   },
+  // {
+  //   label: "Contact",
+  //   icon: FiPhone,
+  //   children: [{ label: "Add Contact", to: "/dashboard/contact" }],
+  // },
   {
     label: "Party",
     icon: FiUsers,
@@ -86,6 +91,7 @@ export default function Sidebar({ isOpen, onClose }) {
   useEffect(() => {
     if (pathname.includes("/supplier")) setOpenKey("Supplier");
     if (pathname.includes("/agent")) setOpenKey("Agent");
+    if (pathname.includes("/MobileList")) setOpenKey("Mobile List");
     if (pathname.includes("/contact")) setOpenKey("Contact");
     if (pathname.includes("/party")) setOpenKey("Party");
     if (pathname.includes("/temp")) setOpenKey("Temp");
