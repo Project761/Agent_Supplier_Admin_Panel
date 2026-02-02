@@ -202,11 +202,11 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
       newErrors.OwnerName = "Owner Name is required";
     }
 
-    if (!value.GSTNo.trim()) {
-      newErrors.GSTNo = "GST No is required"
-    } else if (!gstRegex.test(value.GSTNo.trim().toUpperCase())) {
-      newErrors.GSTNo = "Please enter a valid GST number";
-    }
+    // if (!value.GSTNo.trim()) {
+    //   newErrors.GSTNo = "GST No is required"
+    // } else if (!gstRegex.test(value.GSTNo.trim().toUpperCase())) {
+    //   newErrors.GSTNo = "Please enter a valid GST number";
+    // }
 
     if (!value.InstallationAmt) {
       newErrors.InstallationAmt = "Installation Amount is required";
@@ -256,11 +256,11 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         Area: value.Area,
         GSTNo: value.GSTNo,
         MEOffice: value.MEOffice,
-        FinalAmt: value.FinalAmt,
-        HardwareAmt: value.HardwareAmt,
-        InstallationAmt: value.InstallationAmt,
+        FinalAmt: value.FinalAmt == "" ? "0.00" : value.FinalAmt,
+        HardwareAmt: value.HardwareAmt == "0" ? "0.00" : value.HardwareAmt,
+        InstallationAmt: value.InstallationAmt == "0" ? "0.00" : value.InstallationAmt,
         Remark: value.Remark,
-        GST: value.GST,
+        GST: value.GST == "" ? "0.00" : value.GST,
         CreatedByUser: auth?.UserID || "1",
       };
       const res = await PostWithToken("Party/Insert_Party", payload);
@@ -306,11 +306,11 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         Area: value.Area,
         GSTNo: value.GSTNo,
         MEOffice: value.MEOffice,
-        FinalAmt: value.FinalAmt,
-        HardwareAmt: value.HardwareAmt,
-        InstallationAmt: value.InstallationAmt,
+        FinalAmt: value.FinalAmt == "" ? "0.00" : value.FinalAmt,
+        HardwareAmt: value.HardwareAmt == "0" ? "0.00" : value.HardwareAmt,
+        InstallationAmt: value.InstallationAmt == "0" ? "0.00" : value.InstallationAmt,
         Remark: value.Remark,
-        GST: value.GST,
+        GST: value.GST == "" ? "0.00" : value.GST,
         ModifiedByUser: auth?.UserID || "1",
       };
       const res = await PostWithToken("Party/Update_Party", val);
@@ -385,7 +385,8 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
 
                 <div className="flex flex-col">
                   <label className="mb-1 text-sm font-medium text-slate-600">
-                    GST No <span className="text-red-500">*</span>
+                    GST No
+                    {/* <span className="text-red-500">*</span> */}
                   </label>
                   <input
                     type="text"
@@ -396,9 +397,9 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
                     autoComplete="off-district"
 
                   />
-                  {errors.GSTNo && (
+                  {/* {errors.GSTNo && (
                     <p className="mt-1 text-xs text-red-500">{errors.GSTNo}</p>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex flex-col">
@@ -640,7 +641,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
                   <label className="mb-1 text-sm font-medium text-slate-600">
                     Remarks
                   </label>
-                  
+
                   <textarea
                     rows={3}
                     value={value.Remark}

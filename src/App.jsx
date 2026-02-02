@@ -21,6 +21,7 @@ import POPayment from './pages/POPayment/POPayment';
 import TaxInvoice from './pages/TaxInvoice/TaxInvoice';
 import InvoiceList from './pages/Invoice/InvoiceList';
 import PaymentReceiptPrint from './pages/Payment/PaymentReceiptPrint';
+import MobileList from './pages/MobileList/MobileList';
 
 const PublicRoute = ({ children }) => {
   const userData = sessionStorage.getItem('UserData');
@@ -55,6 +56,7 @@ function App() {
         }>
           <Route index element={<Home />} />
           <Route path="agent" element={<Agent />} />
+          <Route path="MobileList" element={<MobileList />} />
           <Route path="supplier" element={<Supplier />} />
           <Route path="contact" element={<Contact />} />
           <Route path="contact/add" element={<ContactModal />} />

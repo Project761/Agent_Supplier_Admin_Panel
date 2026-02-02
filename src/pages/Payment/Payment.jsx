@@ -16,6 +16,8 @@ import PaymentReceiptPrint from "./PaymentReceiptPrint";
 import { useNavigate } from "react-router-dom";
 import WorkStatusModal from "./WorkStatusModal";
 import { MdConstruction } from "react-icons/md";
+import PartySettingModal from "../Party/PartySettingModal";
+import { IoSettingsOutline } from "react-icons/io5";
 
 
 
@@ -28,6 +30,7 @@ const Payment = () => {
   const [viewData, setViewData] = useState([]);
   // console.log(viewData[0]?.PartyID,'sadf')
   const [viewData2, setViewData2] = useState(null);
+  // console.log(viewData2, 'viewdata')
   const [amtdeteil, setAmtdetil] = useState(null);
   const [amtdeteil2, setAmtdetil2] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
@@ -47,6 +50,9 @@ const Payment = () => {
 
   const printRef = useRef(null);
   const [printData, setPrintData] = useState(null);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedPartyID, setSelectedPartyID] = useState(null);
 
   const navigate = useNavigate();
 
@@ -80,6 +86,7 @@ const Payment = () => {
       PartyName: filterPartyName || "",
       Due: filterDue?.value === "No" ? "0" : "1" || "",
       WorkStatus: WorkStatusfilter?.value || "",
+      OwnerName: filterPartyName || "",
     };
     try {
       const res = await PostWithToken("Payment/GetData_Payment", val);
@@ -170,7 +177,6 @@ const Payment = () => {
 
 
   const onViewItem2 = (row) => {
-
     const partyID = row.PartyID;
     if (partyID) {
       GetSingleData_PartyPayment2(partyID);
@@ -217,10 +223,12 @@ const Payment = () => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((r) => {
-      const hay = `${r.PartyName || ""} ${r.Paymenttype || ""} ${r.Amt || ""} ${r.ByPayment || ""}`.toLowerCase();
+      const hay = `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""}  ${r.ByPayment || ""}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, search]);
+
+  // console.log(filteredItems, 'filteredItems')
 
   const dueOptions = [
     { value: "Yes", label: "Yes" },
@@ -317,10 +325,24 @@ const Payment = () => {
         selector: (row) => row.MEOffice || "-",
         sortable: true,
       },
+
       {
         name: "Actions",
         cell: (r) => (
           <div className="flex gap-2">
+
+            <button
+              className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
+              onClick={() => {
+                // console.log("Settings clicked for PartyID:", r);
+                setSelectedPartyID(r.PartyID);
+                setSettingsOpen(true);
+              }}
+              type="button"
+              title="Add Work Status"
+            >
+              <IoSettingsOutline className="text-base" />
+            </button>
 
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
@@ -330,6 +352,7 @@ const Payment = () => {
             >
               <MdConstruction className="text-base" />
             </button>
+
             <button
               className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
               onClick={() => onAddPayment(r)}
@@ -399,12 +422,14 @@ const Payment = () => {
         acc.totalAmount += Number(item.FinalAmt || 0);
         acc.totalRemaining += Number(item.RemainingAmt || 0);
         acc.totalPaid += Number(item.TotalPaid || 0);
+        acc.TotalExpensePayment += Number(item.TotalExpensePayment || 0);
         return acc;
       },
-      { totalAmount: 0, totalRemaining: 0, totalPaid: 0 }
+      { totalAmount: 0, totalRemaining: 0, totalPaid: 0, TotalExpensePayment: 0 }
     );
   }, [items]);
 
+  const netBalance = totals.totalPaid - totals.TotalExpensePayment;
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(items);
@@ -640,15 +665,17 @@ const Payment = () => {
       <div className="flex-1 space-y-3 overflow-y-auto px-2 py-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="">
+
+
             <div className="mb-4 space-y-3">
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                 <input
-                  value={filterPartyName}
-                  onChange={(e) => setFilterPartyName(e.target.value)}
-                  placeholder="Search by party name..."
-                  className="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  // value={filterPartyName}
+                  // onChange={(e) => setFilterPartyName(e.target.value)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search Payment..."
+                  className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
 
                 />
@@ -658,7 +685,7 @@ const Payment = () => {
                   value={filterFromDate}
                   onChange={(e) => setFilterFromDate(e.target.value)}
                   placeholder="From Date"
-                  className="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
 
                 />
@@ -668,7 +695,7 @@ const Payment = () => {
                   value={filterToDate}
                   onChange={(e) => setFilterToDate(e.target.value)}
                   placeholder="To Date"
-                  className="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
 
                 />
@@ -677,24 +704,56 @@ const Payment = () => {
                   value={filterDue}
                   onChange={setFilterDue}
                   options={dueOptions}
-                  placeholder="Filter by Due..."
+                  placeholder="Due"
                   isClearable
-                  styles={selectStyles}
+                  styles={{
+                    ...selectStyles,
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "32px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      padding: "0 6px",
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: "32px",
+                    }),
+                  }}
                 />
 
                 <Select
                   value={WorkStatusfilter}
                   onChange={setWorkStatusfilter}
                   options={paymentTypeOptions}
-                  placeholder="Filter by WorkStatus..."
+                  placeholder="Work"
                   isClearable
-                  styles={workstatusStyles}
+                  styles={{
+                    ...workstatusStyles,
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "32px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      padding: "0 6px",
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: "32px",
+                    }),
+                  }}
                 />
 
                 <div>
                   <button
                     onClick={exportToExcel}
-                    className="mb-3 rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    className="mb-3 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
                   >
                     Export Excel
                   </button>
@@ -717,13 +776,32 @@ const Payment = () => {
                   ₹{totals.totalRemaining.toFixed(2)}
                 </p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
 
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Total Paid</p>
+                <p className="text-xs text-slate-700 font-medium">Total In Amt</p>
                 <p className="text-lg font-semibold text-slate-800">
                   ₹{totals.totalPaid.toFixed(2)}
                 </p>
               </div>
+
+              <div className="rounded-md border border-slate-300 p-3">
+                <p className="text-xs text-slate-700 font-medium">Total Out Amt</p>
+                <p className="text-lg font-semibold text-slate-800">
+                  ₹{totals.TotalExpensePayment.toFixed(2)}
+                </p>
+              </div>
+
+              <div className="rounded-md border border-slate-300 p-3">
+                <p className="text-xs text-slate-700 font-medium">Net Balance</p>
+                <p className={`text-lg font-semibold ${netBalance < 0 ? "text-red-600" : "text-green-600"}`} >
+                  {/* ₹{netBalance.toFixed(2)} */}
+                  ₹{Math.abs(netBalance).toFixed(2)}
+                </p>
+              </div>
+
             </div>
 
 
@@ -774,6 +852,17 @@ const Payment = () => {
             editData={editRow}
             onSuccess={GetData_Payment}
           />
+
+
+          <PartySettingModal
+            open={settingsOpen}
+            onClose={() => {
+              setSettingsOpen(false);
+              setSelectedPartyID(null);
+            }}
+            PartyID={selectedPartyID}
+          />
+
 
 
           {viewOpen && viewData && (
@@ -1075,11 +1164,10 @@ const Payment = () => {
                       </div>
                     )}
 
-                    <div className="mt-6 gap-3 flex justify-end">
+                    {/* <div className="mt-6 gap-3 flex justify-end">
                       <button
                         onClick={SingleExportToExcel2}
                         className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                      // className="mb-3 rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                       >
                         Export Excel
                       </button>
@@ -1090,9 +1178,42 @@ const Payment = () => {
                       >
                         Close
                       </button>
+                    </div> */}
 
+                    <div className="mt-6 flex items-center justify-between gap-3">
+
+                      {/* LEFT SIDE */}
+                      <p className="text-sm font-medium text-slate-700">
+                        Total Expenses Amount:
+                        <span className="ml-1 font-semibold text-red-600">
+                          ₹{viewData2
+                            .reduce((acc, item) => acc + Number(item.Amt || 0), 0)
+                            .toFixed(2)}
+                        </span>
+                      </p>
+
+
+                      {/* RIGHT SIDE */}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={SingleExportToExcel2}
+                          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Export Excel
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setViewOpen2(false)}
+                          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                          Close
+                        </button>
+                      </div>
 
                     </div>
+
+
                   </div>
                 </div>
               </div>
