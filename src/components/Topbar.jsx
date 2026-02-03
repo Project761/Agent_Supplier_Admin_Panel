@@ -4,6 +4,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ProfileCard from "./ProfileCard";
 
 const Topbar = ({ onMenuClick, isSidebarOpen }) => {
+
+    const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
+    // console.log(parsedUserData, "parsedUserData in Topbar");
+
     const location = useLocation();
     const navigate = useNavigate();
     const [showProfile, setShowProfile] = useState(false);
@@ -64,16 +68,8 @@ const Topbar = ({ onMenuClick, isSidebarOpen }) => {
         if (location.pathname.includes("/contact")) return "Contacts";
         if (location.pathname.includes("/bill")) return "Bills";
         if (location.pathname === "/dashboard" || location.pathname === "/dashboard/") return "Dashboard";
-        return "Dashboard";
+        return parsedUserData?.IsSuperAdmin === true || parsedUserData?.IsSuperAdmin === "True" ? "Dashboard" : "WeighBridge Automation";
     };
-
-
-
-
-
-
-
-
 
     const formatDate = (date) => {
         return date.toLocaleDateString("en-US", {
@@ -90,13 +86,21 @@ const Topbar = ({ onMenuClick, isSidebarOpen }) => {
         <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-slate-200 bg-white px-2 sm:px-3 md:px-4 lg:px-6 shadow-sm gap-1 sm:gap-2">
 
             <div className="flex items-center min-w-0 gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
-                <button
-                    onClick={onMenuClick}
-                    className="inline-flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 flex-shrink-0"
-                    aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-                >
-                    <FiMenu className="text-base sm:text-lg md:text-xl" />
-                </button>
+                {
+
+                    parsedUserData?.IsSuperAdmin === true || parsedUserData?.IsSuperAdmin === "True" ?
+
+                        <button
+                            onClick={onMenuClick}
+                            className="inline-flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 flex-shrink-0"
+                            aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                        >
+                            <FiMenu className="text-base sm:text-lg md:text-xl" />
+                        </button>
+
+                        : ''
+
+                }
                 {isSidebarOpen ? null : (
                     isDashboard ? (
                         <h1 className="text-4xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold text-slate-800 truncate">
@@ -104,7 +108,7 @@ const Topbar = ({ onMenuClick, isSidebarOpen }) => {
                         </h1>
                     ) : (
                         <button
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => { parsedUserData?.IsSuperAdmin === true || parsedUserData?.IsSuperAdmin === "True" ? navigate("/dashboard") : navigate("/Userpage") }}
                             className="text-4xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold text-slate-800 truncate hover:text-blue-600 transition-colors cursor-pointer"
                             title="Go to Dashboard"
                         >

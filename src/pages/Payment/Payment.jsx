@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import DataTable from "react-data-table-component";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiX } from "react-icons/fi";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import PaymentModal from "./PaymentModal";
 import ExpensesModal from "./ExpensesModal";
-import { PostWithToken } from "../../ApiMethods/ApiMethods";
+import { Comman_changeArrayFormat, GetWithToken, PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifyError, toastifySuccess } from "../../Utility/Utility";
-import Select from "react-select";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { IoMdPrint } from "react-icons/io";
+import Select from "react-select";
 
 import { useReactToPrint } from "react-to-print";
 import PaymentReceiptPrint from "./PaymentReceiptPrint";
@@ -18,6 +18,7 @@ import WorkStatusModal from "./WorkStatusModal";
 import { MdConstruction } from "react-icons/md";
 import PartySettingModal from "../Party/PartySettingModal";
 import { IoSettingsOutline } from "react-icons/io5";
+import { FaEdit } from "react-icons/fa";
 
 
 
@@ -44,15 +45,22 @@ const Payment = () => {
   const [partyOptions, setPartyOptions] = useState([]);
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [deleteTarget, setDeleteTarget] = useState(null);
-
   const [workstatusopen, setWorkstatusopen] = useState(false);
   const [WorkStatusfilter, setWorkStatusfilter] = useState(null);
-
   const printRef = useRef(null);
   const [printData, setPrintData] = useState(null);
-
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedPartyID, setSelectedPartyID] = useState(null);
+  const [PartyID, setPartyID] = useState(null);
+
+
+  const [showModal, setShowModal] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [userdata, setuserdata] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [permissionData, setPermissionData] = useState([]);
+
+
 
   const navigate = useNavigate();
 
@@ -137,6 +145,120 @@ const Payment = () => {
     }
   };
 
+  const GetSingleData_PermissionUser = async (PermissionUserID) => {
+    try {
+      const val = { PermissionUserID: PermissionUserID };
+      const res = await PostWithToken("PermissionUser/GetSingleData_PermissionUser", val);
+
+    } catch (error) {
+      console.error("GetSingleData_PartyPayment error:", error);
+    }
+  };
+
+  useEffect(() => {
+    PermissionUser_GetDropDown_User();
+  }, [])
+
+
+  const PermissionUser_GetDropDown_User = async () => {
+    try {
+      const res = await GetWithToken("PermissionUser/GetDropDown_User");
+      if (res) {
+        setUserList(res || []);
+      } else {
+        setUserList([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (showModal) {
+      GetData_PermissionUser();
+    }
+  }, [showModal]);
+
+  const GetData_PermissionUser = async () => {
+    try {
+      const val = { PartyID };
+      const res = await PostWithToken(
+        "PermissionUser/GetData_PermissionUser",
+        val
+      );
+
+      if (res && res.length > 0) {
+        setPermissionData(res);
+
+        const preSelected = res.map(item => ({
+          value: item.UserID,
+          label: item.UserFullName,
+          permissionUserID: item.PermissionUserID,
+        }));
+
+        setSelectedUser(preSelected);
+      } else {
+        setSelectedUser([]);
+        setPermissionData([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const userOptions = userList?.map(user => ({
+    value: user.UserID,
+    label: user.FullName,
+  }));
+
+
+
+  const Insert_PermissionUser = async (UserID) => {
+    try {
+      const val = {
+        PartyID: PartyID,
+        UserID: UserID
+      }; 
+
+      const res = await PostWithToken("PermissionUser/Insert_PermissionUser", val);
+      if (res) {
+        toastifySuccess("User assigned successfully");
+        // setShowModal(false);
+      }
+
+
+    } catch (error) {
+      console.error("Insert_PermissionUser error:", error);
+    }
+  };
+
+  const Delete_PermissionUser = async (permissionUserID) => {
+    try {
+      const val = {
+        PermissionUserID: permissionUserID,
+      };
+
+      const res = await PostWithToken(
+        "PermissionUser/Delete_PermissionUser",
+        val
+      );
+
+      if (res) {
+        toastifySuccess("Successfully deleted");
+      }
+    } catch (error) {
+      console.error("Delete_PermissionUser error:", error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    if (showModal) {
+      PermissionUser_GetDropDown_User();
+    }
+  }, [showModal]);
 
   const GetDataSingale_PaymentParty = async (item) => {
     const res = await PostWithToken(
@@ -332,6 +454,16 @@ const Payment = () => {
           <div className="flex gap-2">
 
             <button
+              className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
+              type="button"
+              title="Add Work Status"
+              onClick={() => { setShowModal(true); setPartyID(r.PartyID); }}
+            >
+              <FaEdit className="text-base" />
+            </button>
+
+
+            <button
               className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
               onClick={() => {
                 // console.log("Settings clicked for PartyID:", r);
@@ -343,6 +475,7 @@ const Payment = () => {
             >
               <IoSettingsOutline className="text-base" />
             </button>
+
 
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
@@ -1328,10 +1461,138 @@ const Payment = () => {
           </div>
         )}
 
+
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-50"
+              // onClick={() => setShowModal(false)}
+            ></div>
+
+            {/* Modal */}
+            <div className="relative w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-gray-200">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="mb-4 text-lg font-semibold text-gray-800">
+                  Assign Permission User
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
+                  title="Close"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+              {/* <h2 className="mb-4 text-lg font-semibold text-gray-800">
+                Assign Permission User
+              </h2> */}
+
+              {/* Dropdown */}
+              <div className="mb-5">
+                <label className="mb-1 block text-sm font-medium text-gray-600">
+                  Select User
+                </label>
+
+                <Select
+                  options={userOptions}
+                  value={selectedUser}
+                  isMulti
+                  isClearable
+                  placeholder="Select users..."
+                  className="text-sm"
+                  classNamePrefix="react-select"
+                  onChange={async (newValue, actionMeta) => {
+
+                    if (actionMeta.action === "select-option") {
+                      const selected = actionMeta.option;
+                      if (selected?.value) {
+                        await Insert_PermissionUser(selected.value);
+                      }
+                    }
+
+                    if (actionMeta.action === "remove-value") {
+                      const removedUser = actionMeta.removedValue;
+
+                      if (removedUser?.permissionUserID) {
+                        await Delete_PermissionUser(removedUser.permissionUserID);
+                      }
+                    }
+
+                    /* 🧹 DELETE ALL on clear */
+                    if (actionMeta.action === "clear") {
+                      if (selectedUser?.length > 0) {
+                        for (const item of selectedUser) {
+                          if (item.permissionUserID) {
+                            await Delete_PermissionUser(item.permissionUserID);
+                          }
+                        }
+                      }
+                    }
+
+                    setSelectedUser(newValue || []);
+                  }}
+                />
+
+                {/* <Select
+                  options={userOptions}
+                  value={selectedUser}
+                  isMulti
+                  isClearable
+                  placeholder="Select users..."
+                  className="text-sm"
+                  classNamePrefix="react-select"
+                  onChange={(newValue, actionMeta) => {
+                  
+                    if (actionMeta.action === "remove-value") {
+                      const removedUser = actionMeta.removedValue;
+
+                      if (removedUser?.permissionUserID) {
+                        Delete_PermissionUser(removedUser.permissionUserID);
+                      }
+                    }
+                    if (actionMeta.action === "clear") {
+                      selectedUser.forEach(item => {
+                        if (item.permissionUserID) {
+                          Delete_PermissionUser(item.permissionUserID);
+                        }
+                      });
+                    }
+
+                    setSelectedUser(newValue || []);
+                  }}
+                />
+ */}
+
+
+
+
+              </div>
+
+              {/* Buttons */}
+              {/* <div className="flex justify-end gap-3">
+                <button
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="rounded-lg bg-blue-600 px-5 py-2 text-sm text-white hover:bg-blue-700"
+                  onClick={Insert_PermissionUser}
+                >
+                  Submit
+                </button>
+              </div> */}
+            </div>
+          </div>
+        )}
+
+
+
       </div>
-      {/* <div style={{ position: "absolute", top: "-10000px" }}>
-        <PaymentReceiptPrint ref={printRef} data={printData} />
-      </div> */}
 
 
     </>

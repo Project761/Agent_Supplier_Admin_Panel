@@ -22,23 +22,53 @@ import TaxInvoice from './pages/TaxInvoice/TaxInvoice';
 import InvoiceList from './pages/Invoice/InvoiceList';
 import PaymentReceiptPrint from './pages/Payment/PaymentReceiptPrint';
 import MobileList from './pages/MobileList/MobileList';
+import Userpage from './pages/UserPages/Userpage';
 
+// const PublicRoute = ({ children }) => {
+//   const userData = sessionStorage.getItem('UserData');
+
+//   if (userData) {
+//     try {
+//       const parsedUserData = JSON.parse(userData);
+//       if (parsedUserData?.access_token && parsedUserData?.isOTPVerified) {
+//         return <Navigate to="/dashboard" replace />;
+//       }
+//     } catch (error) {
+//       sessionStorage.removeItem('UserData');
+//     }
+//   }
+
+//   return children;
+// };
 const PublicRoute = ({ children }) => {
-  const userData = sessionStorage.getItem('UserData');
+  const userData = sessionStorage.getItem("UserData");
 
   if (userData) {
     try {
       const parsedUserData = JSON.parse(userData);
+      // console.log(parsedUserData, "parsedUserData");
+
       if (parsedUserData?.access_token && parsedUserData?.isOTPVerified) {
-        return <Navigate to="/dashboard" replace />;
+
+        const isSuperAdmin =
+          parsedUserData.IsSuperAdmin === true ||
+          parsedUserData.IsSuperAdmin === "True";
+
+        return (
+          <Navigate
+            to={isSuperAdmin ? "/dashboard" : "/Userpage"}
+            replace
+          />
+        );
       }
     } catch (error) {
-      sessionStorage.removeItem('UserData');
+      sessionStorage.removeItem("UserData");
     }
   }
 
   return children;
 };
+
 
 function App() {
   return (
@@ -49,11 +79,22 @@ function App() {
             <Login />
           </PublicRoute>
         } />
+        <Route
+          path="/Userpage"
+          element={
+            <ProtectedRoute>
+              <Userpage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/dashboard/*" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         }>
+          {/* <Route path="Userpage" element={<Userpage />} /> */}
+
           <Route index element={<Home />} />
           <Route path="agent" element={<Agent />} />
           <Route path="MobileList" element={<MobileList />} />
@@ -72,6 +113,7 @@ function App() {
           <Route path="taxinvoice" element={<TaxInvoice />} />
           <Route path="PaymentReceiptPrint" element={<PaymentReceiptPrint />} />
           <Route path="listtable" element={<ListTable />} />
+          <Route path="Userpage" element={<Userpage />} />
         </Route>
         {/* Catch all other routes and redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />
