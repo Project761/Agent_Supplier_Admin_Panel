@@ -71,16 +71,26 @@ const Login = () => {
 
                 val);
 
-            if (res?.data?.error_description == "Successfully Login" && res?.data?.error == 200) {
+            // console.log(res, 'res')
+
+            if (res?.data?.error_description == "Successfully Login" && res?.data?.error == 200 && res?.data?.IsSuperAdmin === "True") {
                 sessionStorage.setItem("TempUserData", JSON.stringify(res.data));
-                const userData = res.data;
-                const mobileNumber = userData?.MobileNo || userData?.MobileNumber || "7990586879";
-                // const mobileNumber = userData?.MobileNo || userData?.MobileNumber || "8890441033";
+                const mobileNumber = "7990586879";
                 setMobileNo(mobileNumber);
                 await SendOTP(mobileNumber);
-
                 setLoginStatus(false);
-            } else {
+            }
+
+            else if (res?.data?.error_description == "Successfully Login" && res?.data?.error == 200 && res?.data?.IsSuperAdmin === "False") {
+                sessionStorage.setItem("TempUserData", JSON.stringify(res.data));
+                const userData = res.data;
+                const mobileNumber = userData?.MobileNo;
+                setMobileNo(mobileNumber);
+                await SendOTP(mobileNumber);
+                setLoginStatus(false);
+            }
+
+            else {
                 toastifyError("Invalid username or password");
             }
         } catch (error) {
@@ -147,6 +157,7 @@ const Login = () => {
 
     const VerifyOTP = async () => {
         const otpString = otp.join("");
+
         if (otpString.length !== 4) {
             toastifyError("Please enter 4-digit OTP");
             return;
@@ -165,37 +176,56 @@ const Login = () => {
             };
 
             const res = await PostWithToken("SMS/Check_Otp", payload);
-            // console.log("OTP Verification Response:", res);
-            if (res && res[0].Message == "OTP verified successfully") {
-                const tempUserData = sessionStorage.getItem("TempUserData");
-                if (tempUserData) {
-                    const userData = JSON.parse(tempUserData);
-                    userData.isOTPVerified = true;
-                    sessionStorage.setItem("UserData", JSON.stringify(userData));
-                    sessionStorage.removeItem("TempUserData");
+            console.log("OTP Verification Response:", res);
+
+            if (res?.[0]?.Message === "OTP verified successfully") {
+
+                const tempUserData = JSON.parse(
+                    sessionStorage.getItem("TempUserData")
+                );
+
+                if (!tempUserData) {
+                    toastifyError("User data not found");
+                    return;
                 }
 
+                const isSuperAdmin =
+                    tempUserData.IsSuperAdmin === true ||
+                    tempUserData.IsSuperAdmin === "True";
+
+                const userData = {
+                    ...tempUserData,
+                    isOTPVerified: true
+                };
+
+                sessionStorage.setItem("UserData", JSON.stringify(userData));
+                sessionStorage.removeItem("TempUserData");
+
                 toastifySuccess("OTP verified successfully");
-                navigate("/dashboard");
+
+                navigate(isSuperAdmin ? "/dashboard" : "/Userpage");
+
             } else {
                 toastifyError("Invalid OTP. Please try again.");
-                setOtp(["", "", "", ""]);
-                lastVerifiedOtpRef.current = "";
-                otpInputRefs.current[0]?.focus();
+                resetOtpInputs();
             }
 
         } catch (error) {
             console.error("Error verifying OTP:", error);
             toastifyError("Failed to verify OTP. Please try again.");
-            setOtp(["", "", "", ""]);
-            lastVerifiedOtpRef.current = "";
-            otpInputRefs.current[0]?.focus();
+            resetOtpInputs();
         } finally {
             setOtpLoading(false);
-
             isVerifyingRef.current = false;
         }
     };
+
+    const resetOtpInputs = () => {
+        setOtp(["", "", "", ""]);
+        lastVerifiedOtpRef.current = "";
+        otpInputRefs.current[0]?.focus();
+    };
+
 
     const handleResendOTP = async () => {
         try {
