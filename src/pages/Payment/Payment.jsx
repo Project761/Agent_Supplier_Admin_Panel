@@ -219,7 +219,7 @@ const Payment = () => {
       const val = {
         PartyID: PartyID,
         UserID: UserID
-      }; 
+      };
 
       const res = await PostWithToken("PermissionUser/Insert_PermissionUser", val);
       if (res) {
@@ -1142,30 +1142,44 @@ const Payment = () => {
                       </div>
                     )}
 
-                    <div className="mt-6 gap-3 flex justify-end">
-                      <button
-                        onClick={() => { PrintFun(viewData[0]?.PartyID) }}
-                        className="flex items-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-all duration-200 shadow-md"
-                      >
-                        <IoMdPrint className="text-lg" />
-                        <span>Print Total Payment Received</span>
-                      </button>
+                    <div className="mt-6 flex items-center gap-3 justify-between">
+                      {/* LEFT SIDE */}
+                      <p className="text-sm font-medium text-slate-700">
+                        Total Payment Received:
+                        <span className="ml-1 font-semibold text-green-600">
+                          ₹{viewData
+                            .reduce((acc, item) => acc + Number(item.Amt || 0), 0)
+                            .toFixed(2)}
+                        </span>
+                      </p>
 
-                      <button
-                        onClick={SingleExportToExcel}
-                        className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                      // className="mb-3 rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                      >
-                        Export Excel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setViewOpen(false)}
-                        className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                      >
-                        Close
-                      </button>
+                      {/* RIGHT SIDE BUTTONS */}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { PrintFun(viewData[0]?.PartyID) }}
+                          className="flex items-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 shadow-md"
+                        >
+                          <IoMdPrint className="text-lg" />
+                          <span>Print Total Payment Received</span>
+                        </button>
+
+                        <button
+                          onClick={SingleExportToExcel}
+                          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Export Excel
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setViewOpen(false)}
+                          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                          Close
+                        </button>
+                      </div>
                     </div>
+
 
                   </div>
                 </div>
@@ -1467,7 +1481,7 @@ const Payment = () => {
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-50"
-              // onClick={() => setShowModal(false)}
+            // onClick={() => setShowModal(false)}
             ></div>
 
             {/* Modal */}
