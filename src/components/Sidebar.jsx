@@ -44,7 +44,11 @@ const items = [
   {
     label: "Party Payment",
     icon: FiCreditCard,
-    children: [{ label: "Party Payment", to: "/dashboard/payment" }],
+    // children: [{ label: "Party Payment", to: "/dashboard/payment" }],
+     children: [
+    { label: "Party Payment", to: "/dashboard/payment" },
+    { label: "Remaining Payment Report", to: "/dashboard/payment" }
+  ],
   },
   {
     label: "Temp",

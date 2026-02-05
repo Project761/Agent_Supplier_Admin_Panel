@@ -29,7 +29,8 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
     { value: "Hardware-Inprogress", label: "Hardware-Inprogress" },
     { value: "Hardware-Done", label: "Hardware-Done" },
     { value: "Testing-InProgress", label: "Testing-InProgress" },
-    { value: "Close", label: "Close" },
+    { value: "Testing Close-Payment Remaining", label: "Testing Close-Payment Remaining" },
+    { value: "Testing Close-Payment Done", label: "Testing Close-Payment Done" },
   ];
 
  const selectStyles = {

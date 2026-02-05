@@ -64,7 +64,8 @@ const Payment = () => {
   const [totalpartypaymentmodel, setTotalpartypaymentmodel] = useState(false);
   const [TotalExpense, setTotalExpense] = useState([]);
   const [totalExpenseModel, setTotalExpenseModel] = useState(false);
-
+  const [totalbalance,setTotalbalance] = useState([]);
+  const[totalbalancemodel,settotalbalancemodel] = useState(false);
   const navigate = useNavigate();
 
   const otpInputRefs = useRef([]);
@@ -74,6 +75,7 @@ const Payment = () => {
     GetPartyDropdown();
     GetData_TotalpartyPayment();
     GetData_TotalExpense();
+    GetData_Totalbalance();
   }, []);
   // console.log(viewData, 'viewData')
   const GetPartyDropdown = async () => {
@@ -127,6 +129,19 @@ const Payment = () => {
     }
   };
 
+   const GetData_Totalbalance = async () => {
+    try {
+      const res = await PostWithToken("Payment/TotalCaluAmtbyParty", {});
+      if (res) {
+        console.log(res, "res");
+        setTotalbalance(res);
+      } else {
+        setTotalbalance([]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const GetData_TotalExpense = async () => {
     try {
       const res = await PostWithToken("Payment/TotalExpense", {});
@@ -484,7 +499,7 @@ const Payment = () => {
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
               type="button"
-              title="Add Work Status"
+              title="Add Permission"
               onClick={() => {
                 setShowModal(true);
                 setPartyID(r.PartyID);
@@ -501,7 +516,7 @@ const Payment = () => {
                 setSettingsOpen(true);
               }}
               type="button"
-              title="Add Work Status"
+              title="Party Settings"
             >
               <IoSettingsOutline className="text-base" />
             </button>
@@ -531,7 +546,7 @@ const Payment = () => {
                 setAmtdetil(r);
               }}
               type="button"
-              title="View"
+              title="View Payment"
             >
               <FiEye className="text-base" />
             </button>
@@ -552,7 +567,7 @@ const Payment = () => {
                 setAmtdetil2(r);
               }}
               type="button"
-              title="View"
+              title="View Expenses"
             >
               <FiEye className="text-base" />
             </button>
@@ -640,7 +655,8 @@ const Payment = () => {
     { value: "Hardware-Inprogress", label: "Hardware-Inprogress" },
     { value: "Hardware-Done", label: "Hardware-Done" },
     { value: "Testing-InProgress", label: "Testing-InProgress" },
-    { value: "Close", label: "Close" },
+   { value: "Testing Close-Payment Remaining", label: "Testing Close-Payment Remaining" },
+    { value: "Testing Close-Payment Done", label: "Testing Close-Payment Done" },
   ];
 
   const workstatusStyles = {
@@ -964,7 +980,7 @@ const Payment = () => {
                 </p>
               </div>
 
-              <div className="rounded-md border border-slate-300 p-3">
+              <div style={{cursor:"pointer"}} onClick={()=>settotalbalancemodel(true)} className="rounded-md border border-slate-300 p-3">
                 <p className="text-xs text-slate-700 font-medium">
                   Net Balance
                 </p>
@@ -1744,9 +1760,7 @@ const Payment = () => {
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                               Amount
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Remaining Amt
-                            </th>
+                           
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                               By Payment
                             </th>
@@ -1774,9 +1788,7 @@ const Payment = () => {
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.Amt || "-"}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.ReamaningAmt || "-"}
-                              </td>
+                             
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.ByPayment || "-"}
                               </td>
@@ -1856,6 +1868,9 @@ const Payment = () => {
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Name
                             </th>
+                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Owner Name
+                            </th>
 
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Weighbridge No
@@ -1883,6 +1898,9 @@ const Payment = () => {
                             >
                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item.Name || "-"}
+                              </td>
+                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item?.OwnerName || "-"}
                               </td>
 
                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
@@ -1928,6 +1946,121 @@ const Payment = () => {
             </div>
           </div>
         )}
+
+    {totalbalancemodel && totalbalancemodel && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div
+              className="absolute inset-0 bg-slate-900/40"
+              onClick={() => settotalbalancemodel(false)}
+            />
+            <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
+              <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-slate-800">
+                       Net Balance Details
+                    </h2>
+
+                    <button
+                      onClick={() => settotalbalancemodel(false)}
+                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+                      type="button"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {Array.isArray(totalbalance) && totalbalance.length > 0 ? (
+                    <div className="overflow-x-auto rounded-lg border border-slate-200">
+                      <table className="w-full border-collapse bg-white">
+                        <thead>
+                          <tr className="bg-blue-600">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Name
+                            </th>
+                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Owner Name
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                             Recived Payment
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                             Out Payment
+                            </th>
+                           
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Payment Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-200">
+                          {totalbalance.map((item, index) => (
+                            <tr
+                              key={item.PaymentId || index}
+                              className="hover:bg-blue-50 transition-colors"
+                            >
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.Name || "-"}
+                              </td>
+                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item?.OwnerName || "-"}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.RecivedPayment || "-"}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.OutPayment || "-"}
+                              </td>
+                             
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.PaymentDtTm || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                      <p className="text-sm text-slate-500">
+                        No data available
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => settotalbalancemodel(false)}
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );
