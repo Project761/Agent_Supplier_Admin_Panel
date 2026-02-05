@@ -44,10 +44,9 @@ const items = [
   {
     label: "Party Payment",
     icon: FiCreditCard,
-    // children: [{ label: "Party Payment", to: "/dashboard/payment" }],
      children: [
     { label: "Party Payment", to: "/dashboard/payment" },
-    { label: "Remaining Payment Report", to: "/dashboard/payment" }
+    { label: "Remaining Payment", to: "/dashboard/remainderpaymentreport" }
   ],
   },
   {
@@ -101,6 +100,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/temp")) setOpenKey("Temp");
     if (pathname.includes("/paymentreminder")) setOpenKey("Payment Reminder");
     if (pathname.includes("/payment")) setOpenKey("Payment");
+    if(pathname.includes("/remainderpaymentreport")) setOpenKey("Payment");
     if (pathname.includes("/bill")) setOpenKey("Bill");
     if (pathname.includes("/taxinvoice") || pathname.includes("/invoice")) setOpenKey("Tax Invoice");
     if (pathname.includes("/purchaseorder")) setOpenKey("Purchase Order");

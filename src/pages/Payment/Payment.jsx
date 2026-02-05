@@ -31,9 +31,9 @@ const Payment = () => {
   const [editRow, setEditRow] = useState(null);
   const [editItemId, setEditItemId] = useState(null);
   const [viewData, setViewData] = useState([]);
-  // console.log(viewData[0]?.PartyID,'sadf')
+
   const [viewData2, setViewData2] = useState(null);
-  // console.log(viewData2, 'viewdata')
+
   const [amtdeteil, setAmtdetil] = useState(null);
   const [amtdeteil2, setAmtdetil2] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
@@ -64,8 +64,8 @@ const Payment = () => {
   const [totalpartypaymentmodel, setTotalpartypaymentmodel] = useState(false);
   const [TotalExpense, setTotalExpense] = useState([]);
   const [totalExpenseModel, setTotalExpenseModel] = useState(false);
-  const [totalbalance,setTotalbalance] = useState([]);
-  const[totalbalancemodel,settotalbalancemodel] = useState(false);
+  const [totalbalance, setTotalbalance] = useState([]);
+  const [totalbalancemodel, settotalbalancemodel] = useState(false);
   const navigate = useNavigate();
 
   const otpInputRefs = useRef([]);
@@ -77,7 +77,7 @@ const Payment = () => {
     GetData_TotalExpense();
     GetData_Totalbalance();
   }, []);
-  // console.log(viewData, 'viewData')
+
   const GetPartyDropdown = async () => {
     try {
       const res = await PostWithToken("Party/GetData_Party", { IsActive: "1" });
@@ -105,7 +105,6 @@ const Payment = () => {
     try {
       const res = await PostWithToken("Payment/GetData_Payment", val);
       if (res) {
-        // console.log(res, 'res')
         setItems(res);
       } else {
         setItems([]);
@@ -119,7 +118,6 @@ const Payment = () => {
     try {
       const res = await PostWithToken("Payment/TotalpartyPayment", {});
       if (res) {
-        console.log(res, "res");
         setTotalpartyPayment(res);
       } else {
         setTotalpartyPayment([]);
@@ -129,11 +127,10 @@ const Payment = () => {
     }
   };
 
-   const GetData_Totalbalance = async () => {
+  const GetData_Totalbalance = async () => {
     try {
       const res = await PostWithToken("Payment/TotalCaluAmtbyParty", {});
       if (res) {
-        console.log(res, "res");
         setTotalbalance(res);
       } else {
         setTotalbalance([]);
@@ -146,7 +143,6 @@ const Payment = () => {
     try {
       const res = await PostWithToken("Payment/TotalExpense", {});
       if (res) {
-        console.log(res, "res");
         setTotalExpense(res);
       } else {
         setTotalExpense([]);
@@ -191,7 +187,7 @@ const Payment = () => {
         "ExpensePayment/GetSingalData_PartyExpensePayment",
         val,
       );
-      // console.log("GetSingleData_PartyPayment2 res:", res);
+
       if (res) {
         setViewData2(res);
         setViewOpen2(true);
@@ -323,7 +319,6 @@ const Payment = () => {
 
     if (res && res.length > 0) {
       setPrintData(res[0]);
-      console.log(res[0], "res[0]");
 
       // setTimeout(() => {
       //   handlePrint();
@@ -356,8 +351,6 @@ const Payment = () => {
   };
 
   const onAddPayment = (row) => {
-    // console.log("Add Payment for row:", row);
-
     const today = new Date().toISOString().split("T")[0];
     setEditRow({
       PartyID: row.PartyID || "",
@@ -373,8 +366,6 @@ const Payment = () => {
   };
 
   const onExpeses = (row) => {
-    // console.log("Add Expenses for row:", row);
-
     const today = new Date().toISOString().split("T")[0];
     setEditRow({
       PartyID: row.PartyID || "",
@@ -398,8 +389,6 @@ const Payment = () => {
       return hay.includes(q);
     });
   }, [items, search]);
-
-  // console.log(filteredItems, 'filteredItems')
 
   const dueOptions = [
     { value: "Yes", label: "Yes" },
@@ -511,7 +500,6 @@ const Payment = () => {
             <button
               className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
               onClick={() => {
-                // console.log("Settings clicked for PartyID:", r);
                 setSelectedPartyID(r.PartyID);
                 setSettingsOpen(true);
               }}
@@ -573,7 +561,7 @@ const Payment = () => {
             </button>
           </div>
         ),
-        minWidth: "220px",
+        minWidth: "300px",
         grow: 2,
       },
     ],
@@ -655,8 +643,14 @@ const Payment = () => {
     { value: "Hardware-Inprogress", label: "Hardware-Inprogress" },
     { value: "Hardware-Done", label: "Hardware-Done" },
     { value: "Testing-InProgress", label: "Testing-InProgress" },
-   { value: "Testing Close-Payment Remaining", label: "Testing Close-Payment Remaining" },
-    { value: "Testing Close-Payment Done", label: "Testing Close-Payment Done" },
+    {
+      value: "Testing Close-Payment Remaining",
+      label: "Testing Close-Payment Remaining",
+    },
+    {
+      value: "Testing Close-Payment Done",
+      label: "Testing Close-Payment Done",
+    },
   ];
 
   const workstatusStyles = {
@@ -818,19 +812,6 @@ const Payment = () => {
     }
   };
 
-  // const handlePrint = useReactToPrint({
-  //   content: () => printRef.current,
-  // });
-
-  // const handlePrint = () => {
-  //   window.print();
-  // };
-
-  // const handlePrint = useReactToPrint({
-  //   content: () => printRef.current,
-  // });
-  // console.log("PRINT REF:", printRef.current);
-
   const PrintFun = (item) => {
     navigate(
       `/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`,
@@ -845,8 +826,6 @@ const Payment = () => {
             <div className="mb-4 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                 <input
-                  // value={filterPartyName}
-                  // onChange={(e) => setFilterPartyName(e.target.value)}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search Payment..."
@@ -954,10 +933,12 @@ const Payment = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
-              <div
-                style={{ cursor: "pointer" }}
+              <div //after hower background color change
+                style={{ cursor: "pointer", color: "#2563eb" }}
                 onClick={() => setTotalpartypaymentmodel(true)}
-                className="rounded-md border border-slate-300 p-3"
+                // className="rounded-md border border-slate-300 p-3"
+                className="cursor-pointer rounded-md border border-slate-300 p-3
+             hover:bg-blue-300 transition"
               >
                 <p className="text-xs text-slate-700 font-medium">
                   Total In Amt
@@ -968,9 +949,10 @@ const Payment = () => {
               </div>
 
               <div
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer" }} //changes
                 onClick={() => setTotalExpenseModel(true)}
-                className="rounded-md border border-slate-300 p-3"
+                className="cursor-pointer rounded-md border border-slate-300 p-3
+             hover:bg-blue-300 transition"
               >
                 <p className="text-xs text-slate-700 font-medium">
                   Total Out Amt
@@ -980,7 +962,12 @@ const Payment = () => {
                 </p>
               </div>
 
-              <div style={{cursor:"pointer"}} onClick={()=>settotalbalancemodel(true)} className="rounded-md border border-slate-300 p-3">
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={() => settotalbalancemodel(true)}
+                className="cursor-pointer rounded-md border border-slate-300 p-3
+             hover:bg-blue-300 transition"
+              >
                 <p className="text-xs text-slate-700 font-medium">
                   Net Balance
                 </p>
@@ -1760,7 +1747,7 @@ const Payment = () => {
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                               Amount
                             </th>
-                           
+
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                               By Payment
                             </th>
@@ -1788,7 +1775,7 @@ const Payment = () => {
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.Amt || "-"}
                               </td>
-                             
+
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.ByPayment || "-"}
                               </td>
@@ -1868,7 +1855,7 @@ const Payment = () => {
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Name
                             </th>
-                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Owner Name
                             </th>
 
@@ -1899,7 +1886,7 @@ const Payment = () => {
                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item.Name || "-"}
                               </td>
-                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item?.OwnerName || "-"}
                               </td>
 
@@ -1947,7 +1934,7 @@ const Payment = () => {
           </div>
         )}
 
-    {totalbalancemodel && totalbalancemodel && (
+        {totalbalancemodel && totalbalancemodel && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div
               className="absolute inset-0 bg-slate-900/40"
@@ -1958,7 +1945,7 @@ const Payment = () => {
                 <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-slate-800">
-                       Net Balance Details
+                      Net Balance Details
                     </h2>
 
                     <button
@@ -1992,18 +1979,18 @@ const Payment = () => {
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Name
                             </th>
-                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                               Owner Name
                             </th>
 
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                             Recived Payment
+                              Recived Payment
                             </th>
 
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                             Out Payment
+                              Out Payment
                             </th>
-                           
+
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                               Payment Date
                             </th>
@@ -2018,7 +2005,7 @@ const Payment = () => {
                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item.Name || "-"}
                               </td>
-                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item?.OwnerName || "-"}
                               </td>
 
@@ -2029,7 +2016,7 @@ const Payment = () => {
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.OutPayment || "-"}
                               </td>
-                             
+
                               <td className="px-4 py-3 text-sm text-slate-800">
                                 {item.PaymentDtTm || "-"}
                               </td>
@@ -2060,7 +2047,6 @@ const Payment = () => {
             </div>
           </div>
         )}
-
       </div>
     </>
   );
