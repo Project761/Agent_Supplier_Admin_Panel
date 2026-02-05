@@ -4,7 +4,11 @@ import { FiEye, FiX } from "react-icons/fi";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import PaymentModal from "./PaymentModal";
 import ExpensesModal from "./ExpensesModal";
-import { Comman_changeArrayFormat, GetWithToken, PostWithToken } from "../../ApiMethods/ApiMethods";
+import {
+  Comman_changeArrayFormat,
+  GetWithToken,
+  PostWithToken,
+} from "../../ApiMethods/ApiMethods";
 import { toastifyError, toastifySuccess } from "../../Utility/Utility";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -19,8 +23,6 @@ import { MdConstruction } from "react-icons/md";
 import PartySettingModal from "../Party/PartySettingModal";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaEdit } from "react-icons/fa";
-
-
 
 const Payment = () => {
   const [search, setSearch] = useState("");
@@ -53,23 +55,25 @@ const Payment = () => {
   const [selectedPartyID, setSelectedPartyID] = useState(null);
   const [PartyID, setPartyID] = useState(null);
 
-
   const [showModal, setShowModal] = useState(false);
   const [userList, setUserList] = useState([]);
   const [userdata, setuserdata] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
   const [permissionData, setPermissionData] = useState([]);
-
-
+  const [totalpartyPayment, setTotalpartyPayment] = useState([]);
+  const [totalpartypaymentmodel, setTotalpartypaymentmodel] = useState(false);
+  const [TotalExpense, setTotalExpense] = useState([]);
+  const [totalExpenseModel, setTotalExpenseModel] = useState(false);
 
   const navigate = useNavigate();
-
 
   const otpInputRefs = useRef([]);
 
   useEffect(() => {
     GetData_Payment();
     GetPartyDropdown();
+    GetData_TotalpartyPayment();
+    GetData_TotalExpense();
   }, []);
   // console.log(viewData, 'viewData')
   const GetPartyDropdown = async () => {
@@ -109,14 +113,51 @@ const Payment = () => {
     }
   };
 
+  const GetData_TotalpartyPayment = async () => {
+    try {
+      const res = await PostWithToken("Payment/TotalpartyPayment", {});
+      if (res) {
+        console.log(res, "res");
+        setTotalpartyPayment(res);
+      } else {
+        setTotalpartyPayment([]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const GetData_TotalExpense = async () => {
+    try {
+      const res = await PostWithToken("Payment/TotalExpense", {});
+      if (res) {
+        console.log(res, "res");
+        setTotalExpense(res);
+      } else {
+        setTotalExpense([]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     GetData_Payment();
-  }, [filterFromDate, filterToDate, filterPartyName, filterDue, WorkStatusfilter]);
+  }, [
+    filterFromDate,
+    filterToDate,
+    filterPartyName,
+    filterDue,
+    WorkStatusfilter,
+  ]);
 
   const GetSingleData_PartyPayment = async (PartyID) => {
     try {
       const val = { PartyID: PartyID };
-      const res = await PostWithToken("Payment/GetSingalData_PartyPayment", val);
+      const res = await PostWithToken(
+        "Payment/GetSingalData_PartyPayment",
+        val,
+      );
       if (res) {
         setViewData(res);
         setViewOpen(true);
@@ -128,11 +169,13 @@ const Payment = () => {
     }
   };
 
-
   const GetSingleData_PartyPayment2 = async (PartyID) => {
     try {
       const val = { PartyID: PartyID };
-      const res = await PostWithToken("ExpensePayment/GetSingalData_PartyExpensePayment", val);
+      const res = await PostWithToken(
+        "ExpensePayment/GetSingalData_PartyExpensePayment",
+        val,
+      );
       // console.log("GetSingleData_PartyPayment2 res:", res);
       if (res) {
         setViewData2(res);
@@ -148,8 +191,10 @@ const Payment = () => {
   const GetSingleData_PermissionUser = async (PermissionUserID) => {
     try {
       const val = { PermissionUserID: PermissionUserID };
-      const res = await PostWithToken("PermissionUser/GetSingleData_PermissionUser", val);
-
+      const res = await PostWithToken(
+        "PermissionUser/GetSingleData_PermissionUser",
+        val,
+      );
     } catch (error) {
       console.error("GetSingleData_PartyPayment error:", error);
     }
@@ -157,8 +202,7 @@ const Payment = () => {
 
   useEffect(() => {
     PermissionUser_GetDropDown_User();
-  }, [])
-
+  }, []);
 
   const PermissionUser_GetDropDown_User = async () => {
     try {
@@ -184,13 +228,13 @@ const Payment = () => {
       const val = { PartyID };
       const res = await PostWithToken(
         "PermissionUser/GetData_PermissionUser",
-        val
+        val,
       );
 
       if (res && res.length > 0) {
         setPermissionData(res);
 
-        const preSelected = res.map(item => ({
+        const preSelected = res.map((item) => ({
           value: item.UserID,
           label: item.UserFullName,
           permissionUserID: item.PermissionUserID,
@@ -206,28 +250,26 @@ const Payment = () => {
     }
   };
 
-
-  const userOptions = userList?.map(user => ({
+  const userOptions = userList?.map((user) => ({
     value: user.UserID,
     label: user.FullName,
   }));
-
-
 
   const Insert_PermissionUser = async (UserID) => {
     try {
       const val = {
         PartyID: PartyID,
-        UserID: UserID
+        UserID: UserID,
       };
 
-      const res = await PostWithToken("PermissionUser/Insert_PermissionUser", val);
+      const res = await PostWithToken(
+        "PermissionUser/Insert_PermissionUser",
+        val,
+      );
       if (res) {
         toastifySuccess("User assigned successfully");
         // setShowModal(false);
       }
-
-
     } catch (error) {
       console.error("Insert_PermissionUser error:", error);
     }
@@ -241,7 +283,7 @@ const Payment = () => {
 
       const res = await PostWithToken(
         "PermissionUser/Delete_PermissionUser",
-        val
+        val,
       );
 
       if (res) {
@@ -252,8 +294,6 @@ const Payment = () => {
     }
   };
 
-
-
   useEffect(() => {
     if (showModal) {
       PermissionUser_GetDropDown_User();
@@ -261,17 +301,14 @@ const Payment = () => {
   }, [showModal]);
 
   const GetDataSingale_PaymentParty = async (item) => {
-    const res = await PostWithToken(
-      "Payment/GetDataSingale_PaymentParty",
-      {
-        PaymentID: item.PaymentID,
-        PartyID: item.PartyID,
-      }
-    );
+    const res = await PostWithToken("Payment/GetDataSingale_PaymentParty", {
+      PaymentID: item.PaymentID,
+      PartyID: item.PartyID,
+    });
 
     if (res && res.length > 0) {
       setPrintData(res[0]);
-      console.log(res[0], 'res[0]')
+      console.log(res[0], "res[0]");
 
       // setTimeout(() => {
       //   handlePrint();
@@ -279,16 +316,13 @@ const Payment = () => {
     }
   };
 
-
   // useEffect(() => {
   //   if (printData && printRef.current) {
   //     handlePrint();
   //   }
   // }, [printData]);
 
-
   const onViewItem = (row) => {
-
     const partyID = row.PartyID;
     if (partyID) {
       GetSingleData_PartyPayment(partyID);
@@ -296,7 +330,6 @@ const Payment = () => {
       toastifySuccess("Party ID not found");
     }
   };
-
 
   const onViewItem2 = (row) => {
     const partyID = row.PartyID;
@@ -345,7 +378,8 @@ const Payment = () => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((r) => {
-      const hay = `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""}  ${r.ByPayment || ""}`.toLowerCase();
+      const hay =
+        `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""}  ${r.ByPayment || ""}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, search]);
@@ -372,40 +406,33 @@ const Payment = () => {
         name: <span className="font-semibold">Party Name</span>,
         selector: (row) => row.Name || "-",
         sortable: true,
-        cell: (row) => <div className="font-medium text-slate-800">{row.Name || "-"}</div>,
+        cell: (row) => (
+          <div className="font-medium text-slate-800">{row.Name || "-"}</div>
+        ),
       },
       {
         name: <span className="font-semibold">Amount</span>,
         selector: (row) => row.FinalAmt || "-",
         sortable: true,
         cell: (row) => (
-          <div className="font-medium text-slate-800">
-            ₹{row.FinalAmt}
-          </div>
+          <div className="font-medium text-slate-800">₹{row.FinalAmt}</div>
         ),
-
       },
       {
         name: <span className="font-semibold">Remaining Amount</span>,
         selector: (row) => row.RemainingAmt || "-",
         sortable: true,
         cell: (row) => (
-          <div className="font-medium text-slate-800">
-            ₹{row.RemainingAmt}
-          </div>
+          <div className="font-medium text-slate-800">₹{row.RemainingAmt}</div>
         ),
-
       },
       {
         name: <span className="font-semibold">TotalPaid Amount</span>,
         selector: (row) => row.TotalPaid || "-",
         sortable: true,
         cell: (row) => (
-          <div className="font-medium text-slate-800">
-            ₹{row.TotalPaid}
-          </div>
+          <div className="font-medium text-slate-800">₹{row.TotalPaid}</div>
         ),
-
       },
       {
         name: <span className="font-semibold">Total Expense Payment</span>,
@@ -416,7 +443,6 @@ const Payment = () => {
             ₹{row.TotalExpensePayment}
           </div>
         ),
-
       },
 
       {
@@ -424,23 +450,26 @@ const Payment = () => {
         selector: (row) => row.WorkStatus || "-",
         sortable: true,
         cell: (row) => (
-          <div className="font-medium text-slate-800">
-            {row.WorkStatus}
-          </div>
+          <div className="font-medium text-slate-800">{row.WorkStatus}</div>
         ),
-
       },
       {
         name: <span className="font-semibold">Owner Name</span>,
         selector: (row) => row.OwnerName || "-",
         sortable: true,
-        cell: (row) => <div className="font-medium text-slate-800">{row.OwnerName || "-"}</div>,
+        cell: (row) => (
+          <div className="font-medium text-slate-800">
+            {row.OwnerName || "-"}
+          </div>
+        ),
       },
       {
         name: <span className="font-semibold">Area</span>,
         selector: (row) => row.Area || "-",
         sortable: true,
-        cell: (row) => <div className="font-medium text-slate-800">{row.Area || "-"}</div>,
+        cell: (row) => (
+          <div className="font-medium text-slate-800">{row.Area || "-"}</div>
+        ),
       },
       {
         name: <span className="font-semibold">ME Office</span>,
@@ -452,16 +481,17 @@ const Payment = () => {
         name: "Actions",
         cell: (r) => (
           <div className="flex gap-2">
-
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
               type="button"
               title="Add Work Status"
-              onClick={() => { setShowModal(true); setPartyID(r.PartyID); }}
+              onClick={() => {
+                setShowModal(true);
+                setPartyID(r.PartyID);
+              }}
             >
               <FaEdit className="text-base" />
             </button>
-
 
             <button
               className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
@@ -475,7 +505,6 @@ const Payment = () => {
             >
               <IoSettingsOutline className="text-base" />
             </button>
-
 
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
@@ -497,7 +526,10 @@ const Payment = () => {
 
             <button
               className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-              onClick={() => { onViewItem(r); setAmtdetil(r); }}
+              onClick={() => {
+                onViewItem(r);
+                setAmtdetil(r);
+              }}
               type="button"
               title="View"
             >
@@ -513,22 +545,24 @@ const Payment = () => {
               <FiMinus className="text-base" />
             </button>
 
-
             <button
               className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-              onClick={() => { onViewItem2(r); setAmtdetil2(r); }}
+              onClick={() => {
+                onViewItem2(r);
+                setAmtdetil2(r);
+              }}
               type="button"
               title="View"
             >
               <FiEye className="text-base" />
             </button>
-
           </div>
-        ), minWidth: "220px",
+        ),
+        minWidth: "220px",
         grow: 2,
       },
     ],
-    [editItemId]
+    [editItemId],
   );
 
   const tableStyles = {
@@ -548,7 +582,6 @@ const Payment = () => {
     cells: { style: { padding: "1rem 0.75rem" } },
   };
 
-
   const totals = useMemo(() => {
     return items.reduce(
       (acc, item) => {
@@ -558,7 +591,12 @@ const Payment = () => {
         acc.TotalExpensePayment += Number(item.TotalExpensePayment || 0);
         return acc;
       },
-      { totalAmount: 0, totalRemaining: 0, totalPaid: 0, TotalExpensePayment: 0 }
+      {
+        totalAmount: 0,
+        totalRemaining: 0,
+        totalPaid: 0,
+        TotalExpensePayment: 0,
+      },
     );
   }, [items]);
 
@@ -581,9 +619,7 @@ const Payment = () => {
     saveAs(data, "Payment_Report.xlsx");
   };
 
-
   const onWorkStatus = (row) => {
-
     const today = new Date().toISOString().split("T")[0];
     setEditRow({
       PartyID: row.PartyID || "",
@@ -597,7 +633,6 @@ const Payment = () => {
     setEditItemId(null);
     setWorkstatusopen(true);
   };
-
 
   const paymentTypeOptions = [
     { value: "Civil-Inprogress", label: "Civil-Inprogress" },
@@ -650,8 +685,6 @@ const Payment = () => {
     saveAs(data, "Expenses_Report.xlsx");
   };
 
-
-
   const DeletePaymentById = async (paymentId) => {
     const res = await PostWithToken("ExpensePayment/Delete_ExpensePayment", {
       ExpensePaymentID: paymentId,
@@ -664,7 +697,6 @@ const Payment = () => {
       setViewOpen2(false);
     }
   };
-
 
   const DeletePaymentById2 = async (paymentId) => {
     const res = await PostWithToken("Payment/Delete_Payment", {
@@ -679,7 +711,7 @@ const Payment = () => {
   const SendOTP = async () => {
     try {
       const payload = {
-        MobileNo: "7990586879"
+        MobileNo: "7990586879",
       };
       const res = await PostWithToken("SMS/SendMessage", payload);
       if (res) {
@@ -690,7 +722,6 @@ const Payment = () => {
       toastifyError("Failed to send OTP");
     }
   };
-
 
   const VerifyOTP = async () => {
     const otpString = otp.join("");
@@ -757,7 +788,10 @@ const Payment = () => {
 
   const handleOtpPaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 4);
+    const pastedData = e.clipboardData
+      .getData("text")
+      .replace(/[^0-9]/g, "")
+      .slice(0, 4);
     const newOtp = [...otp];
     for (let i = 0; i < 4; i++) {
       newOtp[i] = pastedData[i] || "";
@@ -768,9 +802,6 @@ const Payment = () => {
     }
   };
 
-
-
-
   // const handlePrint = useReactToPrint({
   //   content: () => printRef.current,
   // });
@@ -779,27 +810,22 @@ const Payment = () => {
   //   window.print();
   // };
 
-
   // const handlePrint = useReactToPrint({
   //   content: () => printRef.current,
   // });
   // console.log("PRINT REF:", printRef.current);
 
-
   const PrintFun = (item) => {
-    navigate(`/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`);
+    navigate(
+      `/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`,
+    );
   };
 
-
   return (
-
     <>
-
       <div className="flex-1 space-y-3 overflow-y-auto px-2 py-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="">
-
-
             <div className="mb-4 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                 <input
@@ -810,7 +836,6 @@ const Payment = () => {
                   placeholder="Search Payment..."
                   className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
-
                 />
 
                 <input
@@ -820,7 +845,6 @@ const Payment = () => {
                   placeholder="From Date"
                   className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
-
                 />
 
                 <input
@@ -830,7 +854,6 @@ const Payment = () => {
                   placeholder="To Date"
                   className="w-full h-[32px] rounded-md border border-slate-300 px-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="off-district"
-
                 />
 
                 <Select
@@ -895,16 +918,19 @@ const Payment = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Total Amount</p>
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Amount
+                </p>
                 <p className="text-lg font-semibold text-slate-800">
                   ₹{totals.totalAmount.toFixed(2)}
                 </p>
               </div>
 
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Total Remaining</p>
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Remaining
+                </p>
                 <p className="text-lg font-semibold text-slate-800">
                   ₹{totals.totalRemaining.toFixed(2)}
                 </p>
@@ -912,31 +938,44 @@ const Payment = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
-
-              <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Total In Amt</p>
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={() => setTotalpartypaymentmodel(true)}
+                className="rounded-md border border-slate-300 p-3"
+              >
+                <p className="text-xs text-slate-700 font-medium">
+                  Total In Amt
+                </p>
                 <p className="text-lg font-semibold text-slate-800">
                   ₹{totals.totalPaid.toFixed(2)}
                 </p>
               </div>
 
-              <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Total Out Amt</p>
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={() => setTotalExpenseModel(true)}
+                className="rounded-md border border-slate-300 p-3"
+              >
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Out Amt
+                </p>
                 <p className="text-lg font-semibold text-slate-800">
                   ₹{totals.TotalExpensePayment.toFixed(2)}
                 </p>
               </div>
 
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">Net Balance</p>
-                <p className={`text-lg font-semibold ${netBalance < 0 ? "text-red-600" : "text-green-600"}`} >
-                  {/* ₹{netBalance.toFixed(2)} */}
-                  ₹{Math.abs(netBalance).toFixed(2)}
+                <p className="text-xs text-slate-700 font-medium">
+                  Net Balance
+                </p>
+                <p
+                  className={`text-lg font-semibold ${netBalance < 0 ? "text-red-600" : "text-green-600"}`}
+                >
+                  {/* ₹{netBalance.toFixed(2)} */}₹
+                  {Math.abs(netBalance).toFixed(2)}
                 </p>
               </div>
-
             </div>
-
 
             <div className="overflow-x-auto">
               <DataTable
@@ -965,7 +1004,6 @@ const Payment = () => {
             onSuccess={GetData_Payment}
           />
 
-
           <ExpensesModal
             open={open2}
             onClose={() => {
@@ -986,7 +1024,6 @@ const Payment = () => {
             onSuccess={GetData_Payment}
           />
 
-
           <PartySettingModal
             open={settingsOpen}
             onClose={() => {
@@ -996,14 +1033,14 @@ const Payment = () => {
             PartyID={selectedPartyID}
           />
 
-
-
           {viewOpen && viewData && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
-              <div className="absolute inset-0 bg-slate-900/40" onClick={() => setViewOpen(false)} />
+              <div
+                className="absolute inset-0 bg-slate-900/40"
+                onClick={() => setViewOpen(false)}
+              />
               <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
                 <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
-
                   <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-slate-800">
@@ -1031,17 +1068,27 @@ const Payment = () => {
                         )}
                       </h2>
 
-
                       <button
-                        onClick={() => { setViewOpen(false); }}
+                        onClick={() => {
+                          setViewOpen(false);
+                        }}
                         className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
                         type="button"
                       >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
-
                     </div>
                   </div>
 
@@ -1070,7 +1117,6 @@ const Payment = () => {
                                 Created Date
                               </th>
 
-
                               <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase border-r border-blue-500">
                                 Action
                               </th>
@@ -1082,13 +1128,32 @@ const Payment = () => {
 
                           <tbody className="bg-white divide-y divide-slate-200">
                             {viewData.map((item, index) => (
-                              <tr key={item.PaymentID || index} className="hover:bg-blue-50 transition-colors">
-
+                              <tr
+                                key={item.PaymentID || index}
+                                className="hover:bg-blue-50 transition-colors"
+                              >
                                 <td className="px-4 py-3 text-sm font-semibold text-green-700 border-r border-slate-200">
-                                  ₹{item.Amt ? parseFloat(item.Amt).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                  ₹
+                                  {item.Amt
+                                    ? parseFloat(item.Amt).toLocaleString(
+                                        "en-IN",
+                                        {
+                                          minimumFractionDigits: 2,
+                                          maximumFractionDigits: 2,
+                                        },
+                                      )
+                                    : "0.00"}
                                 </td>
                                 <td className="px-4 py-3 text-sm font-semibold text-orange-700 border-r border-slate-200">
-                                  ₹{item.ReamaningAmt ? parseFloat(item.ReamaningAmt).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                  ₹
+                                  {item.ReamaningAmt
+                                    ? parseFloat(
+                                        item.ReamaningAmt,
+                                      ).toLocaleString("en-IN", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })
+                                    : "0.00"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                   {item.Paymenttype || "-"}
@@ -1097,22 +1162,26 @@ const Payment = () => {
                                   {item.ByPayment || "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.PaymentDtTm ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-
-
-                                  }) : "-"}
+                                  {item.PaymentDtTm
+                                    ? new Date(item.PaymentDtTm).toLocaleString(
+                                        "en-IN",
+                                        {
+                                          day: "2-digit",
+                                          month: "short",
+                                          year: "numeric",
+                                        },
+                                      )
+                                    : "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800">
                                   {item.CreatedDtTm || "-"}
                                 </td>
 
-
                                 <td className="px-4 py-3 text-center">
                                   <button
-                                    onClick={() => { setDeleteTarget(item); }}
+                                    onClick={() => {
+                                      setDeleteTarget(item);
+                                    }}
                                     className="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700"
                                   >
                                     Delete
@@ -1122,15 +1191,14 @@ const Payment = () => {
                                 <td className="px-1  text-center">
                                   <button
                                     // onClick={() => { GetDataSingale_PaymentParty(item) }}
-                                    onClick={() => { PrintFun(item) }}
+                                    onClick={() => {
+                                      PrintFun(item);
+                                    }}
                                     className="rounded-lg bg-teal-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                                   >
                                     <IoMdPrint />
                                   </button>
                                 </td>
-
-
-
                               </tr>
                             ))}
                           </tbody>
@@ -1138,7 +1206,9 @@ const Payment = () => {
                       </div>
                     ) : (
                       <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                        <p className="text-sm text-slate-500">No payment data available</p>
+                        <p className="text-sm text-slate-500">
+                          No payment data available
+                        </p>
                       </div>
                     )}
 
@@ -1147,8 +1217,12 @@ const Payment = () => {
                       <p className="text-sm font-medium text-slate-700">
                         Total Payment Received:
                         <span className="ml-1 font-semibold text-green-600">
-                          ₹{viewData
-                            .reduce((acc, item) => acc + Number(item.Amt || 0), 0)
+                          ₹
+                          {viewData
+                            .reduce(
+                              (acc, item) => acc + Number(item.Amt || 0),
+                              0,
+                            )
                             .toFixed(2)}
                         </span>
                       </p>
@@ -1156,7 +1230,9 @@ const Payment = () => {
                       {/* RIGHT SIDE BUTTONS */}
                       <div className="flex gap-3">
                         <button
-                          onClick={() => { PrintFun(viewData[0]?.PartyID) }}
+                          onClick={() => {
+                            PrintFun(viewData[0]?.PartyID);
+                          }}
                           className="flex items-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 shadow-md"
                         >
                           <IoMdPrint className="text-lg" />
@@ -1179,21 +1255,20 @@ const Payment = () => {
                         </button>
                       </div>
                     </div>
-
-
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-
           {viewOpen2 && viewData2 && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
-              <div className="absolute inset-0 bg-slate-900/40" onClick={() => setViewOpen2(false)} />
+              <div
+                className="absolute inset-0 bg-slate-900/40"
+                onClick={() => setViewOpen2(false)}
+              />
               <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
                 <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
-
                   <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-slate-800">
@@ -1221,17 +1296,25 @@ const Payment = () => {
                         )}
                       </h2>
 
-
                       <button
                         onClick={() => setViewOpen2(false)}
                         className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
                         type="button"
                       >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
-
                     </div>
                   </div>
 
@@ -1241,7 +1324,6 @@ const Payment = () => {
                         <table className="w-full border-collapse bg-white">
                           <thead>
                             <tr className="bg-blue-600">
-
                               <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                                 Amount
                               </th>
@@ -1262,10 +1344,21 @@ const Payment = () => {
                           </thead>
                           <tbody className="bg-white divide-y divide-slate-200">
                             {viewData2.map((item, index) => (
-                              <tr key={item.PaymentID || index} className="hover:bg-blue-50 transition-colors">
-
+                              <tr
+                                key={item.PaymentID || index}
+                                className="hover:bg-blue-50 transition-colors"
+                              >
                                 <td className="px-4 py-3 text-sm font-semibold text-red-700 border-r border-slate-200">
-                                  ₹{item.Amt ? parseFloat(item.Amt).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                  ₹
+                                  {item.Amt
+                                    ? parseFloat(item.Amt).toLocaleString(
+                                        "en-IN",
+                                        {
+                                          minimumFractionDigits: 2,
+                                          maximumFractionDigits: 2,
+                                        },
+                                      )
+                                    : "0.00"}
                                 </td>
 
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
@@ -1275,31 +1368,32 @@ const Payment = () => {
                                   {item.ByPayment || "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.PaymentDtTm ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-
-
-                                  }) : "-"}
+                                  {item.PaymentDtTm
+                                    ? new Date(item.PaymentDtTm).toLocaleString(
+                                        "en-IN",
+                                        {
+                                          day: "2-digit",
+                                          month: "short",
+                                          year: "numeric",
+                                        },
+                                      )
+                                    : "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800">
                                   {item.CreatedDtTm || "-"}
                                 </td>
 
-
                                 <td className="px-4 py-3 text-center">
                                   <button
                                     // onClick={() => DeletePaymentById(item.ExpensePaymentID)}
-                                    onClick={() => { setDeleteTarget(item); }}
+                                    onClick={() => {
+                                      setDeleteTarget(item);
+                                    }}
                                     className="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700"
                                   >
                                     Delete
                                   </button>
                                 </td>
-
-
-
                               </tr>
                             ))}
                           </tbody>
@@ -1307,7 +1401,9 @@ const Payment = () => {
                       </div>
                     ) : (
                       <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                        <p className="text-sm text-slate-500">No payment data available</p>
+                        <p className="text-sm text-slate-500">
+                          No payment data available
+                        </p>
                       </div>
                     )}
 
@@ -1328,17 +1424,19 @@ const Payment = () => {
                     </div> */}
 
                     <div className="mt-6 flex items-center justify-between gap-3">
-
                       {/* LEFT SIDE */}
                       <p className="text-sm font-medium text-slate-700">
                         Total Expenses Amount:
                         <span className="ml-1 font-semibold text-red-600">
-                          ₹{viewData2
-                            .reduce((acc, item) => acc + Number(item.Amt || 0), 0)
+                          ₹
+                          {viewData2
+                            .reduce(
+                              (acc, item) => acc + Number(item.Amt || 0),
+                              0,
+                            )
                             .toFixed(2)}
                         </span>
                       </p>
-
 
                       {/* RIGHT SIDE */}
                       <div className="flex gap-3">
@@ -1357,72 +1455,66 @@ const Payment = () => {
                           Close
                         </button>
                       </div>
-
                     </div>
-
-
                   </div>
                 </div>
               </div>
             </div>
           )}
-
         </div>
 
-        {
-          OTPStatus && (
+        {OTPStatus && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+            <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-2xl">
+              <div className="p-6 md:p-8">
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">
+                  Verify OTP
+                </h1>
 
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-              <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-2xl">
-                <div className="p-6 md:p-8">
-                  <h1 className="text-2xl font-bold text-slate-800 mb-2">
-                    Verify OTP
-                  </h1>
+                <p className="text-sm text-slate-500 mb-8">
+                  We've sent a verification code to{" "}
+                  <strong className="text-slate-700">7990586879</strong>
+                </p>
 
-                  <p className="text-sm text-slate-500 mb-8">
-                    We've sent a verification code to{" "}
-                    <strong className="text-slate-700">7990586879</strong>
-                  </p>
+                <div className="mb-6">
+                  <label className="mb-3 block text-sm font-medium text-slate-700 text-left">
+                    Enter 4-digit OTP
+                  </label>
 
-                  <div className="mb-6">
-                    <label className="mb-3 block text-sm font-medium text-slate-700 text-left">
-                      Enter 4-digit OTP
-                    </label>
-
-                    <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
-                      {otp.map((digit, index) => (
-                        <input
-                          key={index}
-                          ref={(el) => (otpInputRefs.current[index] = el)}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          autoComplete="off-district"
-                          className="w-16 h-16 text-center text-xl font-semibold rounded-lg border-2 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={VerifyOTP}
-                    disabled={otp.join("").length !== 4}
-                    className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-60"
+                  <div
+                    className="flex gap-3 justify-center"
+                    onPaste={handleOtpPaste}
                   >
-                    Verify OTP
-                  </button>
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        autoComplete="off-district"
+                        className="w-16 h-16 text-center text-xl font-semibold rounded-lg border-2 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={VerifyOTP}
+                  disabled={otp.join("").length !== 4}
+                  className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-60"
+                >
+                  Verify OTP
+                </button>
               </div>
             </div>
-
-          )
-        }
-
+          </div>
+        )}
 
         {deleteTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -1462,26 +1554,21 @@ const Payment = () => {
                     await SendOTP();
                     setOTPStatus(true);
                   }}
-
-
-
                   className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
                 >
                   Yes, Delete
                 </button>
-
               </div>
             </div>
           </div>
         )}
-
 
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-50"
-            // onClick={() => setShowModal(false)}
+              // onClick={() => setShowModal(false)}
             ></div>
 
             {/* Modal */}
@@ -1518,7 +1605,6 @@ const Payment = () => {
                   className="text-sm"
                   classNamePrefix="react-select"
                   onChange={async (newValue, actionMeta) => {
-
                     if (actionMeta.action === "select-option") {
                       const selected = actionMeta.option;
                       if (selected?.value) {
@@ -1530,7 +1616,9 @@ const Payment = () => {
                       const removedUser = actionMeta.removedValue;
 
                       if (removedUser?.permissionUserID) {
-                        await Delete_PermissionUser(removedUser.permissionUserID);
+                        await Delete_PermissionUser(
+                          removedUser.permissionUserID,
+                        );
                       }
                     }
 
@@ -1578,10 +1666,6 @@ const Payment = () => {
                   }}
                 />
  */}
-
-
-
-
               </div>
 
               {/* Buttons */}
@@ -1604,14 +1688,249 @@ const Payment = () => {
           </div>
         )}
 
+        {totalpartypaymentmodel && totalpartypaymentmodel && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div
+              className="absolute inset-0 bg-slate-900/40"
+              onClick={() => setTotalpartypaymentmodel(false)}
+            />
+            <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
+              <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-slate-800">
+                      Total In Amount Details
+                    </h2>
 
+                    <button
+                      onClick={() => setTotalpartypaymentmodel(false)}
+                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+                      type="button"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
 
+                <div className="p-6">
+                  {Array.isArray(totalpartyPayment) &&
+                  totalpartyPayment.length > 0 ? (
+                    <div className="overflow-x-auto rounded-lg border border-slate-200">
+                      <table className="w-full border-collapse bg-white">
+                        <thead>
+                          <tr className="bg-blue-600">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Name
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Owner Name
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Weighbridge No
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Amount
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Remaining Amt
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              By Payment
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Payment Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-200">
+                          {totalpartyPayment.map((item, index) => (
+                            <tr
+                              key={item.PaymentId || index}
+                              className="hover:bg-blue-50 transition-colors"
+                            >
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.Name || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.OwnerName || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.WeighbridgeNo || "-"}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.Amt || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.ReamaningAmt || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.ByPayment || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.PaymentDtTm || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                      <p className="text-sm text-slate-500">
+                        No data available
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTotalpartypaymentmodel(false)}
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {totalExpenseModel && totalExpenseModel && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div
+              className="absolute inset-0 bg-slate-900/40"
+              onClick={() => setTotalExpenseModel(false)}
+            />
+            <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
+              <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-slate-800">
+                      Total Out Amount Details
+                    </h2>
+
+                    <button
+                      onClick={() => setTotalExpenseModel(false)}
+                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+                      type="button"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {Array.isArray(TotalExpense) && TotalExpense.length > 0 ? (
+                    <div className="overflow-x-auto rounded-lg border border-slate-200">
+                      <table className="w-full border-collapse bg-white">
+                        <thead>
+                          <tr className="bg-blue-600">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Name
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
+                              Weighbridge No
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Amount
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Payment Type
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              By Payment
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Payment Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-200">
+                          {TotalExpense.map((item, index) => (
+                            <tr
+                              key={item.PaymentId || index}
+                              className="hover:bg-blue-50 transition-colors"
+                            >
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.Name || "-"}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.WeighbridgeNo || "-"}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.Amt || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.Paymenttype || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.ByPayment || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">
+                                {item.PaymentDtTm || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                      <p className="text-sm text-slate-500">
+                        No data available
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTotalExpenseModel(false)}
+                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-
     </>
   );
 };
 
 export default Payment;
-
