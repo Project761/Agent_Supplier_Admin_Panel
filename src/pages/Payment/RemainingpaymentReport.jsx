@@ -31,9 +31,25 @@ const tableStyles = {
   };
 
 
+const totalFinalAmt = data.reduce(
+  (sum, row) => sum + Number(row.FinalAmt || 0),
+  0
+);
+
+const totalPaidAmt = data.reduce(
+  (sum, row) => sum + Number(row.PaidAmt || 0),
+  0
+);
+
+const totalRemainingAmt = data.reduce(
+  (sum, row) => sum + Number(row.ReamaningAmt || 0),
+  0
+);
+
+
    const columns =  [
         {
-          name: <span className="font-semibold">Party Name</span>,
+          name: <span className="font-semibold">Webridge Name</span>,
           selector: (row) => row.Name || "-",
           sortable: true,
           cell: (row) => (
@@ -56,16 +72,7 @@ const tableStyles = {
             <div className="font-medium text-slate-800">{row.OwnerMobileNo || "-"}</div>
           ),
         },
- {
-          name: <span className="font-semibold">Work Status</span>,
-          selector: (row) => row.WorkStatus || "-",
-          sortable: true,
-          cell: (row) => (
-            <div className="font-medium text-slate-800">
-              {row.WorkStatus}
-            </div>
-          ),
-        },
+
 
         {
           name: <span className="font-semibold">Final Amount</span>,
@@ -80,6 +87,15 @@ const tableStyles = {
         
        
         {
+          name: <span className="font-semibold">Paid Amount</span>,
+          selector: (row) => row.PaidAmt || "-",
+          sortable: true,
+          cell: (row) => (
+            <div className="font-medium text-slate-800">₹{row.PaidAmt}</div>
+          ),
+        },
+
+           {
           name: <span className="font-semibold">Remaining Amount</span>,
           selector: (row) => row.ReamaningAmt || "-",
           sortable: true,
@@ -115,6 +131,61 @@ const GetData_RemainingReport = async () => {
     <h2 className="text-xl font-semibold text-gray-800">
       Remaining Payment Report
     </h2>
+
+
+
+
+ <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+              <div
+                
+                
+        className=" rounded-md border border-slate-300 p-3 transition"
+              >
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Final Amt
+                </p>
+                <p className="text-lg font-semibold text-slate-800">
+                  ₹{totalFinalAmt.toFixed(2)}
+                </p>
+              </div>
+
+              <div
+               
+               className=" rounded-md border border-slate-300 p-3 transition"
+
+              >
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Paid Amt
+                </p>
+                <p className="text-lg font-semibold text-slate-800">
+                  ₹{totalPaidAmt.toFixed(2)}
+                </p>
+              </div>
+
+              <div
+              
+                className=" rounded-md border border-slate-300 p-3 transition"
+              >
+                <p className="text-xs text-slate-700 font-medium">
+                  Total Remaining Amt
+                </p>
+                <p
+                  className="text-lg font-semibold text-slate-800"
+                >
+                  
+                  ₹{totalRemainingAmt.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
   </div>
 
 
