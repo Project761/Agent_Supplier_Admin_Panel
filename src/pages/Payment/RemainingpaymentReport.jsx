@@ -135,7 +135,9 @@ const GetData_RemainingReport = async () => {
 
 
 
- <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+  </div>
+
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
               <div
                 
                 
@@ -177,18 +179,6 @@ const GetData_RemainingReport = async () => {
                 </p>
               </div>
             </div>
-
-
-
-
-
-
-
-
-
-  </div>
-
-
 
      <div className="overflow-x-auto">
                   <DataTable
