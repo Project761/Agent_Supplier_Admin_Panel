@@ -20,16 +20,17 @@ const Adminuser = () => {
 
 
     useEffect(() => {
-        GetData_Party()
+        GetData_Adminuser()
     }, [])
 
 
-    const GetData_Party = async () => {
+    const GetData_Adminuser = async () => {
         const val = {
             IsActive: "1",
         };
         try {
-            const res = await PostWithToken("Reference/GetData_Reference", val);
+            const res = await PostWithToken("User/GetData_User", val);
+            console.log(res, "res");
             if (res) {
                 setItems(res);
             } else {
@@ -63,7 +64,7 @@ const Adminuser = () => {
     };
 
     const onEditItem = (row) => {
-        setEditItemId(row.ReferenceID);
+        setEditItemId(row.UserID);
         setOpen(true);
         setEditRow(row);
     };
@@ -87,25 +88,31 @@ const Adminuser = () => {
     const columns = useMemo(
         () => [
             {
-                name: <span className="font-semibold">Name</span>,
-                selector: (row) => row.ReferenceName,
+                name: <span className="font-semibold">CompanyName</span>,
+                selector: (row) => row.CompanyName,
                 sortable: true,
-                cell: (row) => <div className="font-medium text-slate-800">{row.ReferenceName}</div>,
+                cell: (row) => <div className="font-medium text-slate-800">{row.CompanyName}</div>,
             },
 
 
-
-
-
-
             {
-                name: <span className="font-semibold">mobile No.</span>,
+                name: <span className="font-semibold">UserName</span>,
+                selector: (row) => row.UserName || "-",
+                sortable: true,
+            },
+            {
+                name: <span className="font-semibold">MobileNo</span>,
                 selector: (row) => row.MobileNo || "-",
                 sortable: true,
             },
+             {
+                name: <span className="font-semibold">Password</span>,
+                selector: (row) => row.Password || "-",
+                sortable: true,
+            },
             {
-                name: <span className="font-semibold">commission</span>,
-                selector: (row) => row.commission || "-",
+                name: <span className="font-semibold">Is super Admin</span>,
+                selector: (row) => row.IsSuperAdmin ? "Yes" : "No",
                 sortable: true,
             },
 
@@ -123,14 +130,14 @@ const Adminuser = () => {
                             <FaRegEdit className="text-base" />
                         </button>
 
-                        <button
+                        {/* <button
                             className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
                             onClick={() => onDeleteRequest(r)}
                             type="button"
                             title="Delete"
                         >
                             <FiTrash2 className="text-base" />
-                        </button>
+                        </button> */}
                     </div>
                 ),
             },
@@ -165,8 +172,8 @@ const Adminuser = () => {
             }
             const res = await PostWithToken('Reference/Delete_Reference', val)
             if (res) {
-                toastifySuccess('Reference successfully Deleted');
-                await GetData_Party();
+                toastifySuccess('Admin user successfully Deleted');
+                await GetData_Adminuser();
             }
         } catch (error) {
             console.log(error, 'error')
@@ -175,6 +182,9 @@ const Adminuser = () => {
 
 
 
+
+    
+
     return (
         <div className="flex-1 space-y-3 overflow-y-auto px-2 py-3">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -182,18 +192,19 @@ const Adminuser = () => {
 
                 <div className="">
                     <div className="mb-2 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <input
+                        {/* <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search Admin user..."
                             className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-
+                        /> */}
+                       <div></div>
                         <button
                             onClick={() => {
-                                setEditItemId(null);
-                                setOpen(true);
                                 setEditRow(null);
+                              setEditItemId(null);
+                                setOpen(true);
+
                             }}
                             className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap"
                         >
@@ -224,7 +235,7 @@ const Adminuser = () => {
                     onClose={() => setOpen(false)}
                     onSave={handleSaveItem}
                     editData={editRow}
-                    onSuccess={GetData_Party}
+                    onSuccess={GetData_Adminuser}
                 />
 
                 {deleteTarget && (
