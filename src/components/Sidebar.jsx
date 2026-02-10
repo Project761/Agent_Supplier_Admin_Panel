@@ -49,33 +49,33 @@ const items = [
     { label: "Remaining Payment", to: "/dashboard/remainderpaymentreport" }
   ],
   },
-  {
-    label: "Temp",
-    icon: FiClock,
-    children: [{ label: "Add Temp", to: "/dashboard/temp" }],
-  },
+  // {
+  //   label: "Temp",
+  //   icon: FiClock,
+  //   children: [{ label: "Add Temp", to: "/dashboard/temp" }],
+  // },
   {
     label: "Payment Reminder",
     icon: FiBell,
     children: [{ label: "Add Reminder", to: "/dashboard/paymentreminder" }],
   },
-  {
-    label: "Bill",
-    icon: FiFileText,
-    children: [{ label: "Add Bill", to: "/dashboard/bill" }],
-  },
-  {
-    label: "Tax Invoice",
-    icon: FiPrinter,
-    children: [
-      { label: "Invoice List", to: "/dashboard/invoice" }
-    ],
-  },
-  {
-    label: "Transactions",
-    icon: FiDollarSign,
-    children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
-  },
+  // {
+  //   label: "Bill",
+  //   icon: FiFileText,
+  //   children: [{ label: "Add Bill", to: "/dashboard/bill" }],
+  // },
+  // {
+  //   label: "Tax Invoice",
+  //   icon: FiPrinter,
+  //   children: [
+  //     { label: "Invoice List", to: "/dashboard/invoice" }
+  //   ],
+  // },
+  // {
+  //   label: "Transactions",
+  //   icon: FiDollarSign,
+  //   children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
+  // },
   {
     label: "List / Table",
     icon: FiList,
