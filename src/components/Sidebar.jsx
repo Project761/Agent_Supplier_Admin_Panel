@@ -76,6 +76,12 @@ const items = [
   //   icon: FiDollarSign,
   //   children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
   // },
+ {
+    label: "Admin User",
+    icon: FiUserCheck,
+    children: [{ label: "Add Admin User", to: "/dashboard/adminuser" }],
+  },
+
   {
     label: "List / Table",
     icon: FiList,
@@ -106,6 +112,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/purchaseorder")) setOpenKey("Purchase Order");
     if (pathname.includes("/POPayment")) setOpenKey("PO Payment");
     if (pathname.includes("/expense")) setOpenKey("Transactions");
+    if (pathname.includes("/adminuser")) setOpenKey("Admin User");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
   }, [pathname]);
 
