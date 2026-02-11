@@ -5,8 +5,11 @@ import { FaRegEdit } from "react-icons/fa";
 import VichlegpsModel from "./VichlegpsModel";
 import { toastifySuccess } from "../../Utility/Utility";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
+import { useNavigate } from "react-router-dom";
+import Otpverify from "../../components/Otpverify";
 
 const Vichlegps = () => {
+    const navigate = useNavigate();
    
 
     const [items, setItems] = useState();
@@ -26,7 +29,7 @@ const Vichlegps = () => {
         };
         try {
             const res = await PostWithToken("VehicleGPS/GetData_VehicleGPS", val);
-            console.log(res, "res");
+        
             if (res) {
                 setItems(res);
             } else {
@@ -42,6 +45,8 @@ const Vichlegps = () => {
     const [editRow, setEditRow] = useState(null);
     const [editItemId, setEditItemId] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [otpverifyOpen, setOtpverifyOpen] = useState(false);
+    const[deleteId,setDeleteId]=useState(null);
 
 
 
@@ -61,12 +66,13 @@ const Vichlegps = () => {
 
     const onEditItem = (row) => {
         setEditItemId(row.VehicleGPSID);
+       
         setOpen(true);
         setEditRow(row);
     };
 
     const onDeleteRequest = (row) => {
-
+        setDeleteId(row.VehicleGPSID);
         setDeleteTarget(row);
     };
 
@@ -290,20 +296,8 @@ const handleDownload = async (url, fileName = "vehicle.jpg") => {
 
 
     const Delete_Reference = async (VehicleGPSID) => {
-        try {
-            const val = {
-                VehicleGPSID: VehicleGPSID,
-                IsActive: '',
-
-            }
-            const res = await PostWithToken('VehicleGPS/Delete_VehicleGPS', val)
-            if (res) {
-                toastifySuccess('Vehicle GPS successfully Deleted');
-                await GetData_Gps();
-            }
-        } catch (error) {
-            console.log(error, 'error')
-        }
+  setOtpverifyOpen(true);
+   
     }
 
 
@@ -333,6 +327,17 @@ const handleDownload = async (url, fileName = "vehicle.jpg") => {
                             Add Vehicle Gps
                         </button>
                     </div>
+                    { otpverifyOpen && (
+        <Otpverify
+          open={otpverifyOpen}
+          onClose={() => setOtpverifyOpen(false)}
+          editItemId={deleteId}
+          onSuccess={async () => {
+            setOtpverifyOpen(false);
+            await GetData_Gps();
+          }}
+        />
+      )}
 
                     <div className="overflow-x-auto">
                         <DataTable
@@ -350,7 +355,7 @@ const handleDownload = async (url, fileName = "vehicle.jpg") => {
                         />
                     </div>
                 </div>
-
+              
 
              { open && <VichlegpsModel
                     open={open}
@@ -399,6 +404,8 @@ const handleDownload = async (url, fileName = "vehicle.jpg") => {
                         </div>
                     </div>
                 )}
+  
+  
             </div>
         </div>
     );

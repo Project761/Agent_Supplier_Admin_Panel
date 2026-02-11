@@ -24,6 +24,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
     FinalAmt: "",
     HardwareAmt: "",
     InstallationAmt: "",
+    HardAmtwithoutGst: "",
     GST: "",
     Remark: "",
 
@@ -64,6 +65,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         FinalAmt: "",
         HardwareAmt: "",
         InstallationAmt: "",
+        HardAmtwithoutGst: "",
         Remark: "",
         GST: ""
       });
@@ -113,6 +115,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         FinalAmt: editData.FinalAmt || "",
         HardwareAmt: editData.HardwareAmt || "",
         InstallationAmt: editData.InstallationAmt || "",
+        HardAmtwithoutGst: editData.HardAmtwithoutGst || "",
         Remark: editData.Remark || "",
         GST: editData.GST || ""
       });
@@ -133,8 +136,8 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
 
 
 
-    if (key === "HardwareAmt" || key === "InstallationAmt" || key === "GST") {
-      if (key === "HardwareAmt" || key === "InstallationAmt" || key === "GST") {
+    if (key === "HardwareAmt" || key === "InstallationAmt" || key === "GST" || key === "HardAmtwithoutGst") {
+      if (key === "HardwareAmt" || key === "InstallationAmt" || key === "GST" || key === "HardAmtwithoutGst") {
         v = v.replace(/[^0-9.]/g, "");
         const parts = v.split(".");
         if (parts.length > 2) {
@@ -166,6 +169,15 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
             ? parseFloat(value.InstallationAmt)
             : 0
       );
+      const hardAmtwithoutGst = Number(
+        key === "HardAmtwithoutGst"
+          ? v
+            ? parseFloat(v)
+            : 0
+          : value.HardAmtwithoutGst
+            ? parseFloat(value.HardAmtwithoutGst)
+            : 0
+      );
 
       let gst = 0;
       if (key === "GST") {
@@ -174,7 +186,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         gst = Number(((hw) * 0.18).toFixed(2));
       }
 
-      const finalAmt = Number((hw + inst + gst).toFixed(2));
+      const finalAmt = Number((hw + inst + hardAmtwithoutGst + gst).toFixed(2));
 
       setvalue((p) => ({
         ...p,
@@ -258,7 +270,9 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         MEOffice: value.MEOffice,
         FinalAmt: value.FinalAmt == "" ? "0.00" : value.FinalAmt,
         HardwareAmt: value.HardwareAmt == "0" ? "0.00" : value.HardwareAmt,
+        HardAmtwithoutGst: value.HardAmtwithoutGst == "" ? "0.00" : value.HardAmtwithoutGst,
         InstallationAmt: value.InstallationAmt == "0" ? "0.00" : value.InstallationAmt,
+        
         Remark: value.Remark,
         GST: value.GST == "" ? "0.00" : value.GST,
         CreatedByUser: auth?.UserID || "1",
@@ -280,6 +294,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
           MEOffice: "",
           FinalAmt: "",
           HardwareAmt: "",
+          HardAmtwithoutGst: "",
           InstallationAmt: "",
           Remark: "",
           GST: ""
@@ -308,6 +323,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
         MEOffice: value.MEOffice,
         FinalAmt: value.FinalAmt == "" ? "0.00" : value.FinalAmt,
         HardwareAmt: value.HardwareAmt == "0" ? "0.00" : value.HardwareAmt,
+        HardAmtwithoutGst: value.HardAmtwithoutGst == "0" ? "0.00" : value.HardAmtwithoutGst,
         InstallationAmt: value.InstallationAmt == "0" ? "0.00" : value.InstallationAmt,
         Remark: value.Remark,
         GST: value.GST == "" ? "0.00" : value.GST,
@@ -331,6 +347,7 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
           FinalAmt: "",
           HardwareAmt: "",
           InstallationAmt: "",
+          HardAmtwithoutGst: "",
           Remark: "",
           GST: ""
         });
@@ -496,6 +513,22 @@ const PartyModal = ({ open, onClose, editData, onSuccess }) => {
                   {errors.GST && (
                     <p className="mt-1 text-xs text-red-500">{errors.GST}</p>
                   )}
+                </div>
+
+ <div className="flex flex-col">
+                  <label className="mb-1 text-sm font-medium text-slate-600">
+                    Hardware Amount Without Gst
+                  </label>
+                  <input
+                    type="text"
+                    value={value.HardAmtwithoutGst}
+                    onChange={handleChange("HardAmtwithoutGst")}
+                    placeholder="Enter Hardware Amount Without Gst"
+                    className={inputCls}
+                    autoComplete="off-district"
+
+                  />
+                 
                 </div>
 
                 <div className="flex flex-col">

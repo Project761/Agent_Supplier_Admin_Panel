@@ -121,6 +121,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/adminuser")) setOpenKey("Admin User");
     if (pathname.includes("/vehiclegps")) setOpenKey("Vehicle GPS");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
+    
   }, [pathname]);
 
   useEffect(() => {

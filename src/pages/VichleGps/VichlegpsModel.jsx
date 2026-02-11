@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
-import { toastifySuccess } from "../../Utility/Utility";
+import { toastifyError, toastifySuccess } from "../../Utility/Utility";
 
 const inputCls =
   "mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none";
 
 const VehicleGPSModal = ({ open, onClose, editData, onSuccess }) => {
-  console.log("Edit Data in Modal:", editData);
+ 
    
 
 
@@ -20,6 +20,8 @@ const VehicleGPSModal = ({ open, onClose, editData, onSuccess }) => {
     Vendor: editData?.Vendor || "",
     Refernce: editData?.Refernce || "",
     Amount: editData?.Amount || "",
+    LeaseName: editData?.LeaseName || "",
+    LeaseNo: editData?.LeaseNo || "",
   });
 
  
@@ -62,6 +64,8 @@ const handleSubmit = async () => {
     Vendor: value.Vendor,
     Refernce: value.Refernce,
     Amount: value.Amount,
+    LeaseName: value.LeaseName,
+    LeaseNo: value.LeaseNo,
   };
 
   
@@ -73,17 +77,19 @@ const handleSubmit = async () => {
   formdata.append("Data", JSON.stringify(payload));
 
   const res = await PostWithToken(api, formdata);
-
-  if (res) {
+ console.log(res, "res");
+  if (res?.[0]?.Message === "Inserted Successfully" || res?.[0]?.Message === " Updated Successfully") {
     toastifySuccess(
       editData ? "Vehicle GPS Updated" : "Vehicle GPS Added"
     );
     onClose?.();
     onSuccess?.();
   }
+  else if(res?.[0]?.Message === " Alreday Insert " || res?.[0]?.Message === " Alreday Update ") {
+    toastifyError(" Vehicle No & IEMI No already exists");
 };
 
-
+}
 
 
 
@@ -118,6 +124,9 @@ const handleSubmit = async () => {
               ["ContactNo", "Contact No"],
               ["Vendor", "Vendor"],
               ["Refernce", "Reference"],
+               ["LeaseName", "Lease Name"],
+              ["LeaseNo", "Lease No"],
+
             ].map(([key, label, type = "text"]) => (
               <div key={key}>
                 <label className="text-sm font-medium">{label}</label>
