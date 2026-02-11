@@ -81,6 +81,12 @@ const items = [
     icon: FiUserCheck,
     children: [{ label: "Add Admin User", to: "/dashboard/adminuser" }],
   },
+   {
+    label: "Vehicle GPS",
+    icon: FiUserCheck,
+    children: [{ label: "Add Vehicle GPS", to: "/dashboard/vehiclegps" }],
+  },
+
 
   {
     label: "List / Table",
@@ -113,6 +119,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/POPayment")) setOpenKey("PO Payment");
     if (pathname.includes("/expense")) setOpenKey("Transactions");
     if (pathname.includes("/adminuser")) setOpenKey("Admin User");
+    if (pathname.includes("/vehiclegps")) setOpenKey("Vehicle GPS");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
   }, [pathname]);
 

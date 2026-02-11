@@ -25,6 +25,8 @@ import MobileList from './pages/MobileList/MobileList';
 import Userpage from './pages/UserPages/Userpage';
 import RemainingpaymentReport from './pages/Payment/RemainingpaymentReport';
 import Adminuser from './pages/AdminUser/Adminuser';
+import Vichlegps from './pages/VichleGps/Vichlegps';
+
 
 // const PublicRoute = ({ children }) => {
 //   const userData = sessionStorage.getItem('UserData');
@@ -118,6 +120,7 @@ function App() {
           <Route path="Userpage" element={<Userpage />} />
           <Route path='remainderpaymentreport' element={<RemainingpaymentReport />} />
           <Route path="adminuser" element={<Adminuser />} />
+          <Route path="vehiclegps" element={<Vichlegps/>} />
         </Route>
         {/* Catch all other routes and redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />

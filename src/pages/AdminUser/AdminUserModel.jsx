@@ -53,6 +53,7 @@ const AdminUserModel = ({ open, onClose, editData, onSuccess }) => {
         FullName: editData.FullName ?? "",
         CompanyID: editData.CompanyID ?? "",
         CompanyName: editData.CompanyName ?? "",
+        IsSuperAdmin: editData.IsSuperAdmin ?? false,
       });
     }
   }, [editData]);
@@ -69,6 +70,7 @@ useEffect(() => {
       FullName: "",
       CompanyID: "",
       CompanyName: "",
+      IsSuperAdmin: false,
     });
     setErrors({});
   }
@@ -91,6 +93,7 @@ useEffect(() => {
     FullName: value.FullName,
     CompanyID: value.CompanyID,
     CompanyName: value.CompanyName,
+    IsSuperAdmin: value.IsSuperAdmin || false,
   };
 
   if (editData) {
@@ -161,6 +164,30 @@ console.log("Form value:", value);
               />
             </div>
           </div>
+
+<div className="flex items-center gap-3 mt-4">
+  <input
+    type="checkbox"
+    id="IsSuperAdmin"
+    checked={value.IsSuperAdmin || false}
+    onChange={(e) =>
+      setValue((prev) => ({
+        ...prev,
+        IsSuperAdmin: e.target.checked,
+      }))
+    }
+    className="h-4 w-4 cursor-pointer"
+  />
+
+  <label
+    htmlFor="IsSuperAdmin"
+    className="text-sm font-medium cursor-pointer"
+  >
+    Is Super Admin
+  </label>
+</div>
+
+
 
           <div className="flex justify-end mt-6">
             <button
