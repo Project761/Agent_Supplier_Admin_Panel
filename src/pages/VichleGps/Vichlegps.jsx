@@ -128,7 +128,7 @@ const Vichlegps = () => {
     if (!q) return items;
     return items.filter((r) => {
       const hay =
-        `${r.item} ${r.rate} ${r.company} ${r.modelNo} ${r.description}`.toLowerCase();
+        `${r.VehicleNo} ${r.IEMINo} ${r.Amount} ${r.AadharNo} ${r.description}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, search]);
@@ -382,12 +382,12 @@ const Vichlegps = () => {
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="">
           <div className="mb-2 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {/* <input
+            <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search agent..."
+                            placeholder="Search ..."
                             className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        /> */}
+                        />
             <div></div>
             <button
               onClick={() => {
