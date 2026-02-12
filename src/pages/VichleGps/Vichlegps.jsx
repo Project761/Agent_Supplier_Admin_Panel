@@ -175,7 +175,7 @@ const Vichlegps = () => {
           if (!row.AddharPic) return "-";
 
           const imageUrl = formatUrl(row.AddharPic);
-          console.log("AddharPic URL:", imageUrl);
+          
 
           return (
             <div className="flex flex-col items-center gap-1">
@@ -214,7 +214,7 @@ const Vichlegps = () => {
           if (!row.VehiclePic) return "-";
 
           const imageUrl = formatUrl(row.VehiclePic);
-          console.log("VehiclePic URL:", imageUrl);
+     
 
           return (
             <div className="flex flex-col items-center gap-1">
@@ -253,7 +253,7 @@ const Vichlegps = () => {
           if (!row.RCPic) return "-";
 
           const imageUrl = formatUrl(row.RCPic);
-          console.log("RCPic URL:", imageUrl);
+        
 
           return (
             <div className="flex flex-col items-center gap-1">
@@ -293,7 +293,7 @@ const Vichlegps = () => {
           if (!row.DevicePic) return "-";
 
           const imageUrl = formatUrl(row.DevicePic);
-          console.log("DevicePic URL:", imageUrl);
+          
 
           return (
             <div className="flex flex-col items-center gap-1">

@@ -77,7 +77,7 @@ const handleSubmit = async () => {
   formdata.append("Data", JSON.stringify(payload));
 
   const res = await PostWithToken(api, formdata);
- console.log(res, "res");
+ 
   if (res?.[0]?.Message === "Inserted Successfully" || res?.[0]?.Message === " Updated Successfully") {
     toastifySuccess(
       editData ? "Vehicle GPS Updated" : "Vehicle GPS Added"
