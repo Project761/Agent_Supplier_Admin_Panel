@@ -156,9 +156,9 @@ const handleDownload = async (url, fileName = "vehicle.jpg") => {
              {
     name: <span className="font-semibold">AddharPic</span>,
     cell: (row) => {
-        if (!row.AadharPic) return "-";
+        if (!row.AddharPic) return "-";
 
-        const imageUrl = formatUrl(row.AadharPic);
+        const imageUrl = formatUrl(row.AddharPic);
 
         return (
             <div className="flex flex-col items-center gap-1">
