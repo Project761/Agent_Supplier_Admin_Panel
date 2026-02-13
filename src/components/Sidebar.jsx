@@ -44,35 +44,50 @@ const items = [
   {
     label: "Party Payment",
     icon: FiCreditCard,
-    children: [{ label: "Party Payment", to: "/dashboard/payment" }],
+     children: [
+    { label: "Party Payment", to: "/dashboard/payment" },
+    { label: "Remaining Payment", to: "/dashboard/remainderpaymentreport" }
+  ],
   },
-  {
-    label: "Temp",
-    icon: FiClock,
-    children: [{ label: "Add Temp", to: "/dashboard/temp" }],
-  },
+  // {
+  //   label: "Temp",
+  //   icon: FiClock,
+  //   children: [{ label: "Add Temp", to: "/dashboard/temp" }],
+  // },
   {
     label: "Payment Reminder",
     icon: FiBell,
     children: [{ label: "Add Reminder", to: "/dashboard/paymentreminder" }],
   },
-  {
-    label: "Bill",
-    icon: FiFileText,
-    children: [{ label: "Add Bill", to: "/dashboard/bill" }],
+  // {
+  //   label: "Bill",
+  //   icon: FiFileText,
+  //   children: [{ label: "Add Bill", to: "/dashboard/bill" }],
+  // },
+  // {
+  //   label: "Tax Invoice",
+  //   icon: FiPrinter,
+  //   children: [
+  //     { label: "Invoice List", to: "/dashboard/invoice" }
+  //   ],
+  // },
+  // {
+  //   label: "Transactions",
+  //   icon: FiDollarSign,
+  //   children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
+  // },
+ {
+    label: "Admin User",
+    icon: FiUserCheck,
+    children: [{ label: "Add Admin User", to: "/dashboard/adminuser" }],
   },
-  {
-    label: "Tax Invoice",
-    icon: FiPrinter,
-    children: [
-      { label: "Invoice List", to: "/dashboard/invoice" }
-    ],
+   {
+    label: "Vehicle GPS",
+    icon: FiUserCheck,
+    children: [{ label: "Add Vehicle GPS", to: "/dashboard/vehiclegps" }],
   },
-  {
-    label: "Transactions",
-    icon: FiDollarSign,
-    children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
-  },
+
+
   {
     label: "List / Table",
     icon: FiList,
@@ -97,12 +112,16 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/temp")) setOpenKey("Temp");
     if (pathname.includes("/paymentreminder")) setOpenKey("Payment Reminder");
     if (pathname.includes("/payment")) setOpenKey("Payment");
+    if(pathname.includes("/remainderpaymentreport")) setOpenKey("Payment");
     if (pathname.includes("/bill")) setOpenKey("Bill");
     if (pathname.includes("/taxinvoice") || pathname.includes("/invoice")) setOpenKey("Tax Invoice");
     if (pathname.includes("/purchaseorder")) setOpenKey("Purchase Order");
     if (pathname.includes("/POPayment")) setOpenKey("PO Payment");
     if (pathname.includes("/expense")) setOpenKey("Transactions");
+    if (pathname.includes("/adminuser")) setOpenKey("Admin User");
+    if (pathname.includes("/vehiclegps")) setOpenKey("Vehicle GPS");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
+    
   }, [pathname]);
 
   useEffect(() => {
