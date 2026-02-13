@@ -27,6 +27,7 @@ import RemainingpaymentReport from './pages/Payment/RemainingpaymentReport';
 import Adminuser from './pages/AdminUser/Adminuser';
 import Vichlegps from './pages/VichleGps/Vichlegps';
 import Otpverify from './components/Otpverify';
+import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
 
 
 // const PublicRoute = ({ children }) => {
@@ -123,6 +124,7 @@ function App() {
           <Route path="adminuser" element={<Adminuser />} />
           <Route path="vehiclegps" element={<Vichlegps/>} />
           <Route path="otpverify" element={<Otpverify/>} />
+          <Route path="gpsdevicepayment" element={<GpsDevicePayments />} />
         </Route>
         {/* Catch all other routes and redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />
