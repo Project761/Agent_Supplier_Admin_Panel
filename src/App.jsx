@@ -23,6 +23,7 @@ import InvoiceList from './pages/Invoice/InvoiceList';
 import PaymentReceiptPrint from './pages/Payment/PaymentReceiptPrint';
 import MobileList from './pages/MobileList/MobileList';
 import Userpage from './pages/UserPages/Userpage';
+import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
 
 // const PublicRoute = ({ children }) => {
 //   const userData = sessionStorage.getItem('UserData');
@@ -114,6 +115,7 @@ function App() {
           <Route path="PaymentReceiptPrint" element={<PaymentReceiptPrint />} />
           <Route path="listtable" element={<ListTable />} />
           <Route path="Userpage" element={<Userpage />} />
+          <Route path="gpsdevicepayment" element={<GpsDevicePayments />} />
         </Route>
         {/* Catch all other routes and redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />

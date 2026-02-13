@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FiChevronDown, FiTruck, FiUserCheck, FiCircle, FiPhone, FiHome, FiFileText, FiList, FiDollarSign, FiUsers, FiClock, FiCreditCard, FiBell, FiShoppingCart, FiPrinter } from "react-icons/fi";
 import { FiPlus } from "react-icons/fi";
+import { FiMapPin } from "react-icons/fi";
 
 const items = [
   {
@@ -78,6 +79,11 @@ const items = [
     icon: FiList,
     children: [{ label: "Manage APIs", to: "/dashboard/listtable" }],
   },
+  {
+    label: "Gps Device Payment",
+    icon: FiMapPin,
+    children: [{ label: "Manage GPS Device Payments", to: "/dashboard/gpsdevicepayment" }],
+  },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -103,6 +109,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/POPayment")) setOpenKey("PO Payment");
     if (pathname.includes("/expense")) setOpenKey("Transactions");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
+    if (pathname.includes("/gpsdevicepayment")) setOpenKey("Gps Device Payment");
   }, [pathname]);
 
   useEffect(() => {
