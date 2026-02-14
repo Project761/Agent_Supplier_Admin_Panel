@@ -4,7 +4,8 @@ import { AddDeleteUpadate, PostWithToken } from "../../ApiMethods/ApiMethods";
 import DataTable from "react-data-table-component";
 import { CgLayoutGrid } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
-//----------1------------------------------------
+import { FiTrash2 } from "react-icons/fi";
+
 export default function GpsDevicePayments() {
 
     const [GpsDevicePayData, setGpsDevicePayData] = useState();
@@ -14,9 +15,23 @@ export default function GpsDevicePayments() {
     const [editingRow, setEditingRow] = useState(null);
     const [editValue, setEditValue] = useState({});
     const [openReceiptModal, setOpenReceiptModal] = useState(false);
-
-
     const textareaRefs = useRef([]);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+
+    const [value, setvalue] = useState({
+        VehicleNo: "", LeaseNo: "", LeaseName: "", ContactNo: "",
+        Payment: ""
+    });
+    const [headerValues, setHeaderValues] = useState({
+        ReceiptNo: "Auto Generated", MEOffice: "", PaymentDate: ""
+    });
+
+    useEffect(() => {
+        GetData_GpsDevicePayments()
+    }, [])
+    const onDeleteRequest = (row) => {
+        setDeleteTarget(row);
+    };
 
     // Use useCallback to prevent unnecessary re-renders
     const handleFieldChange = useCallback((fieldIndex, fieldValue) => {
@@ -26,125 +41,85 @@ export default function GpsDevicePayments() {
                 case 0: updatedValue.VehicleNo = fieldValue; break;
                 case 1: updatedValue.LeaseNo = fieldValue; break;
                 case 2: updatedValue.LeaseName = fieldValue; break;
-                case 3: updatedValue.ContactNo = fieldValue; break;
-                case 4: updatedValue.Payment = fieldValue; break;
+                case 3:
+                    const contactLines = fieldValue.split('\n');
+                    const validatedContactLines = contactLines.map(line =>
+                        line.replace(/[^0-9]/g, '').substring(0, 10)
+                    );
+                    updatedValue.ContactNo = validatedContactLines.join('\n');
+                    break;
+                case 4: updatedValue.Payment = fieldValue.replace(/[^0-9\n]/g, ''); break;
             }
             return updatedValue;
         });
     }, []);
 
-    // Handle DataTable row click
     const handleDataTableRowClick = (row) => {
-        console.log(row)
-        setEditingRow(row);
-        setEditValue(row);
-
-        // Only set PaymentGPSID if exists, don't make API call
+        setEditingRow(row); setEditValue(row);
         if (row.PaymentGPSID) {
             setPaymentGPSID(row.PaymentGPSID);
         }
     };
 
     const handleEditChange = (field, value) => {
-        setEditValue(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        if (field === "Payment" || field === "ContactNo") {
+            let numericValue = value.replace(/[^0-9]/g, '');
+            if (field === "ContactNo" && numericValue.length > 10) {
+                numericValue = numericValue.substring(0, 10);
+            }
+            setEditValue(prev => ({
+                ...prev, [field]: numericValue
+            }));
+        } else {
+            setEditValue(prev => ({
+                ...prev, [field]: value
+            }));
+        }
     };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault();
-            moveToNextRow();
+            e.preventDefault(); moveToNextRow();
         }
     };
-    console.log(PaymentGPSSingleData[0]?.MEOffice)
+
     const moveToNextRow = () => {
         const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
         const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
-
         if (editingRow !== null) {
             const currentIndex = dataArray.findIndex(item => item === editingRow);
             if (currentIndex !== -1 && currentIndex < dataArray.length - 1) {
                 const nextRow = dataArray[currentIndex + 1];
-                setEditingRow(nextRow);
-                setEditValue(nextRow);
-
-                // Focus on the first textarea of the next row
+                setEditingRow(nextRow); setEditValue(nextRow);
                 setTimeout(() => {
                     const firstTextarea = document.querySelector(`tr[data-row-index="${currentIndex + 1}"] textarea`);
-                    if (firstTextarea) {
-                        firstTextarea.focus();
-                    }
+                    if (firstTextarea) { firstTextarea.focus(); }
                 }, 0);
             }
-            // Removed automatic saveEdit call - user should click Save button explicitly
         }
     };
 
     const cancelEdit = () => {
-        // Reset editing states
-        setEditingRow(null);
-        setEditValue({});
-        setPaymentGPSID("");
-
-        // Clear table single data
-        setPaymentGPSSingleData([]);
-
-        // Clear header values
-        setHeaderValues({
-            ReceiptNo: "Auto Generated",
-            MEOffice: "",
-            PaymentDate: ""
-        });
-
-        // Clear input row values
-        setvalue({
-            VehicleNo: "",
-            LeaseNo: "",
-            LeaseName: "",
-            ContactNo: "",
-            Payment: ""
-        });
-
-        // Optional: Clear textarea DOM manually (extra safe)
-        textareaRefs.current.forEach((el) => {
-            if (el) el.value = "";
-        });
+        setEditingRow(null); setEditValue({}); setPaymentGPSID("");
+        setPaymentGPSSingleData([]); setHeaderValues({ ReceiptNo: "Auto Generated", MEOffice: "", PaymentDate: "" });
+        setvalue({ VehicleNo: "", LeaseNo: "", LeaseName: "", ContactNo: "", Payment: "" });
+        textareaRefs.current.forEach((el) => { if (el) el.value = ""; });
     };
-
-    //----------------------------------2----------------------------------------------
-
-    const [value, setvalue] = useState({
-        VehicleNo: "", LeaseNo: "", LeaseName: "", ContactNo: "",
-        Payment: ""
-    });
-
-    const [headerValues, setHeaderValues] = useState({
-        ReceiptNo: "Auto Generated", MEOffice: "", PaymentDate: ""
-    });
-
-    useEffect(() => {
-        GetData_GpsDevicePayments()
-    }, [])
 
     const GetData_GpsDevicePayments = async () => {
         const val = { IsActive: "1", };
-        console.log("Calling API with:", val);
         try {
             const res = await PostWithToken("VehicleGPS/GetData_PaymentGPSReceipt", val);
-            console.log("API Response:", res);
             if (res) {
-                console.log("Setting GpsDevicePayData with:", res.length, "items");
                 setGpsDevicePayData(res);
             } else {
-                console.log("API returned null/undefined, setting empty array");
                 setGpsDevicePayData([]);
             }
         } catch (error) {
             console.error("API Error:", error);
         }
     };
+
     useEffect(() => {
         GetData_GpsDeviceSingle(PaymentGPSID)
     }, [PaymentGPSID])
@@ -168,22 +143,16 @@ export default function GpsDevicePayments() {
     const Add_Type = async () => {
         const MEOffice = editValue.MEOffice || headerValues.MEOffice;
         const PaymentDate = editValue.PaymentDate || headerValues.PaymentDate;
-
-        // 🔴 Validation
         if (!MEOffice?.trim()) {
             toastifyError("Please enter ME Office");
             return;
         }
-
         if (!PaymentDate) {
             toastifyError("Please select Payment Date");
             return;
         }
-
         const val = {
-            ReceiptNo: headerValues.ReceiptNo,
-            MEOffice: MEOffice,
-            PaymentDate: PaymentDate,
+            ReceiptNo: headerValues.ReceiptNo, MEOffice: MEOffice, PaymentDate: PaymentDate,
         };
 
         try {
@@ -191,7 +160,6 @@ export default function GpsDevicePayments() {
                 'VehicleGPS/Insert_PaymentGPSReceipt',
                 val
             );
-
             if (res.success && res.data) {
                 const parsed = JSON.parse(res.data);
                 const tableData = parsed?.Table?.[0];
@@ -211,14 +179,11 @@ export default function GpsDevicePayments() {
 
     const saveEdit = async (newPaymentID) => {
         try {
-            // Split all fields by new line
             const vehicleNos = value.VehicleNo?.split("\n") || [];
             const leaseNos = value.LeaseNo?.split("\n") || [];
             const leaseNames = value.LeaseName?.split("\n") || [];
             const contactNos = value.ContactNo?.split("\n") || [];
             const payments = value.Payment?.split("\n") || [];
-
-            // Find maximum length (important if uneven rows)
             const maxLength = Math.max(
                 vehicleNos.length,
                 leaseNos.length,
@@ -226,7 +191,6 @@ export default function GpsDevicePayments() {
                 contactNos.length,
                 payments.length
             );
-
             for (let i = 0; i < maxLength; i++) {
                 const val = {
                     VehicleNo: vehicleNos[i]?.trim() || "",
@@ -236,25 +200,18 @@ export default function GpsDevicePayments() {
                     Payment: payments[i]?.trim() || "",
                     PaymentGPSID: newPaymentID
                 };
-
-                // Skip empty rows
                 if (!val.VehicleNo && !val.LeaseNo && !val.Payment) continue;
-
                 await AddDeleteUpadate(
                     "VehicleGPS/Insert_PaymentGPSReceipt",
                     val
                 );
             }
-
             toastifySuccess("All rows inserted successfully");
             GetData_GpsDevicePayments(); setOpenReceiptModal(false)
-
         } catch (error) {
             console.error("Error inserting multiple rows:", error);
         }
-
-        setEditingRow(null);
-        setEditValue({});
+        setEditingRow(null); setEditValue({});
     };
 
 
@@ -263,14 +220,11 @@ export default function GpsDevicePayments() {
         const dataToPrint = PaymentGPSSingleData && PaymentGPSSingleData.length > 0
             ? PaymentGPSSingleData
             : [];
-
         const dataArray = Array.isArray(dataToPrint) ? dataToPrint : [dataToPrint];
         const totalPayment = dataArray.reduce((sum, item) => {
             const payment = parseFloat(item.Payment) || 0;
             return sum + payment;
         }, 0);
-
-        // Create HTML content for printing
         const printContent = `
             <!DOCTYPE html>
             <html>
@@ -318,37 +272,41 @@ export default function GpsDevicePayments() {
                         font-size: 12px;
                         width: 150px;
                     }
-                  table {
+table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid black; /* outer border */
+  table-layout: fixed; /* 🔥 important for straight borders */
 }
-                    thead th {
+ 
+/* Header */
+thead th {
   border: 1px solid black;
   padding: 8px;
   text-align: left;
   font-weight: bold;
   background-color: #f0f0f0;
  
-  /* Print color fix */
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-                  th {
-  border: 1px solid black;
-  padding: 8px;
-  text-align: left;
-  font-weight: bold;
-  background-color: #f0f0f0;
-}
  
-/* Body rows no border */
+/* Body cells */
 tbody td {
-  border: none;
   padding: 8px;
+  vertical-align: top;
+ 
+  /* 🔥 vertical lines */
+  border-right: 1px solid black;
 }
  
-                   .total-row td {
+/* last column ka border hatao */
+tbody td:last-child {
+  border-right: none;
+}
+ 
+/* bottom total row */
+.total-row td {
   border-top: 1px solid black;
   font-weight: bold;
 }
@@ -416,11 +374,8 @@ tbody td {
             </body>
             </html>
         `;
-
         printWindow.document.write(printContent);
         printWindow.document.close();
-
-        // Wait for content to load, then print
         printWindow.onload = function () {
             printWindow.print();
             printWindow.close();
@@ -468,21 +423,6 @@ tbody td {
                 ) : (row.MEOffice || "-"),
                 sortable: true,
             },
-            // {
-            // name: <span className="font-semibold">Transaction Id</span>,
-            // selector: (row) => editingRow === row ? (
-            // <input
-            // type="text"
-            // className="w-full text-sm border-none outline-none"
-            // value={editValue.TransactionId || ""}
-            // onChange={(e) => handleEditChange("TransactionId", e.target.value)}
-            // onKeyPress={handleKeyPress}
-            // onClick={(e) => e.stopPropagation()}
-            // />
-            // ) : (row.TransactionId || "-"),
-            // sortable: true,
-            // },
-
             {
                 name: <span className="font-semibold">Payment Date</span>,
                 selector: (row) => editingRow === row ? (
@@ -510,17 +450,48 @@ tbody td {
                         >
                             <FaPlus size={16} />
                         </button>
-
                     </div>
                 ),
                 ignoreRowClick: true,
                 allowOverflow: true,
                 button: true,
             },
+            // {
+            //     name: <span className="font-semibold">delete</span>,
+            //     cell: (row) => (
+
+            //         <button
+            //             className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
+            //             onClick={() => onDeleteRequest(row)}
+            //             type="button"
+            //             title="Delete"
+            //         >
+            //             <FiTrash2 className="text-base" />
+            //         </button>
+            //     ),
+            // },
 
         ],
         []
     );
+
+    const Delete_Party = async (PaymentGPSID) => {
+        try {
+            const val = {
+                PaymentGPSID: PaymentGPSID,
+            };
+            const res = await PostWithToken("VehicleGPS/Delete_PaymentGPSReceipt", val);
+            if (res) {
+                toastifySuccess("successfully Deleted");
+                await GetData_GpsDevicePayments();
+            }
+        } catch (error) {
+            console.error("Delete_Party error:", error);
+        }
+    };
+
+
+
     const tableStyles = {
         headRow: { style: { backgroundColor: "#2563eb", minHeight: "34px" } },
         headCells: {
@@ -541,15 +512,9 @@ tbody td {
 
     return (
         <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 border border-slate-200 bg-white shadow-sm font-sans">
-
-
             {openReceiptModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-
-                    {/* Modal Box */}
                     <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-y-auto rounded shadow-lg p-6 relative">
-
-                        {/* Close Button */}
                         <button
                             onClick={() => { setOpenReceiptModal(false); cancelEdit() }}
                             className="absolute top-3 right-3 text-xl font-bold"
@@ -565,7 +530,6 @@ tbody td {
                         <p className="text-center text-sm">
                             624 Mansarovar Plaza Jaipur
                         </p>
-
                         <div className="w-full text-center mb-4">
                             <p className="inline-block bg-yellow-300 px-6 py-1 font-semibold text-sm">
                                 GPS Payment Receipt
@@ -593,7 +557,6 @@ tbody td {
                                     onChange={(e) => setHeaderValues(prev => ({ ...prev, MEOffice: e.target.value }))}
                                 />
                             </div>
-
                             <div className="flex items-center gap-4">
                                 <label htmlFor="">Payment Date</label>
                                 <input
@@ -619,7 +582,6 @@ tbody td {
                                     <th className="border border-black p-2">Payment</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {/* Data Rows */}
                                 {(() => {
@@ -638,7 +600,7 @@ tbody td {
                                                 setEditValue(item);
                                             }}
                                         >
-                                            <td className=" p-2 text-sm">
+                                            <td className=" p-2 text-sm border-r border-blackborder-r border-black">
                                                 {editingRow === item ? (
                                                     <textarea
                                                         className="w-full text-sm border-none outline-none resize-none"
@@ -655,7 +617,7 @@ tbody td {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className=" p-2 text-sm">
+                                            <td className=" p-2 text-sm border-r border-blackborder-r border-black">
                                                 {editingRow === item ? (
                                                     <textarea
                                                         className="w-full text-sm border-none outline-none resize-none"
@@ -672,7 +634,7 @@ tbody td {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className=" p-2 text-sm">
+                                            <td className=" p-2 text-sm border-r border-blackborder-r border-black">
                                                 {editingRow === item ? (
                                                     <textarea
                                                         className="w-full text-sm border-none outline-none resize-none"
@@ -689,7 +651,7 @@ tbody td {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className=" p-2 text-sm">
+                                            <td className=" p-2 text-sm border-r border-blackborder-r border-black">
                                                 {editingRow === item ? (
                                                     <textarea
                                                         className="w-full text-sm border-none outline-none resize-none"
@@ -706,7 +668,7 @@ tbody td {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className=" p-2 text-sm">
+                                            <td className=" p-2 text-sm border-r border-blackborder-r border-black">
                                                 {editingRow === item ? (
                                                     <textarea
                                                         className="w-full text-sm border-none outline-none resize-none"
@@ -732,7 +694,7 @@ tbody td {
                                     {Array.from({ length: 5 }).map((_, i) => (
                                         <td
                                             key={i}
-                                            className=" h-[250px] p-0 align-top"
+                                            className=" h-[250px] p-0 align-top border-r border-black"
                                         >
                                             <textarea
                                                 ref={el => textareaRefs.current[i] = el}
@@ -750,10 +712,7 @@ tbody td {
                                     ))}
                                 </tr>
                             </tbody>
-
-
                         </table>
-
                         <div className="flex justify-between items-center mt-2">
                             <input
                                 type="text"
@@ -774,12 +733,21 @@ tbody td {
                                     placeholder="Total"
                                     disabled
                                     value={(() => {
+                                        // Calculate total from existing data
                                         const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
                                         const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
-                                        const total = dataArray.reduce((sum, item) => {
+                                        let total = dataArray.reduce((sum, item) => {
                                             const payment = parseFloat(item.Payment) || 0;
                                             return sum + payment;
                                         }, 0);
+
+                                        // Add current input values to total
+                                        const currentPayments = value.Payment?.split("\n") || [];
+                                        currentPayments.forEach(payment => {
+                                            const paymentValue = parseFloat(payment?.trim()) || 0;
+                                            total += paymentValue;
+                                        });
+
                                         return total.toFixed(2);
                                     })()}
                                 />
@@ -836,25 +804,19 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={cancelEdit}
                                         className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
                                     >
-                                        Cancel
+                                        Reset
                                     </button>
                                 </>
                             )}
                         </div>
-
-
-
-
                     </div>
                 </div>
             )}
-
-
-
-
-
             <div>
-                <div className="flex justify-end items-center">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="text-lg font-semibold">GPS Device Payments</h2>
+                    </div>
                     <button
                         onClick={() => setOpenReceiptModal(true)}
                         className="px-4 py-2 border border-black text-sm font-medium hover:bg-black hover:text-white transition"
@@ -865,7 +827,7 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                 <div className="overflow-x-auto mt-3">
                     <DataTable
                         columns={columns}
-                        data={filteredItems}
+                        data={filteredItems || []}
                         pagination
                         paginationRowsPerPageOptions={[5, 10, 25, 50]}
                         paginationPerPage={5}
@@ -874,15 +836,53 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                         fixedHeader
                         fixedHeaderScrollHeight="400px"
                         responsive
+                        persistTableHead
                         customStyles={tableStyles}
                         onRowClicked={handleDataTableRowClick}
+                        noDataComponent={"No Data Available"}
                     />
                 </div>
+
+                {deleteTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                        <div
+                            className="absolute inset-0 bg-slate-900/40"
+                            onClick={() => setDeleteTarget(null)}
+                        />
+                        <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xl">
+                            <h2 className="text-lg font-semibold text-slate-800">
+                                Delete GpsDevicePayment
+                            </h2>
+                            <p className="mt-2 text-sm text-slate-600">
+                                Are you sure you want to delete{" "}
+                                <span className="font-semibold">
+                                    {deleteTarget.Name || "GpsDevicePayment"}
+                                </span>
+                                ?
+                            </p>
+                            <div className="mt-4 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteTarget(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                >
+                                    No
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        await Delete_Party(deleteTarget.PaymentGPSID);
+                                        setDeleteTarget(null);
+                                    }}
+                                    className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
-
-
-
-
         </div>
     );
 }
