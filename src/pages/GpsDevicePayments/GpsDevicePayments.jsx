@@ -247,7 +247,7 @@ export default function GpsDevicePayments() {
             }
 
             toastifySuccess("All rows inserted successfully");
-            GetData_GpsDevicePayments();
+            GetData_GpsDevicePayments(); setOpenReceiptModal(false)
 
         } catch (error) {
             console.error("Error inserting multiple rows:", error);
@@ -492,7 +492,7 @@ tbody td {
                         value={editValue.PaymentDate || ""}
                         onChange={(e) => handleEditChange("PaymentDate", e.target.value)}
                         onKeyPress={handleKeyPress}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); GetData_GpsDeviceSingle() }}
                     />
                 ) : (row.PaymentDate || "-"),
                 sortable: true,
@@ -502,7 +502,10 @@ tbody td {
                 cell: (row) => (
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => setOpenReceiptModal(true)}
+                            onClick={() => {
+                                setOpenReceiptModal(true); GetData_GpsDeviceSingle(row.PaymentGPSID);
+                                setPaymentGPSID(row.PaymentGPSID); handleDataTableRowClick(row);
+                            }}
                             className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
                         >
                             <FaPlus size={16} />
@@ -548,7 +551,7 @@ tbody td {
 
                         {/* Close Button */}
                         <button
-                            onClick={() => setOpenReceiptModal(false)}
+                            onClick={() => { setOpenReceiptModal(false); cancelEdit() }}
                             className="absolute top-3 right-3 text-xl font-bold"
                         >
                             ✕
@@ -788,7 +791,7 @@ tbody td {
                         <div className="flex justify-end gap-3 mt-4 print:hidden">
                             {editingRow !== null ? (
                                 <>
-                                    <button
+                                    {/* <button
                                         onClick={Add_Type}
                                         disabled={!headerValues.MEOffice || !headerValues.PaymentDate}
                                         className="px-4 py-2 border border-black text-sm font-medium
@@ -796,7 +799,7 @@ hover:bg-black hover:text-white transition
 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Add
-                                    </button>
+                                    </button> */}
 
 
                                     <button
@@ -806,12 +809,12 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                                         Print
                                     </button>
 
-                                    <button
+                                    {/* <button
                                         onClick={cancelEdit}
                                         className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
                                     >
                                         Cancel
-                                    </button>
+                                    </button> */}
                                 </>
                             ) : (
                                 <>
@@ -822,12 +825,12 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                                         save
                                     </button>
 
-                                    <button
+                                    {/* <button
                                         onClick={handlePrint}
                                         className="px-4 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition"
                                     >
                                         Print
-                                    </button>
+                                    </button> */}
 
                                     <button
                                         onClick={cancelEdit}
