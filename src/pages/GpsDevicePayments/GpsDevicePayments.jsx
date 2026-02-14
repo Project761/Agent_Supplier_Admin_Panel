@@ -3,6 +3,7 @@ import { toastifySuccess, toastifyError } from "../../Utility/Utility";
 import { AddDeleteUpadate, PostWithToken } from "../../ApiMethods/ApiMethods";
 import DataTable from "react-data-table-component";
 import { CgLayoutGrid } from "react-icons/cg";
+import { FaPlus } from "react-icons/fa";
 //----------1------------------------------------
 export default function GpsDevicePayments() {
 
@@ -12,6 +13,8 @@ export default function GpsDevicePayments() {
     const [PaymentGPSSingleData, setPaymentGPSSingleData] = useState([]);
     const [editingRow, setEditingRow] = useState(null);
     const [editValue, setEditValue] = useState({});
+    const [openReceiptModal, setOpenReceiptModal] = useState(false);
+
 
     const textareaRefs = useRef([]);
 
@@ -494,6 +497,23 @@ tbody td {
                 ) : (row.PaymentDate || "-"),
                 sortable: true,
             },
+            {
+                name: <span className="font-semibold">Action</span>,
+                cell: (row) => (
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setOpenReceiptModal(true)}
+                            className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
+                        >
+                            <FaPlus size={16} />
+                        </button>
+
+                    </div>
+                ),
+                ignoreRowClick: true,
+                allowOverflow: true,
+                button: true,
+            },
 
         ],
         []
@@ -518,306 +538,347 @@ tbody td {
 
     return (
         <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 border border-slate-200 bg-white shadow-sm font-sans">
-            {/* Header */}
-            <h2 className="text-center font-bold text-lg">
-                ARUSTU TECHNOLOGY
-            </h2>
-            <p className="text-center text-sm">
-                624 Mansarovar Plaza Jaipur
-            </p>
-
-            <div className="w-full text-center mb-4">
-                <p className="inline-block bg-yellow-300 px-6 py-1 font-semibold text-sm">
-                    GPS Payment Receipt
-                </p>
-            </div>
-
-            <div className="flex justify-between items-center my-3">
-                <input
-                    type="text"
-                    className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
-                    placeholder="Auto Generated"
-                    disabled
-                    value={editValue.ReceiptNo || headerValues.ReceiptNo}
-                    onChange={(e) => setHeaderValues(prev => ({ ...prev, ReceiptNo: e.target.value }))}
-                />
-                <div className="flex items-center gap-4">
-                    <label htmlFor="">ME Office</label>
-                    <input
-                        type="text"
-                        className="border rounded-sm border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="ME Office"
-                        // value={editValue.MEOffice}
-                        value={editValue.MEOffice || headerValues.MEOffice}
-
-                        onChange={(e) => setHeaderValues(prev => ({ ...prev, MEOffice: e.target.value }))}
-                    />
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <label htmlFor="">Payment Date</label>
-                    <input
-                        type="date"
-                        name="Payment Date"
-                        className="border rounded-sm border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        // value={editValue.PaymentDate}
-                        value={editValue.PaymentDate || headerValues.PaymentDate}
-
-                        onChange={(e) => setHeaderValues(prev => ({ ...prev, PaymentDate: e.target.value }))}
-                    />
-                </div>
-            </div>
-
-            {/* Table */}
-            <table className="w-full border-collapse border border-black">
-                <thead>
-                    <tr className="text-sm font-semibold">
-                        <th className="border border-black p-2">Vehicle No</th>
-                        <th className="border border-black p-2">Lease No</th>
-                        <th className="border border-black p-2">Lease Name</th>
-                        <th className="border border-black p-2">Contact#</th>
-                        <th className="border border-black p-2">Payment</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {/* Data Rows */}
-                    {(() => {
-                        // Use PaymentGPSSingleData if available, otherwise use GpsDevicePayData
-                        const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
-                        const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
-                        console.log("Table Data:", dataArray, "PaymentGPSSingleData:", PaymentGPSSingleData,);
-
-                        return dataArray && dataArray.length > 0 && dataArray.map((item, index) => (
-                            <tr
-                                key={index}
-                                data-row-index={index}
-                                className="cursor-pointer hover:bg-gray-100"
-                                onClick={() => {
-                                    // setEditingRow(item);
-                                    setEditValue(item);
-                                }}
-                            >
-                                <td className=" p-2 text-sm">
-                                    {editingRow === item ? (
-                                        <textarea
-                                            className="w-full text-sm border-none outline-none resize-none"
-                                            value={editValue.VehicleNo || ""}
-                                            onChange={(e) => handleEditChange("VehicleNo", e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            onClick={(e) => e.stopPropagation()}
-                                            rows={2}
-                                            style={{ minHeight: '40px' }}
-                                        />
-                                    ) : (
-                                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                            {item.VehicleNo || "-"}
-                                        </div>
-                                    )}
-                                </td>
-                                <td className=" p-2 text-sm">
-                                    {editingRow === item ? (
-                                        <textarea
-                                            className="w-full text-sm border-none outline-none resize-none"
-                                            value={editValue.LeaseNo || ""}
-                                            onChange={(e) => handleEditChange("LeaseNo", e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            onClick={(e) => e.stopPropagation()}
-                                            rows={2}
-                                            style={{ minHeight: '40px' }}
-                                        />
-                                    ) : (
-                                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                            {item.LeaseNo || "-"}
-                                        </div>
-                                    )}
-                                </td>
-                                <td className=" p-2 text-sm">
-                                    {editingRow === item ? (
-                                        <textarea
-                                            className="w-full text-sm border-none outline-none resize-none"
-                                            value={editValue.LeaseName || ""}
-                                            onChange={(e) => handleEditChange("LeaseName", e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            onClick={(e) => e.stopPropagation()}
-                                            rows={2}
-                                            style={{ minHeight: '40px' }}
-                                        />
-                                    ) : (
-                                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                            {item.LeaseName || "-"}
-                                        </div>
-                                    )}
-                                </td>
-                                <td className=" p-2 text-sm">
-                                    {editingRow === item ? (
-                                        <textarea
-                                            className="w-full text-sm border-none outline-none resize-none"
-                                            value={editValue.ContactNo || ""}
-                                            onChange={(e) => handleEditChange("ContactNo", e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            onClick={(e) => e.stopPropagation()}
-                                            rows={2}
-                                            style={{ minHeight: '40px' }}
-                                        />
-                                    ) : (
-                                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                            {item.ContactNo || "-"}
-                                        </div>
-                                    )}
-                                </td>
-                                <td className=" p-2 text-sm">
-                                    {editingRow === item ? (
-                                        <textarea
-                                            className="w-full text-sm border-none outline-none resize-none"
-                                            value={editValue.Payment || ""}
-                                            onChange={(e) => handleEditChange("Payment", e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            onClick={(e) => e.stopPropagation()}
-                                            rows={2}
-                                            style={{ minHeight: '40px' }}
-                                        />
-                                    ) : (
-                                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                            {item.Payment || "-"}
-                                        </div>
-                                    )}
-                                </td>
-                            </tr>
-                        ));
-                    })()}
-
-                    {/* Input Row */}
-                    <tr>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <td
-                                key={i}
-                                className=" h-[250px] p-0 align-top"
-                            >
-                                <textarea
-                                    ref={el => textareaRefs.current[i] = el}
-                                    className="w-full h-full resize-none outline-none border-none text-sm p-2"
-                                    onChange={(e) => {
-                                        const fieldValue = e.target.value;
-                                        handleFieldChange(i, fieldValue);
-                                    }}
-                                    value={[
-                                        value.VehicleNo, value.LeaseNo, value.LeaseName, value.ContactNo,
-                                        value.Payment
-                                    ][i] || ""}
-                                />
-                            </td>
-                        ))}
-                    </tr>
-                </tbody>
 
 
-            </table>
+            {openReceiptModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 
-            <div className="flex justify-between items-center">
-                <input
-                    type="text"
-                    className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
-                    placeholder="TransactionID"
-                    disabled
-                    // editValue.VehicleNo
-                    // value={editValue.TransactionId}
-                    value={editValue.TransactionId || ""}
+                    {/* Modal Box */}
+                    <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-y-auto rounded shadow-lg p-6 relative">
 
-                    onChange={(e) => setHeaderValues(prev => ({ ...prev, TransactionId: e.target.value }))}
-                />
-                <div className="flex items-center gap-4">
-                    <label htmlFor="">Total</label>
-                    <input
-                        type="text"
-                        className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
-                        placeholder="Total"
-                        disabled
-                        value={(() => {
-                            const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
-                            const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
-                            const total = dataArray.reduce((sum, item) => {
-                                const payment = parseFloat(item.Payment) || 0;
-                                return sum + payment;
-                            }, 0);
-                            return total.toFixed(2);
-                        })()}
-                    />
-                </div>
-            </div>
-
-            <div className="overflow-x-auto mt-3">
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    pagination
-                    paginationRowsPerPageOptions={[5, 10, 25, 50]}
-                    paginationPerPage={5}
-                    highlightOnHover
-                    striped
-                    fixedHeader
-                    fixedHeaderScrollHeight="400px"
-                    responsive
-                    customStyles={tableStyles}
-                    onRowClicked={handleDataTableRowClick}
-                />
-            </div>
-
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3 mt-4 print:hidden">
-                {editingRow !== null ? (
-                    <>
+                        {/* Close Button */}
                         <button
-                            onClick={Add_Type}
-                            disabled={!headerValues.MEOffice || !headerValues.PaymentDate}
-                            className="px-4 py-2 border border-black text-sm font-medium
+                            onClick={() => setOpenReceiptModal(false)}
+                            className="absolute top-3 right-3 text-xl font-bold"
+                        >
+                            ✕
+                        </button>
+
+                        {/* ================= RECEIPT CONTENT START ================= */}
+                        {/* Header */}
+                        <h2 className="text-center font-bold text-lg">
+                            ARUSTU TECHNOLOGY
+                        </h2>
+                        <p className="text-center text-sm">
+                            624 Mansarovar Plaza Jaipur
+                        </p>
+
+                        <div className="w-full text-center mb-4">
+                            <p className="inline-block bg-yellow-300 px-6 py-1 font-semibold text-sm">
+                                GPS Payment Receipt
+                            </p>
+                        </div>
+
+                        <div className="flex justify-between items-center my-3">
+                            <input
+                                type="text"
+                                className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
+                                placeholder="Auto Generated"
+                                disabled
+                                value={editValue.ReceiptNo || headerValues.ReceiptNo}
+                                onChange={(e) => setHeaderValues(prev => ({ ...prev, ReceiptNo: e.target.value }))}
+                            />
+                            <div className="flex items-center gap-4">
+                                <label htmlFor="">ME Office</label>
+                                <input
+                                    type="text"
+                                    className="border rounded-sm border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="ME Office"
+                                    // value={editValue.MEOffice}
+                                    value={editValue.MEOffice || headerValues.MEOffice}
+
+                                    onChange={(e) => setHeaderValues(prev => ({ ...prev, MEOffice: e.target.value }))}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <label htmlFor="">Payment Date</label>
+                                <input
+                                    type="date"
+                                    name="Payment Date"
+                                    className="border rounded-sm border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    // value={editValue.PaymentDate}
+                                    value={editValue.PaymentDate || headerValues.PaymentDate}
+
+                                    onChange={(e) => setHeaderValues(prev => ({ ...prev, PaymentDate: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <table className="w-full border-collapse border border-black">
+                            <thead>
+                                <tr className="text-sm font-semibold">
+                                    <th className="border border-black p-2">Vehicle No</th>
+                                    <th className="border border-black p-2">Lease No</th>
+                                    <th className="border border-black p-2">Lease Name</th>
+                                    <th className="border border-black p-2">Contact#</th>
+                                    <th className="border border-black p-2">Payment</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {/* Data Rows */}
+                                {(() => {
+                                    // Use PaymentGPSSingleData if available, otherwise use GpsDevicePayData
+                                    const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
+                                    const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
+                                    console.log("Table Data:", dataArray, "PaymentGPSSingleData:", PaymentGPSSingleData,);
+
+                                    return dataArray && dataArray.length > 0 && dataArray.map((item, index) => (
+                                        <tr
+                                            key={index}
+                                            data-row-index={index}
+                                            className="cursor-pointer hover:bg-gray-100"
+                                            onClick={() => {
+                                                // setEditingRow(item);
+                                                setEditValue(item);
+                                            }}
+                                        >
+                                            <td className=" p-2 text-sm">
+                                                {editingRow === item ? (
+                                                    <textarea
+                                                        className="w-full text-sm border-none outline-none resize-none"
+                                                        value={editValue.VehicleNo || ""}
+                                                        onChange={(e) => handleEditChange("VehicleNo", e.target.value)}
+                                                        onKeyPress={handleKeyPress}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        rows={2}
+                                                        style={{ minHeight: '40px' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                        {item.VehicleNo || "-"}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className=" p-2 text-sm">
+                                                {editingRow === item ? (
+                                                    <textarea
+                                                        className="w-full text-sm border-none outline-none resize-none"
+                                                        value={editValue.LeaseNo || ""}
+                                                        onChange={(e) => handleEditChange("LeaseNo", e.target.value)}
+                                                        onKeyPress={handleKeyPress}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        rows={2}
+                                                        style={{ minHeight: '40px' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                        {item.LeaseNo || "-"}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className=" p-2 text-sm">
+                                                {editingRow === item ? (
+                                                    <textarea
+                                                        className="w-full text-sm border-none outline-none resize-none"
+                                                        value={editValue.LeaseName || ""}
+                                                        onChange={(e) => handleEditChange("LeaseName", e.target.value)}
+                                                        onKeyPress={handleKeyPress}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        rows={2}
+                                                        style={{ minHeight: '40px' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                        {item.LeaseName || "-"}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className=" p-2 text-sm">
+                                                {editingRow === item ? (
+                                                    <textarea
+                                                        className="w-full text-sm border-none outline-none resize-none"
+                                                        value={editValue.ContactNo || ""}
+                                                        onChange={(e) => handleEditChange("ContactNo", e.target.value)}
+                                                        onKeyPress={handleKeyPress}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        rows={2}
+                                                        style={{ minHeight: '40px' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                        {item.ContactNo || "-"}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className=" p-2 text-sm">
+                                                {editingRow === item ? (
+                                                    <textarea
+                                                        className="w-full text-sm border-none outline-none resize-none"
+                                                        value={editValue.Payment || ""}
+                                                        onChange={(e) => handleEditChange("Payment", e.target.value)}
+                                                        onKeyPress={handleKeyPress}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        rows={2}
+                                                        style={{ minHeight: '40px' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                        {item.Payment || "-"}
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ));
+                                })()}
+
+                                {/* Input Row */}
+                                <tr>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <td
+                                            key={i}
+                                            className=" h-[250px] p-0 align-top"
+                                        >
+                                            <textarea
+                                                ref={el => textareaRefs.current[i] = el}
+                                                className="w-full h-full resize-none outline-none border-none text-sm p-2"
+                                                onChange={(e) => {
+                                                    const fieldValue = e.target.value;
+                                                    handleFieldChange(i, fieldValue);
+                                                }}
+                                                value={[
+                                                    value.VehicleNo, value.LeaseNo, value.LeaseName, value.ContactNo,
+                                                    value.Payment
+                                                ][i] || ""}
+                                            />
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+
+
+                        </table>
+
+                        <div className="flex justify-between items-center mt-2">
+                            <input
+                                type="text"
+                                className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
+                                placeholder="TransactionID"
+                                disabled
+                                // editValue.VehicleNo
+                                // value={editValue.TransactionId}
+                                value={editValue.TransactionId || ""}
+
+                                onChange={(e) => setHeaderValues(prev => ({ ...prev, TransactionId: e.target.value }))}
+                            />
+                            <div className="flex items-center gap-4">
+                                <label htmlFor="">Total</label>
+                                <input
+                                    type="text"
+                                    className=" rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500disabled:bg-slate-100 disabled:text-slate-500"
+                                    placeholder="Total"
+                                    disabled
+                                    value={(() => {
+                                        const dataToUse = PaymentGPSSingleData && PaymentGPSSingleData.length > 0 ? PaymentGPSSingleData : ('', []);
+                                        const dataArray = Array.isArray(dataToUse) ? dataToUse : [dataToUse];
+                                        const total = dataArray.reduce((sum, item) => {
+                                            const payment = parseFloat(item.Payment) || 0;
+                                            return sum + payment;
+                                        }, 0);
+                                        return total.toFixed(2);
+                                    })()}
+                                />
+                            </div>
+                        </div>
+
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-3 mt-4 print:hidden">
+                            {editingRow !== null ? (
+                                <>
+                                    <button
+                                        onClick={Add_Type}
+                                        disabled={!headerValues.MEOffice || !headerValues.PaymentDate}
+                                        className="px-4 py-2 border border-black text-sm font-medium
 hover:bg-black hover:text-white transition
 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Add
-                        </button>
+                                    >
+                                        Add
+                                    </button>
 
 
-                        <button
-                            onClick={handlePrint}
-                            className="px-4 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition"
-                        >
-                            Print
-                        </button>
+                                    <button
+                                        onClick={handlePrint}
+                                        className="px-4 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition"
+                                    >
+                                        Print
+                                    </button>
 
-                        <button
-                            onClick={cancelEdit}
-                            className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
-                        >
-                            Cancel
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button
-                            onClick={Add_Type}
-                            className="px-4 py-2 border border-black text-sm font-medium hover:bg-black hover:text-white transition"
-                        >
-                            Add
-                        </button>
+                                    <button
+                                        onClick={cancelEdit}
+                                        className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={Add_Type}
+                                        className="px-4 py-2 border border-black text-sm font-medium hover:bg-black hover:text-white transition"
+                                    >
+                                        save
+                                    </button>
 
-                        <button
-                            onClick={handlePrint}
-                            className="px-4 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition"
-                        >
-                            Print
-                        </button>
+                                    <button
+                                        onClick={handlePrint}
+                                        className="px-4 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition"
+                                    >
+                                        Print
+                                    </button>
 
-                        <button
-                            onClick={cancelEdit}
-                            className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
-                        >
-                            Cancel
-                        </button>
-                    </>
-                )}
+                                    <button
+                                        onClick={cancelEdit}
+                                        className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            )}
+
+
+
+
+
+            <div>
+                <div className="flex justify-end items-center">
+                    <button
+                        onClick={() => setOpenReceiptModal(true)}
+                        className="px-4 py-2 border border-black text-sm font-medium hover:bg-black hover:text-white transition"
+                    >
+                        Add Receipt
+                    </button>
+                </div>
+                <div className="overflow-x-auto mt-3">
+                    <DataTable
+                        columns={columns}
+                        data={filteredItems}
+                        pagination
+                        paginationRowsPerPageOptions={[5, 10, 25, 50]}
+                        paginationPerPage={5}
+                        highlightOnHover
+                        striped
+                        fixedHeader
+                        fixedHeaderScrollHeight="400px"
+                        responsive
+                        customStyles={tableStyles}
+                        onRowClicked={handleDataTableRowClick}
+                    />
+                </div>
             </div>
+
+
+
 
         </div>
     );
