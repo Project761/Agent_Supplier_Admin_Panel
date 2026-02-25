@@ -17,7 +17,7 @@ export default function GpsDevicePayments() {
     const [openReceiptModal, setOpenReceiptModal] = useState(false);
     const textareaRefs = useRef([]);
     const [deleteTarget, setDeleteTarget] = useState(null);
-
+    const [loder, setloader] = useState()
     const [value, setvalue] = useState({
         VehicleNo: "", LeaseNo: "", LeaseName: "", ContactNo: "",
         Payment: ""
@@ -41,13 +41,9 @@ export default function GpsDevicePayments() {
                 case 0: updatedValue.VehicleNo = fieldValue; break;
                 case 1: updatedValue.LeaseNo = fieldValue; break;
                 case 2: updatedValue.LeaseName = fieldValue; break;
-                case 3:
-                    const contactLines = fieldValue.split('\n');
-                    const validatedContactLines = contactLines.map(line =>
-                        line.replace(/[^0-9]/g, '').substring(0, 10)
-                    );
-                    updatedValue.ContactNo = validatedContactLines.join('\n');
-                    break;
+                case 3: const contactLines = fieldValue.split('\n');
+                    const validatedContactLines = contactLines.map(line => line.replace(/[^0-9]/g, '').substring(0, 10));
+                    updatedValue.ContactNo = validatedContactLines.join('\n'); break;
                 case 4: updatedValue.Payment = fieldValue.replace(/[^0-9\n]/g, ''); break;
             }
             return updatedValue;
@@ -140,6 +136,81 @@ export default function GpsDevicePayments() {
     };
 
 
+    // const Add_Type = async () => {
+    //     const MEOffice = editValue.MEOffice || headerValues.MEOffice;
+    //     const PaymentDate = editValue.PaymentDate || headerValues.PaymentDate;
+    //     if (!MEOffice?.trim()) {
+    //         toastifyError("Please enter ME Office");
+    //         return;
+    //     }
+    //     if (!PaymentDate) {
+    //         toastifyError("Please select Payment Date");
+    //         return;
+    //     }
+    //     const val = {
+    //         ReceiptNo: headerValues.ReceiptNo, MEOffice: MEOffice, PaymentDate: PaymentDate,
+    //     };
+
+    //     try {
+    //         const res = await AddDeleteUpadate(
+    //             'VehicleGPS/Insert_PaymentGPSReceipt',
+    //             val
+    //         );
+    //         if (res.success && res.data) {
+    //             const parsed = JSON.parse(res.data);
+    //             const tableData = parsed?.Table?.[0];
+    //             if (tableData) {
+    //                 const newPaymentID = tableData.PaymentGPSID;
+    //                 setPaymentGPSID(newPaymentID);
+    //                 toastifySuccess("Inserted Successfully");
+    //                 cancelEdit();
+    //                 await saveEdit(newPaymentID);
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Insert Error:", error);
+    //     }
+    // };
+
+
+    // const saveEdit = async (newPaymentID) => {
+    //     try {
+    //         const vehicleNos = value.VehicleNo?.split("\n") || [];
+    //         const leaseNos = value.LeaseNo?.split("\n") || [];
+    //         const leaseNames = value.LeaseName?.split("\n") || [];
+    //         const contactNos = value.ContactNo?.split("\n") || [];
+    //         const payments = value.Payment?.split("\n") || [];
+    //         const maxLength = Math.max(
+    //             vehicleNos.length,
+    //             leaseNos.length,
+    //             leaseNames.length,
+    //             contactNos.length,
+    //             payments.length
+    //         );
+    //         for (let i = 0; i < maxLength; i++) {
+    //             const val = {
+    //                 VehicleNo: vehicleNos[i]?.trim() || "",
+    //                 LeaseNo: leaseNos[i]?.trim() || "",
+    //                 LeaseName: leaseNames[i]?.trim() || "",
+    //                 ContactNo: contactNos[i]?.trim() || "",
+    //                 Payment: payments[i]?.trim() || "",
+    //                 PaymentGPSID: newPaymentID
+    //             };
+    //             if (!val.VehicleNo && !val.LeaseNo && !val.Payment) continue;
+    //             await AddDeleteUpadate(
+    //                 "VehicleGPS/Insert_PaymentGPSReceipt",
+    //                 val
+    //             );
+    //         }
+    //         toastifySuccess("All rows inserted successfully");
+    //         GetData_GpsDevicePayments(); setOpenReceiptModal(false)
+    //     } catch (error) {
+    //         console.error("Error inserting multiple rows:", error);
+    //     }
+    //     setEditingRow(null); setEditValue({});
+    // };
+
+
     const Add_Type = async () => {
         const MEOffice = editValue.MEOffice || headerValues.MEOffice;
         const PaymentDate = editValue.PaymentDate || headerValues.PaymentDate;
@@ -151,39 +222,33 @@ export default function GpsDevicePayments() {
             toastifyError("Please select Payment Date");
             return;
         }
-        const val = {
-            ReceiptNo: headerValues.ReceiptNo, MEOffice: MEOffice, PaymentDate: PaymentDate,
-        };
-
         try {
+            // 🔹 1️⃣ Insert Header
+            const headerPayload = { ReceiptNo: headerValues.ReceiptNo, MEOffice: MEOffice, PaymentDate: PaymentDate, };
+
             const res = await AddDeleteUpadate(
-                'VehicleGPS/Insert_PaymentGPSReceipt',
-                val
+                "VehicleGPS/Insert_PaymentGPSReceipt",
+                headerPayload
             );
-            if (res.success && res.data) {
-                const parsed = JSON.parse(res.data);
-                const tableData = parsed?.Table?.[0];
-                if (tableData) {
-                    const newPaymentID = tableData.PaymentGPSID;
-                    setPaymentGPSID(newPaymentID);
-                    toastifySuccess("Inserted Successfully");
-                    cancelEdit();
-                    await saveEdit(newPaymentID);
-                }
+
+            if (!res.success || !res.data) {
+                toastifyError("Failed to create receipt");
+                return;
             }
-        } catch (error) {
-            console.error("Insert Error:", error);
-        }
-    };
-
-
-    const saveEdit = async (newPaymentID) => {
-        try {
+            const parsed = JSON.parse(res.data);
+            const newPaymentID = parsed?.Table?.[0]?.PaymentGPSID;
+            if (!newPaymentID) {
+                toastifyError("Invalid server response");
+                return;
+            }
+            setPaymentGPSID(newPaymentID);
+            // 🔹 2️⃣ Prepare Detail Rows
             const vehicleNos = value.VehicleNo?.split("\n") || [];
             const leaseNos = value.LeaseNo?.split("\n") || [];
             const leaseNames = value.LeaseName?.split("\n") || [];
             const contactNos = value.ContactNo?.split("\n") || [];
             const payments = value.Payment?.split("\n") || [];
+
             const maxLength = Math.max(
                 vehicleNos.length,
                 leaseNos.length,
@@ -191,8 +256,9 @@ export default function GpsDevicePayments() {
                 contactNos.length,
                 payments.length
             );
+            const promises = [];
             for (let i = 0; i < maxLength; i++) {
-                const val = {
+                const rowPayload = {
                     VehicleNo: vehicleNos[i]?.trim() || "",
                     LeaseNo: leaseNos[i]?.trim() || "",
                     LeaseName: leaseNames[i]?.trim() || "",
@@ -200,20 +266,20 @@ export default function GpsDevicePayments() {
                     Payment: payments[i]?.trim() || "",
                     PaymentGPSID: newPaymentID
                 };
-                if (!val.VehicleNo && !val.LeaseNo && !val.Payment) continue;
-                await AddDeleteUpadate(
-                    "VehicleGPS/Insert_PaymentGPSReceipt",
-                    val
-                );
+                if (!rowPayload.VehicleNo && !rowPayload.Payment) continue;
+                promises.push(AddDeleteUpadate("VehicleGPS/Insert_PaymentGPSReceipt", rowPayload));
             }
-            toastifySuccess("All rows inserted successfully");
-            GetData_GpsDevicePayments(); setOpenReceiptModal(false)
+            // 🔹 3️⃣ Insert All Details Fast
+            await Promise.all(promises);
+            // 🔹 4️⃣ Success Flow
+            toastifySuccess("Receipt created successfully");
+            GetData_GpsDevicePayments(); setOpenReceiptModal(false);
+            setEditingRow(null); setEditValue({}); cancelEdit();
         } catch (error) {
-            console.error("Error inserting multiple rows:", error);
+            console.error("Insert Error:", error);
+            toastifyError("Something went wrong while saving receipt");
         }
-        setEditingRow(null); setEditValue({});
     };
-
 
     const handlePrint = () => {
         const printWindow = window.open('', '_blank');
@@ -250,15 +316,15 @@ export default function GpsDevicePayments() {
                         margin: 5px 0;
                         font-size: 12px;
                     }
-                   .receipt-title {
-  background-color: rgb(253 224 71);
-  padding: 6px 20px;
+                 .receipt-title {
+  background-color: #fde047;
+  padding: 6px 15px;
   font-weight: bold;
-  font-size: 14px;
-  display: block;
-  width: fit-content;
-  margin: 0 auto 20px auto;   /* 🔥 THIS WILL CENTER */
-  text-align: center;
+  display: inline-block;
+  border-radius: 4px;
+  margin-top: 5px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
                     .receipt-info {
                         display: flex;
@@ -329,9 +395,10 @@ tbody td:last-child {
                 <div class="header">
                     <h2>ARUSTU TECHNOLOGY</h2>
                     <p>624 Mansarovar Plaza Jaipur</p>
+                    <p class="receipt-title">GPS Payment Receipt</p>
+
                 </div>
                
-                <div class="receipt-title">GPS Payment Receipt</div>
                
                 <div class="receipt-info">
                     <input type="text" value="${editValue.ReceiptNo || headerValues.ReceiptNo || 'Auto Generated'}" readonly />
@@ -530,11 +597,24 @@ tbody td:last-child {
                         <p className="text-center text-sm">
                             624 Mansarovar Plaza Jaipur
                         </p>
-                        <div className="w-full text-center mb-4">
-                            <p className="inline-block bg-yellow-300 px-6 py-1 font-semibold text-sm">
+                        <h2 className="text-center text-sm">
+                            <span
+                                style={{
+                                    backgroundColor: "#fde047",
+                                    color: "black",
+                                    padding: "4px 10px",
+                                    display: "inline-block",
+                                    fontWeight: "600"
+                                }}
+                            >
                                 GPS Payment Receipt
-                            </p>
-                        </div>
+                            </span>
+                        </h2>
+                        {/* <p className="text-center inline-block bg-yellow-300 px-6 py-1 font-semibold text-sm">
+                            GPS Payment Receipt
+                        </p> */}
+
+
 
                         <div className="flex justify-between items-center my-3">
                             <input
