@@ -81,8 +81,9 @@ const Vichlegps = () => {
   };
 
   const GetData_Gps = async () => {
+      const auth = JSON.parse(sessionStorage.getItem("UserData"));
     const val = {
-      CreatedByUser: "1",
+      CreatedByUser: auth?.UserID || "1",
     };
     try {
       const res = await PostWithToken("VehicleGPS/GetData_VehicleGPS", val);
