@@ -4,11 +4,7 @@ import { FiEye, FiX } from "react-icons/fi";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import PaymentModal from "./PaymentModal";
 import ExpensesModal from "./ExpensesModal";
-import {
-  Comman_changeArrayFormat,
-  GetWithToken,
-  PostWithToken,
-} from "../../ApiMethods/ApiMethods";
+import { Comman_changeArrayFormat, GetWithToken, PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifyError, toastifySuccess } from "../../Utility/Utility";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -154,21 +150,12 @@ const Payment = () => {
 
   useEffect(() => {
     GetData_Payment();
-  }, [
-    filterFromDate,
-    filterToDate,
-    filterPartyName,
-    filterDue,
-    WorkStatusfilter,
-  ]);
+  }, [filterFromDate, filterToDate, filterPartyName, filterDue, WorkStatusfilter]);
 
   const GetSingleData_PartyPayment = async (PartyID) => {
     try {
       const val = { PartyID: PartyID };
-      const res = await PostWithToken(
-        "Payment/GetSingalData_PartyPayment",
-        val,
-      );
+      const res = await PostWithToken("Payment/GetSingalData_PartyPayment", val);
       if (res) {
         setViewData(res);
         setViewOpen(true);
@@ -183,10 +170,7 @@ const Payment = () => {
   const GetSingleData_PartyPayment2 = async (PartyID) => {
     try {
       const val = { PartyID: PartyID };
-      const res = await PostWithToken(
-        "ExpensePayment/GetSingalData_PartyExpensePayment",
-        val,
-      );
+      const res = await PostWithToken("ExpensePayment/GetSingalData_PartyExpensePayment", val);
 
       if (res) {
         setViewData2(res);
@@ -202,10 +186,7 @@ const Payment = () => {
   const GetSingleData_PermissionUser = async (PermissionUserID) => {
     try {
       const val = { PermissionUserID: PermissionUserID };
-      const res = await PostWithToken(
-        "PermissionUser/GetSingleData_PermissionUser",
-        val,
-      );
+      const res = await PostWithToken("PermissionUser/GetSingleData_PermissionUser", val);
     } catch (error) {
       console.error("GetSingleData_PartyPayment error:", error);
     }
@@ -237,10 +218,7 @@ const Payment = () => {
   const GetData_PermissionUser = async () => {
     try {
       const val = { PartyID };
-      const res = await PostWithToken(
-        "PermissionUser/GetData_PermissionUser",
-        val,
-      );
+      const res = await PostWithToken("PermissionUser/GetData_PermissionUser", val);
 
       if (res && res.length > 0) {
         setPermissionData(res);
@@ -273,10 +251,7 @@ const Payment = () => {
         UserID: UserID,
       };
 
-      const res = await PostWithToken(
-        "PermissionUser/Insert_PermissionUser",
-        val,
-      );
+      const res = await PostWithToken("PermissionUser/Insert_PermissionUser", val);
       if (res) {
         toastifySuccess("User assigned successfully");
         // setShowModal(false);
@@ -292,10 +267,7 @@ const Payment = () => {
         PermissionUserID: permissionUserID,
       };
 
-      const res = await PostWithToken(
-        "PermissionUser/Delete_PermissionUser",
-        val,
-      );
+      const res = await PostWithToken("PermissionUser/Delete_PermissionUser", val);
 
       if (res) {
         toastifySuccess("Successfully deleted");
@@ -384,8 +356,7 @@ const Payment = () => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((r) => {
-      const hay =
-        `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""}  ${r.ByPayment || ""}`.toLowerCase();
+      const hay = `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""}  ${r.ByPayment || ""}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, search]);
@@ -410,70 +381,50 @@ const Payment = () => {
         name: <span className="font-semibold">Party Name</span>,
         selector: (row) => row.Name || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">{row.Name || "-"}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">{row.Name || "-"}</div>,
       },
       {
         name: <span className="font-semibold">Amount</span>,
         selector: (row) => row.FinalAmt || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">₹{row.FinalAmt}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">₹{row.FinalAmt}</div>,
       },
       {
         name: <span className="font-semibold">Remaining Amount</span>,
         selector: (row) => row.RemainingAmt || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">₹{row.RemainingAmt}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">₹{row.RemainingAmt}</div>,
       },
       {
         name: <span className="font-semibold">TotalPaid Amount</span>,
         selector: (row) => row.TotalPaid || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">₹{row.TotalPaid}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">₹{row.TotalPaid}</div>,
       },
       {
         name: <span className="font-semibold">Total Expense Payment</span>,
         selector: (row) => row.TotalExpensePayment || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">
-            ₹{row.TotalExpensePayment}
-          </div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">₹{row.TotalExpensePayment}</div>,
       },
 
       {
         name: <span className="font-semibold">Work Status</span>,
         selector: (row) => row.WorkStatus || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">{row.WorkStatus}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">{row.WorkStatus}</div>,
       },
       {
         name: <span className="font-semibold">Owner Name</span>,
         selector: (row) => row.OwnerName || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">
-            {row.OwnerName || "-"}
-          </div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">{row.OwnerName || "-"}</div>,
       },
       {
         name: <span className="font-semibold">Area</span>,
         selector: (row) => row.Area || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">{row.Area || "-"}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">{row.Area || "-"}</div>,
       },
       {
         name: <span className="font-semibold">ME Office</span>,
@@ -509,21 +460,11 @@ const Payment = () => {
               <IoSettingsOutline className="text-base" />
             </button>
 
-            <button
-              className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
-              onClick={() => onWorkStatus(r)}
-              type="button"
-              title="Add Work Status"
-            >
+            <button className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700" onClick={() => onWorkStatus(r)} type="button" title="Add Work Status">
               <MdConstruction className="text-base" />
             </button>
 
-            <button
-              className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
-              onClick={() => onAddPayment(r)}
-              type="button"
-              title="Add Payment"
-            >
+            <button className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700" onClick={() => onAddPayment(r)} type="button" title="Add Payment">
               <FiPlus className="text-base" />
             </button>
 
@@ -539,12 +480,7 @@ const Payment = () => {
               <FiEye className="text-base" />
             </button>
 
-            <button
-              className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-              onClick={() => onExpeses(r)}
-              type="button"
-              title="Add Expenses"
-            >
+            <button className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700" onClick={() => onExpeses(r)} type="button" title="Add Expenses">
               <FiMinus className="text-base" />
             </button>
 
@@ -813,9 +749,7 @@ const Payment = () => {
   };
 
   const PrintFun = (item) => {
-    navigate(
-      `/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`,
-    );
+    navigate(`/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`);
   };
 
   return (
@@ -902,10 +836,7 @@ const Payment = () => {
                 />
 
                 <div>
-                  <button
-                    onClick={exportToExcel}
-                    className="mb-3 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
-                  >
+                  <button onClick={exportToExcel} className="mb-3 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700">
                     Export Excel
                   </button>
                 </div>
@@ -914,21 +845,13 @@ const Payment = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">
-                  Total Amount
-                </p>
-                <p className="text-lg font-semibold text-slate-800">
-                  ₹{totals.totalAmount.toFixed(2)}
-                </p>
+                <p className="text-xs text-slate-700 font-medium">Total Amount</p>
+                <p className="text-lg font-semibold text-slate-800">₹{totals.totalAmount.toFixed(2)}</p>
               </div>
 
               <div className="rounded-md border border-slate-300 p-3">
-                <p className="text-xs text-slate-700 font-medium">
-                  Total Remaining
-                </p>
-                <p className="text-lg font-semibold text-slate-800">
-                  ₹{totals.totalRemaining.toFixed(2)}
-                </p>
+                <p className="text-xs text-slate-700 font-medium">Total Remaining</p>
+                <p className="text-lg font-semibold text-slate-800">₹{totals.totalRemaining.toFixed(2)}</p>
               </div>
             </div>
 
@@ -940,12 +863,8 @@ const Payment = () => {
                 className="cursor-pointer rounded-md border border-slate-300 p-3
              hover:bg-blue-300 transition"
               >
-                <p className="text-xs text-slate-700 font-medium">
-                  Total In Amt
-                </p>
-                <p className="text-lg font-semibold text-slate-800">
-                  ₹{totals.totalPaid.toFixed(2)}
-                </p>
+                <p className="text-xs text-slate-700 font-medium">Total In Amt</p>
+                <p className="text-lg font-semibold text-slate-800">₹{totals.totalPaid.toFixed(2)}</p>
               </div>
 
               <div
@@ -954,12 +873,8 @@ const Payment = () => {
                 className="cursor-pointer rounded-md border border-slate-300 p-3
              hover:bg-blue-300 transition"
               >
-                <p className="text-xs text-slate-700 font-medium">
-                  Total Out Amt
-                </p>
-                <p className="text-lg font-semibold text-slate-800">
-                  ₹{totals.TotalExpensePayment.toFixed(2)}
-                </p>
+                <p className="text-xs text-slate-700 font-medium">Total Out Amt</p>
+                <p className="text-lg font-semibold text-slate-800">₹{totals.TotalExpensePayment.toFixed(2)}</p>
               </div>
 
               <div
@@ -968,14 +883,9 @@ const Payment = () => {
                 className="cursor-pointer rounded-md border border-slate-300 p-3
              hover:bg-blue-300 transition"
               >
-                <p className="text-xs text-slate-700 font-medium">
-                  Net Balance
-                </p>
-                <p
-                  className={`text-lg font-semibold ${netBalance < 0 ? "text-red-600" : "text-green-600"}`}
-                >
-                  {/* ₹{netBalance.toFixed(2)} */}₹
-                  {Math.abs(netBalance).toFixed(2)}
+                <p className="text-xs text-slate-700 font-medium">Net Balance</p>
+                <p className={`text-lg font-semibold ${netBalance < 0 ? "text-red-600" : "text-green-600"}`}>
+                  {/* ₹{netBalance.toFixed(2)} */}₹{Math.abs(netBalance).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -1038,35 +948,22 @@ const Payment = () => {
 
           {viewOpen && viewData && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
-              <div
-                className="absolute inset-0 bg-slate-900/40"
-                onClick={() => setViewOpen(false)}
-              />
+              <div className="absolute inset-0 bg-slate-900/40" onClick={() => setViewOpen(false)} />
               <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
                 <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
                   <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold text-slate-800">
-                        Payment Received
-                      </h2>
+                      <h2 className="text-xl font-semibold text-slate-800">Payment Received</h2>
                       <h2 className="text-xl font-semibold text-slate-800 flex flex-wrap gap-2">
                         {amtdeteil && (
                           <>
-                            <span className="text-slate-500 font-medium">
-                              Party Name:
-                            </span>
-                            <span className="text-slate-700 font-bold">
-                              {amtdeteil.Name}
-                            </span>
+                            <span className="text-slate-500 font-medium">Party Name:</span>
+                            <span className="text-slate-700 font-bold">{amtdeteil.Name}</span>
 
                             <span className="text-slate-400 mx-1">|</span>
 
-                            <span className="text-slate-500 font-medium">
-                              Owner Name:
-                            </span>
-                            <span className="text-slate-700 font-bold">
-                              {amtdeteil.OwnerName}
-                            </span>
+                            <span className="text-slate-500 font-medium">Owner Name:</span>
+                            <span className="text-slate-700 font-bold">{amtdeteil.OwnerName}</span>
                           </>
                         )}
                       </h2>
@@ -1078,18 +975,8 @@ const Payment = () => {
                         className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
                         type="button"
                       >
-                        <svg
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1101,84 +988,51 @@ const Payment = () => {
                         <table className="w-full border-collapse bg-white">
                           <thead>
                             <tr className="bg-blue-600">
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Amount
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Remaining Amount
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Payment Type
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                By Payment
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Payment Date
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Created Date
-                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">Amount</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">Remaining Amount</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">Payment Type</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">By Payment</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">Payment Date</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase border-r border-blue-500">Created Date</th>
 
-                              <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase border-r border-blue-500">
-                                Action
-                              </th>
-                              <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase">
-                                Print
-                              </th>
+                              <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase border-r border-blue-500">Action</th>
+                              <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase">Print</th>
                             </tr>
                           </thead>
 
                           <tbody className="bg-white divide-y divide-slate-200">
                             {viewData.map((item, index) => (
-                              <tr
-                                key={item.PaymentID || index}
-                                className="hover:bg-blue-50 transition-colors"
-                              >
+                              <tr key={item.PaymentID || index} className="hover:bg-blue-50 transition-colors">
                                 <td className="px-4 py-3 text-sm font-semibold text-green-700 border-r border-slate-200">
                                   ₹
                                   {item.Amt
-                                    ? parseFloat(item.Amt).toLocaleString(
-                                        "en-IN",
-                                        {
-                                          minimumFractionDigits: 2,
-                                          maximumFractionDigits: 2,
-                                        },
-                                      )
-                                    : "0.00"}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-semibold text-orange-700 border-r border-slate-200">
-                                  ₹
-                                  {item.ReamaningAmt
-                                    ? parseFloat(
-                                        item.ReamaningAmt,
-                                      ).toLocaleString("en-IN", {
+                                    ? parseFloat(item.Amt).toLocaleString("en-IN", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                       })
                                     : "0.00"}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.Paymenttype || "-"}
+                                <td className="px-4 py-3 text-sm font-semibold text-orange-700 border-r border-slate-200">
+                                  ₹
+                                  {item.ReamaningAmt
+                                    ? parseFloat(item.ReamaningAmt).toLocaleString("en-IN", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })
+                                    : "0.00"}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.ByPayment || "-"}
-                                </td>
+                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Paymenttype || "-"}</td>
+                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.ByPayment || "-"}</td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                   {item.PaymentDtTm
-                                    ? new Date(item.PaymentDtTm).toLocaleString(
-                                        "en-IN",
-                                        {
-                                          day: "2-digit",
-                                          month: "short",
-                                          year: "numeric",
-                                        },
-                                      )
+                                    ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                      })
                                     : "-"}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-slate-800">
-                                  {item.CreatedDtTm || "-"}
-                                </td>
+                                <td className="px-4 py-3 text-sm text-slate-800">{item.CreatedDtTm || "-"}</td>
 
                                 <td className="px-4 py-3 text-center">
                                   <button
@@ -1209,9 +1063,7 @@ const Payment = () => {
                       </div>
                     ) : (
                       <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                        <p className="text-sm text-slate-500">
-                          No payment data available
-                        </p>
+                        <p className="text-sm text-slate-500">No payment data available</p>
                       </div>
                     )}
 
@@ -1219,15 +1071,7 @@ const Payment = () => {
                       {/* LEFT SIDE */}
                       <p className="text-sm font-medium text-slate-700">
                         Total Payment Received:
-                        <span className="ml-1 font-semibold text-green-600">
-                          ₹
-                          {viewData
-                            .reduce(
-                              (acc, item) => acc + Number(item.Amt || 0),
-                              0,
-                            )
-                            .toFixed(2)}
-                        </span>
+                        <span className="ml-1 font-semibold text-green-600">₹{viewData.reduce((acc, item) => acc + Number(item.Amt || 0), 0).toFixed(2)}</span>
                       </p>
 
                       {/* RIGHT SIDE BUTTONS */}
@@ -1242,18 +1086,11 @@ const Payment = () => {
                           <span>Print Total Payment Received</span>
                         </button>
 
-                        <button
-                          onClick={SingleExportToExcel}
-                          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                        >
+                        <button onClick={SingleExportToExcel} className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
                           Export Excel
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => setViewOpen(false)}
-                          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                        >
+                        <button type="button" onClick={() => setViewOpen(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
                           Close
                         </button>
                       </div>
@@ -1266,56 +1103,29 @@ const Payment = () => {
 
           {viewOpen2 && viewData2 && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
-              <div
-                className="absolute inset-0 bg-slate-900/40"
-                onClick={() => setViewOpen2(false)}
-              />
+              <div className="absolute inset-0 bg-slate-900/40" onClick={() => setViewOpen2(false)} />
               <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
                 <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
                   <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold text-slate-800">
-                        Expenses Details
-                      </h2>
+                      <h2 className="text-xl font-semibold text-slate-800">Expenses Details</h2>
                       <h2 className="text-xl font-semibold text-slate-800 flex flex-wrap gap-2">
                         {amtdeteil2 && (
                           <>
-                            <span className="text-slate-500 font-medium">
-                              Party Name:
-                            </span>
-                            <span className="text-slate-700 font-bold">
-                              {amtdeteil2.Name}
-                            </span>
+                            <span className="text-slate-500 font-medium">Party Name:</span>
+                            <span className="text-slate-700 font-bold">{amtdeteil2.Name}</span>
 
                             <span className="text-slate-400 mx-1">|</span>
 
-                            <span className="text-slate-500 font-medium">
-                              Owner Name:
-                            </span>
-                            <span className="text-slate-700 font-bold">
-                              {amtdeteil2.OwnerName}
-                            </span>
+                            <span className="text-slate-500 font-medium">Owner Name:</span>
+                            <span className="text-slate-700 font-bold">{amtdeteil2.OwnerName}</span>
                           </>
                         )}
                       </h2>
 
-                      <button
-                        onClick={() => setViewOpen2(false)}
-                        className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
-                        type="button"
-                      >
-                        <svg
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                      <button onClick={() => setViewOpen2(false)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100" type="button">
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1327,64 +1137,39 @@ const Payment = () => {
                         <table className="w-full border-collapse bg-white">
                           <thead>
                             <tr className="bg-blue-600">
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                                Amount
-                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Amount</th>
 
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                                Payment Type
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                                By Payment
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                                Payment Date
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                                Created Date
-                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Payment Type</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">By Payment</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Payment Date</th>
+                              <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Created Date</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-slate-200">
                             {viewData2.map((item, index) => (
-                              <tr
-                                key={item.PaymentID || index}
-                                className="hover:bg-blue-50 transition-colors"
-                              >
+                              <tr key={item.PaymentID || index} className="hover:bg-blue-50 transition-colors">
                                 <td className="px-4 py-3 text-sm font-semibold text-red-700 border-r border-slate-200">
                                   ₹
                                   {item.Amt
-                                    ? parseFloat(item.Amt).toLocaleString(
-                                        "en-IN",
-                                        {
-                                          minimumFractionDigits: 2,
-                                          maximumFractionDigits: 2,
-                                        },
-                                      )
+                                    ? parseFloat(item.Amt).toLocaleString("en-IN", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })
                                     : "0.00"}
                                 </td>
 
-                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.Paymenttype || "-"}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                  {item.ByPayment || "-"}
-                                </td>
+                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Paymenttype || "-"}</td>
+                                <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.ByPayment || "-"}</td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                   {item.PaymentDtTm
-                                    ? new Date(item.PaymentDtTm).toLocaleString(
-                                        "en-IN",
-                                        {
-                                          day: "2-digit",
-                                          month: "short",
-                                          year: "numeric",
-                                        },
-                                      )
+                                    ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                      })
                                     : "-"}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-slate-800">
-                                  {item.CreatedDtTm || "-"}
-                                </td>
+                                <td className="px-4 py-3 text-sm text-slate-800">{item.CreatedDtTm || "-"}</td>
 
                                 <td className="px-4 py-3 text-center">
                                   <button
@@ -1404,9 +1189,7 @@ const Payment = () => {
                       </div>
                     ) : (
                       <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                        <p className="text-sm text-slate-500">
-                          No payment data available
-                        </p>
+                        <p className="text-sm text-slate-500">No payment data available</p>
                       </div>
                     )}
 
@@ -1430,31 +1213,16 @@ const Payment = () => {
                       {/* LEFT SIDE */}
                       <p className="text-sm font-medium text-slate-700">
                         Total Expenses Amount:
-                        <span className="ml-1 font-semibold text-red-600">
-                          ₹
-                          {viewData2
-                            .reduce(
-                              (acc, item) => acc + Number(item.Amt || 0),
-                              0,
-                            )
-                            .toFixed(2)}
-                        </span>
+                        <span className="ml-1 font-semibold text-red-600">₹{viewData2.reduce((acc, item) => acc + Number(item.Amt || 0), 0).toFixed(2)}</span>
                       </p>
 
                       {/* RIGHT SIDE */}
                       <div className="flex gap-3">
-                        <button
-                          onClick={SingleExportToExcel2}
-                          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                        >
+                        <button onClick={SingleExportToExcel2} className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
                           Export Excel
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => setViewOpen2(false)}
-                          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                        >
+                        <button type="button" onClick={() => setViewOpen2(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
                           Close
                         </button>
                       </div>
@@ -1471,24 +1239,16 @@ const Payment = () => {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
             <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-2xl">
               <div className="p-6 md:p-8">
-                <h1 className="text-2xl font-bold text-slate-800 mb-2">
-                  Verify OTP
-                </h1>
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">Verify OTP</h1>
 
                 <p className="text-sm text-slate-500 mb-8">
-                  We've sent a verification code to{" "}
-                  <strong className="text-slate-700">7990586879</strong>
+                  We've sent a verification code to <strong className="text-slate-700">7990586879</strong>
                 </p>
 
                 <div className="mb-6">
-                  <label className="mb-3 block text-sm font-medium text-slate-700 text-left">
-                    Enter 4-digit OTP
-                  </label>
+                  <label className="mb-3 block text-sm font-medium text-slate-700 text-left">Enter 4-digit OTP</label>
 
-                  <div
-                    className="flex gap-3 justify-center"
-                    onPaste={handleOtpPaste}
-                  >
+                  <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
                     {otp.map((digit, index) => (
                       <input
                         key={index}
@@ -1521,27 +1281,14 @@ const Payment = () => {
 
         {deleteTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div
-              className="absolute inset-0 bg-slate-900/40"
-              onClick={() => setDeleteTarget(null)}
-            />
+            <div className="absolute inset-0 bg-slate-900/40" onClick={() => setDeleteTarget(null)} />
             <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xl">
-              <h2 className="text-lg font-semibold text-slate-800">
-                Expenses Party
-              </h2>
+              <h2 className="text-lg font-semibold text-slate-800">Expenses Party</h2>
               <p className="mt-2 text-sm text-slate-600">
-                Are you sure you want to delete{" "}
-                <span className="font-semibold">
-                  {deleteTarget.Name || "this party"}
-                </span>
-                ?
+                Are you sure you want to delete <span className="font-semibold">{deleteTarget.Name || "this party"}</span>?
               </p>
               <div className="mt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                >
+                <button type="button" onClick={() => setDeleteTarget(null)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                   No
                 </button>
                 <button
@@ -1577,15 +1324,8 @@ const Payment = () => {
             {/* Modal */}
             <div className="relative w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-gray-200">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800">
-                  Assign Permission User
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
-                  title="Close"
-                >
+                <h2 className="mb-4 text-lg font-semibold text-gray-800">Assign Permission User</h2>
+                <button type="button" onClick={() => setShowModal(false)} className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100" title="Close">
                   <FiX className="w-5 h-5" />
                 </button>
               </div>
@@ -1595,9 +1335,7 @@ const Payment = () => {
 
               {/* Dropdown */}
               <div className="mb-5">
-                <label className="mb-1 block text-sm font-medium text-gray-600">
-                  Select User
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-600">Select User</label>
 
                 <Select
                   options={userOptions}
@@ -1619,9 +1357,7 @@ const Payment = () => {
                       const removedUser = actionMeta.removedValue;
 
                       if (removedUser?.permissionUserID) {
-                        await Delete_PermissionUser(
-                          removedUser.permissionUserID,
-                        );
+                        await Delete_PermissionUser(removedUser.permissionUserID);
                       }
                     }
 
@@ -1693,95 +1429,48 @@ const Payment = () => {
 
         {totalpartypaymentmodel && totalpartypaymentmodel && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-              className="absolute inset-0 bg-slate-900/40"
-              onClick={() => setTotalpartypaymentmodel(false)}
-            />
+            <div className="absolute inset-0 bg-slate-900/40" onClick={() => setTotalpartypaymentmodel(false)} />
             <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
               <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-slate-800">
-                      Total In Amount Details
-                    </h2>
+                    <h2 className="text-xl font-semibold text-slate-800">Total In Amount Details</h2>
 
-                    <button
-                      onClick={() => setTotalpartypaymentmodel(false)}
-                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
-                      type="button"
-                    >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                    <button onClick={() => setTotalpartypaymentmodel(false)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100" type="button">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
                 </div>
 
                 <div className="p-6">
-                  {Array.isArray(totalpartyPayment) &&
-                  totalpartyPayment.length > 0 ? (
+                  {Array.isArray(totalpartyPayment) && totalpartyPayment.length > 0 ? (
                     <div className="overflow-x-auto rounded-lg border border-slate-200">
                       <table className="w-full border-collapse bg-white">
                         <thead>
                           <tr className="bg-blue-600">
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Name
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Owner Name
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Weighbridge No
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Name</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Owner Name</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Weighbridge No</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Amount
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Amount</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              By Payment
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Payment Date
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">By Payment</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Payment Date</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
                           {totalpartyPayment.map((item, index) => (
-                            <tr
-                              key={item.PaymentId || index}
-                              className="hover:bg-blue-50 transition-colors"
-                            >
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.Name || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.OwnerName || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.WeighbridgeNo || "-"}
-                              </td>
+                            <tr key={item.PaymentId || index} className="hover:bg-blue-50 transition-colors">
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Name || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.OwnerName || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.WeighbridgeNo || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.Amt || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.Amt || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.ByPayment || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.PaymentDtTm || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.ByPayment || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.PaymentDtTm || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1789,18 +1478,12 @@ const Payment = () => {
                     </div>
                   ) : (
                     <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                      <p className="text-sm text-slate-500">
-                        No data available
-                      </p>
+                      <p className="text-sm text-slate-500">No data available</p>
                     </div>
                   )}
 
                   <div className="mt-6 flex items-center justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setTotalpartypaymentmodel(false)}
-                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                    >
+                    <button type="button" onClick={() => setTotalpartypaymentmodel(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
                       Close
                     </button>
                   </div>
@@ -1812,35 +1495,16 @@ const Payment = () => {
 
         {totalExpenseModel && totalExpenseModel && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-              className="absolute inset-0 bg-slate-900/40"
-              onClick={() => setTotalExpenseModel(false)}
-            />
+            <div className="absolute inset-0 bg-slate-900/40" onClick={() => setTotalExpenseModel(false)} />
             <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
               <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-slate-800">
-                      Total Out Amount Details
-                    </h2>
+                    <h2 className="text-xl font-semibold text-slate-800">Total Out Amount Details</h2>
 
-                    <button
-                      onClick={() => setTotalExpenseModel(false)}
-                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
-                      type="button"
-                    >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                    <button onClick={() => setTotalExpenseModel(false)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100" type="button">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
@@ -1852,60 +1516,29 @@ const Payment = () => {
                       <table className="w-full border-collapse bg-white">
                         <thead>
                           <tr className="bg-blue-600">
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Name
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Owner Name
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Name</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Owner Name</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Weighbridge No
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Weighbridge No</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Amount
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Payment Type
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              By Payment
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Payment Date
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Amount</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Payment Type</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">By Payment</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Payment Date</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
                           {TotalExpense.map((item, index) => (
-                            <tr
-                              key={item.PaymentId || index}
-                              className="hover:bg-blue-50 transition-colors"
-                            >
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.Name || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item?.OwnerName || "-"}
-                              </td>
+                            <tr key={item.PaymentId || index} className="hover:bg-blue-50 transition-colors">
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Name || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item?.OwnerName || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.WeighbridgeNo || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.WeighbridgeNo || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.Amt || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.Paymenttype || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.ByPayment || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.PaymentDtTm || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.Amt || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.Paymenttype || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.ByPayment || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.PaymentDtTm || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1913,18 +1546,12 @@ const Payment = () => {
                     </div>
                   ) : (
                     <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                      <p className="text-sm text-slate-500">
-                        No data available
-                      </p>
+                      <p className="text-sm text-slate-500">No data available</p>
                     </div>
                   )}
 
                   <div className="mt-6 flex items-center justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setTotalExpenseModel(false)}
-                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                    >
+                    <button type="button" onClick={() => setTotalExpenseModel(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
                       Close
                     </button>
                   </div>
@@ -1936,35 +1563,16 @@ const Payment = () => {
 
         {totalbalancemodel && totalbalancemodel && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-              className="absolute inset-0 bg-slate-900/40"
-              onClick={() => settotalbalancemodel(false)}
-            />
+            <div className="absolute inset-0 bg-slate-900/40" onClick={() => settotalbalancemodel(false)} />
             <div className="relative mx-auto flex min-h-screen items-center justify-center p-2 sm:p-4">
               <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl my-4 max-h-[85vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-slate-800">
-                      Net Balance Details
-                    </h2>
+                    <h2 className="text-xl font-semibold text-slate-800">Net Balance Details</h2>
 
-                    <button
-                      onClick={() => settotalbalancemodel(false)}
-                      className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
-                      type="button"
-                    >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                    <button onClick={() => settotalbalancemodel(false)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100" type="button">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
@@ -1976,50 +1584,27 @@ const Payment = () => {
                       <table className="w-full border-collapse bg-white">
                         <thead>
                           <tr className="bg-blue-600">
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Name
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Owner Name
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Name</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Owner Name</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Recived Payment
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">Recived Payment</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Out Payment
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Out Payment</th>
 
-                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Payment Date
-                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Payment Date</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
                           {totalbalance.map((item, index) => (
-                            <tr
-                              key={item.PaymentId || index}
-                              className="hover:bg-blue-50 transition-colors"
-                            >
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.Name || "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item?.OwnerName || "-"}
-                              </td>
+                            <tr key={item.PaymentId || index} className="hover:bg-blue-50 transition-colors">
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Name || "-"}</td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item?.OwnerName || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.RecivedPayment || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.RecivedPayment || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.OutPayment || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.OutPayment || "-"}</td>
 
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.PaymentDtTm || "-"}
-                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800">{item.PaymentDtTm || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -2027,18 +1612,12 @@ const Payment = () => {
                     </div>
                   ) : (
                     <div className="border border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                      <p className="text-sm text-slate-500">
-                        No data available
-                      </p>
+                      <p className="text-sm text-slate-500">No data available</p>
                     </div>
                   )}
 
                   <div className="mt-6 flex items-center justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => settotalbalancemodel(false)}
-                      className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                    >
+                    <button type="button" onClick={() => settotalbalancemodel(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
                       Close
                     </button>
                   </div>

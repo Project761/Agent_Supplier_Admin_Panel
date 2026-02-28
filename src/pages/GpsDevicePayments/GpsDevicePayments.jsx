@@ -909,6 +909,7 @@ disabled:opacity-50 disabled:cursor-not-allowed"
                         columns={columns}
                         data={filteredItems || []}
                         pagination
+                        
                         paginationRowsPerPageOptions={[5, 10, 25, 50]}
                         paginationPerPage={5}
                         highlightOnHover
