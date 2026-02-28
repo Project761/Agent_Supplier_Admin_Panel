@@ -10,18 +10,19 @@ const Userpage = () => {
   const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
+  const [itemsGps, setItemsGps] = useState([]);
+  const [activeTab, setActiveTab] = useState("party");
 
+  // "party" | "gps"
   useEffect(() => {
     getPermissionUsers();
+    getPermissionUsersGps();
   }, []);
 
   const getPermissionUsers = async () => {
     try {
       const val = { UserID: parsedUserData?.UserID };
-      const res = await PostWithToken(
-        "PermissionUser/GetData_PermissionUser",
-        val
-      );
+      const res = await PostWithToken("PermissionUser/GetData_PermissionUser", val);
       setItems(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error(error);
@@ -29,22 +30,32 @@ const Userpage = () => {
     }
   };
 
+  const getPermissionUsersGps = async () => {
+    try {
+      const val = { UserID: parsedUserData?.UserID };
+      const res = await PostWithToken("PermissionUserGPS/GetData_PermissionUserGPS", val);
+      setItemsGps(Array.isArray(res) ? res : []);
+    } catch (error) {
+      console.error(error);
+      setItemsGps([]);
+    }
+  };
+
+  // const filteredItems = useMemo(() => {
+  //   if (!search) return items;
+  //   const q = search.toLowerCase();
+  //   return items.filter((r) => `${r.Name} ${r.OwnerName} ${r.OfficeMobileNo} ${r.District}`.toLowerCase().includes(q));
+  // }, [items, search]);
 
   const filteredItems = useMemo(() => {
-    if (!search) return items;
+    const dataToFilter = activeTab === "party" ? items : itemsGps;
+
+    if (!search) return dataToFilter;
+
     const q = search.toLowerCase();
-    return items.filter((r) =>
-      `${r.Name} ${r.OwnerName} ${r.OfficeMobileNo} ${r.District}`
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [items, search]);
 
-
-
-
-
-
+    return dataToFilter.filter((r) => Object.values(r).join(" ").toLowerCase().includes(q));
+  }, [items, itemsGps, search, activeTab]);
 
   const columns = useMemo(
     () => [
@@ -78,10 +89,7 @@ const Userpage = () => {
         cell: (row) => (
           <span
             className={`px-2 py-1 text-xs rounded-full font-semibold
-            ${row.WorkStatus === "Close"
-                ? "bg-red-100 text-red-600"
-                : "bg-green-100 text-green-600"
-              }`}
+            ${row.WorkStatus === "Close" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
           >
             {row.WorkStatus}
           </span>
@@ -115,9 +123,34 @@ const Userpage = () => {
       //   ),
       // },
     ],
-    []
+    [],
   );
 
+  const columnsGps = useMemo(
+    () => [
+      {
+        name: "S.No.",
+        selector: (row) => row.no,
+        sortable: true,
+      },
+      {
+        name: "IEMI No",
+        selector: (row) => row.IEMINo,
+        sortable: true,
+      },
+      {
+        name: "Vehicle No",
+        selector: (row) => row.VehicleNo,
+        sortable: true,
+      },
+      {
+        name: "Owner Name",
+        selector: (row) => row.OwnerName,
+        sortable: true,
+      },
+    ],
+    [],
+  );
   /* ================= TABLE STYLES ================= */
   const tableStyles = {
     headRow: {
@@ -141,10 +174,52 @@ const Userpage = () => {
     },
   };
 
+  // const exportToExcel = () => {
+  //   const worksheet = XLSX.utils.json_to_sheet(items);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //   });
+
+  //   const data = new Blob([excelBuffer], {
+  //     type: "application/octet-stream",
+  //   });
+
+  //   saveAs(data, "WeighBridge Automation.xlsx");
+  // };
+
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(items);
+    let formattedData = [];
+    let fileName = "";
+
+    if (activeTab === "party") {
+      formattedData = filteredItems.map((item, index) => ({
+        "S.No.": index + 1,
+        "No.": item.Name,
+        "Weighbridge No": item.WeighbridgeNo,
+        "Owner Name": item.OwnerName,
+        "Owner Mobile No": item.OwnerMobileNo || "-",
+        Status: item.WorkStatus,
+      }));
+
+      fileName = "Party_Master.xlsx";
+    } else {
+      formattedData = itemsGps.map((item, index) => ({
+        "S.No.": index + 1,
+        "IEMI No": item.IEMINo || "-",
+        "Owner Name": item.OwnerName,
+        "Contact No": item.ContactNo || "-",
+      }));
+
+      fileName = "GPS_Vehicle.xlsx";
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
@@ -155,13 +230,29 @@ const Userpage = () => {
       type: "application/octet-stream",
     });
 
-    saveAs(data, "WeighBridge Automation.xlsx");
+    saveAs(data, fileName);
   };
-
   return (
     <>
       <Topbar />
       <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-2 flex gap-2 ">
+          <button
+            onClick={() => setActiveTab("party")}
+            className={`rounded-md px-6 py-1.5 text-sm font-semibold text-white 
+    ${activeTab === "party" ? "bg-blue-600" : "bg-emerald-600 hover:bg-emerald-700"}`}
+          >
+            Party Master
+          </button>
+
+          <button
+            onClick={() => setActiveTab("gps")}
+            className={`rounded-md px-6 py-1.5 text-sm font-semibold text-white 
+    ${activeTab === "gps" ? "bg-blue-600" : "bg-emerald-600 hover:bg-emerald-700"}`}
+          >
+            Gps Vehicle
+          </button>
+        </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
           {/* Header */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -176,10 +267,7 @@ const Userpage = () => {
               className="w-full sm:w-64 rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
             />
             <div>
-              <button
-                onClick={exportToExcel}
-                className="mb-3 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
-              >
+              <button onClick={exportToExcel} className="mb-3 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700">
                 Export Excel
               </button>
             </div>
@@ -187,7 +275,7 @@ const Userpage = () => {
 
           {/* Table */}
           <DataTable
-            columns={columns}
+            columns={activeTab === "party" ? columns : columnsGps}
             data={filteredItems}
             pagination
             paginationPerPage={5}
@@ -196,19 +284,16 @@ const Userpage = () => {
             striped
             responsive
             fixedHeader
+            persistTableHead
+            noDataComponent={"No Data Available"}
             fixedHeaderScrollHeight="420px"
             customStyles={tableStyles}
-            noDataComponent={
-              <div className="py-6 text-gray-500 text-sm">
-                No records found
-              </div>
-            }
+            // noDataComponent={<div className="py-6 text-gray-500 text-sm">No records found</div>}
           />
         </div>
       </div>
     </>
   );
-
 };
 
 export default Userpage;

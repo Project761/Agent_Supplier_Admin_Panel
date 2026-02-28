@@ -1,18 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
-import { FiTrash2 } from "react-icons/fi";
-import { FaRegEdit } from "react-icons/fa";
+import { FiPlus, FiTrash2, FiX } from "react-icons/fi";
+import { FaEdit, FaRegEdit } from "react-icons/fa";
 import VichlegpsModel from "./VichlegpsModel";
 import { toastifySuccess } from "../../Utility/Utility";
-import { PostWithToken } from "../../ApiMethods/ApiMethods";
+import { GetWithToken, PostWithToken } from "../../ApiMethods/ApiMethods";
 import { useNavigate } from "react-router-dom";
 import Otpverify from "../../components/Otpverify";
 import { IoMdCloudDownload } from "react-icons/io";
+import Select from "react-select";
+import { FaUserCheck } from "react-icons/fa6";
 
 const Vichlegps = () => {
   const navigate = useNavigate();
 
   const [items, setItems] = useState();
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editRow, setEditRow] = useState(null);
+  const [editItemId, setEditItemId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [otpverifyOpen, setOtpverifyOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [permissionData, setPermissionData] = useState([]);
 
   useEffect(() => {
     GetData_Gps();
@@ -21,6 +34,51 @@ const Vichlegps = () => {
   useEffect(() => {
     setOpen(false);
   }, []);
+
+  useEffect(() => {
+    PermissionUser_GetDropDown_User();
+  }, []);
+
+  useEffect(() => {
+    if (showModal && editItemId) {
+      GetData_PermissionUser(editItemId);
+    }
+  }, [showModal, editItemId]);
+
+  const GetData_PermissionUser = async (editItemId) => {
+    try {
+      const val = { VehicleGPSID: editItemId };
+      const res = await PostWithToken("PermissionUserGPS/GetData_PermissionUserGPS", val);
+
+      if (res && res.length > 0) {
+        setPermissionData(res);
+        const preSelected = res.map((item) => ({
+          value: item.UserID,
+          label: item.FullName,
+          PermissionUserGPSID: item.PermissionUserGPSID,
+        }));
+        setSelectedUser(preSelected);
+      } else {
+        setSelectedUser([]);
+        setPermissionData([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const PermissionUser_GetDropDown_User = async () => {
+    try {
+      const res = await GetWithToken("PermissionUser/GetDropDown_User");
+      if (res) {
+        setUserList(res || []);
+      } else {
+        setUserList([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const GetData_Gps = async () => {
     const val = {
@@ -39,18 +97,7 @@ const Vichlegps = () => {
     }
   };
 
-  const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
-  const [editRow, setEditRow] = useState(null);
-  const [editItemId, setEditItemId] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [otpverifyOpen, setOtpverifyOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-
-  const makeId = () =>
-    typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const makeId = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
   const handleSaveItem = (payload) => {
     if (payload.id) {
@@ -88,9 +135,7 @@ const Vichlegps = () => {
   async function handleDownload(url) {
     try {
       const response = await fetch(
-        urls === "https://automation.arustu.com"
-          ? "https://automationapi.arustu.com/api/VehicleGPS/Downland_VehicleFile"
-          : "http://autoapi.arustu.com/api/VehicleGPS/Downland_VehicleFile",
+        urls === "https://automation.arustu.com" ? "https://automationapi.arustu.com/api/VehicleGPS/Downland_VehicleFile" : "http://autoapi.arustu.com/api/VehicleGPS/Downland_VehicleFile",
         {
           method: "POST",
           headers: {
@@ -127,8 +172,7 @@ const Vichlegps = () => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((r) => {
-      const hay =
-        `${r.VehicleNo} ${r.IEMINo} ${r.Amount} ${r.AadharNo} ${r.description}`.toLowerCase();
+      const hay = `${r.VehicleNo} ${r.IEMINo} ${r.Amount} ${r.AadharNo} ${r.description}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, search]);
@@ -139,9 +183,7 @@ const Vichlegps = () => {
         name: <span className="font-semibold">VehicleNo</span>,
         selector: (row) => row.VehicleNo || "-",
         sortable: true,
-        cell: (row) => (
-          <div className="font-medium text-slate-800">{row.VehicleNo}</div>
-        ),
+        cell: (row) => <div className="font-medium text-slate-800">{row.VehicleNo}</div>,
       },
 
       {
@@ -175,22 +217,11 @@ const Vichlegps = () => {
           if (!row.AddharPic) return "-";
 
           const imageUrl = formatUrl(row.AddharPic);
-          
 
           return (
             <div className="flex flex-col items-center gap-1">
-              <img
-                src={imageUrl}
-                alt="AddharPic "
-                className="w-14 h-10 object-cover rounded border"
-              />
-              <a
-                href={imageUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-xs underline"
-              >
+              <img src={imageUrl} alt="AddharPic " className="w-14 h-10 object-cover rounded border" />
+              <a href={imageUrl} download target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs underline">
                 <span className="flex items-center gap-1">view</span>
               </a>
               <button
@@ -214,22 +245,11 @@ const Vichlegps = () => {
           if (!row.VehiclePic) return "-";
 
           const imageUrl = formatUrl(row.VehiclePic);
-     
 
           return (
             <div className="flex flex-col items-center gap-1">
-              <img
-                src={imageUrl}
-                alt="Vehicle Pic"
-                className="w-14 h-10 object-cover rounded border"
-              />
-              <a
-                href={imageUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-xs underline"
-              >
+              <img src={imageUrl} alt="Vehicle Pic" className="w-14 h-10 object-cover rounded border" />
+              <a href={imageUrl} download target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs underline">
                 <span className="flex items-center gap-1">view</span>
               </a>
               <button
@@ -253,22 +273,11 @@ const Vichlegps = () => {
           if (!row.RCPic) return "-";
 
           const imageUrl = formatUrl(row.RCPic);
-        
 
           return (
             <div className="flex flex-col items-center gap-1">
-              <img
-                src={imageUrl}
-                alt="RCPic "
-                className="w-14 h-10 object-cover rounded border"
-              />
-              <a
-                href={imageUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-xs underline"
-              >
+              <img src={imageUrl} alt="RCPic " className="w-14 h-10 object-cover rounded border" />
+              <a href={imageUrl} download target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs underline">
                 <span className="flex items-center gap-1">view</span>
               </a>
               <button
@@ -293,22 +302,11 @@ const Vichlegps = () => {
           if (!row.DevicePic) return "-";
 
           const imageUrl = formatUrl(row.DevicePic);
-          
 
           return (
             <div className="flex flex-col items-center gap-1">
-              <img
-                src={imageUrl}
-                alt="Device Pic"
-                className="w-14 h-10 object-cover rounded border"
-              />
-              <a
-                href={imageUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-xs underline"
-              >
+              <img src={imageUrl} alt="Device Pic" className="w-14 h-10 object-cover rounded border" />
+              <a href={imageUrl} download target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs underline">
                 <span className="flex items-center gap-1">view</span>
               </a>
               <button
@@ -332,21 +330,21 @@ const Vichlegps = () => {
 
         cell: (r) => (
           <div className="flex gap-2">
-            <button
-              className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-              onClick={() => onEditItem(r)}
-              type="button"
-              title="Edit"
-            >
+            <button className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700" onClick={() => onEditItem(r)} type="button" title="Edit">
               <FaRegEdit className="text-base" />
             </button>
-
             <button
-              className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-              onClick={() => onDeleteRequest(r)}
+              className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
               type="button"
-              title="Delete"
+              title="Add Permission"
+              onClick={() => {
+                setShowModal(true);
+                setEditItemId(r.VehicleGPSID);
+              }}
             >
+              <FaUserCheck className="text-base" />
+            </button>
+            <button className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700" onClick={() => onDeleteRequest(r)} type="button" title="Delete">
               <FiTrash2 className="text-base" />
             </button>
           </div>
@@ -372,9 +370,46 @@ const Vichlegps = () => {
     rows: { style: { minHeight: "52px" } },
     cells: { style: { padding: "1rem 0.75rem" } },
   };
+  const userOptions = userList?.map((user) => ({
+    value: user.UserID,
+    label: user.FullName,
+  }));
 
+  const Insert_PermissionUser = async (UserID) => {
+    try {
+      const val = {
+        VehicleGPSID: editItemId,
+        UserID: UserID,
+        // CompanyID: CompanyID,
+      };
+
+      const res = await PostWithToken("PermissionUserGPS/Insert_PermissionUserGPS", val);
+      if (res) {
+        toastifySuccess("User assigned successfully");
+        // setShowModal(false);
+      }
+    } catch (error) {
+      console.error("Insert_PermissionUser error:", error);
+    }
+  };
   const Delete_Reference = async (VehicleGPSID) => {
     setOtpverifyOpen(true);
+  };
+
+  const Delete_PermissionUser = async (PermissionUserGPSID) => {
+    try {
+      const val = {
+        PermissionUserGPSID: PermissionUserGPSID,
+      };
+
+      const res = await PostWithToken("PermissionUserGPS/Delete_PermissionUserGPS", val);
+
+      if (res) {
+        toastifySuccess("Successfully deleted");
+      }
+    } catch (error) {
+      console.error("Delete_PermissionUser error:", error);
+    }
   };
 
   return (
@@ -383,11 +418,11 @@ const Vichlegps = () => {
         <div className="">
           <div className="mb-2 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
             <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search ..."
-                            className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search ..."
+              className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
             <div></div>
             <button
               onClick={() => {
@@ -429,36 +464,18 @@ const Vichlegps = () => {
           </div>
         </div>
 
-        {open && (
-          <VichlegpsModel
-            open={open}
-            onClose={() => setOpen(false)}
-            onSave={handleSaveItem}
-            editData={editRow}
-            onSuccess={GetData_Gps}
-          />
-        )}
+        {open && <VichlegpsModel open={open} onClose={() => setOpen(false)} onSave={handleSaveItem} editData={editRow} onSuccess={GetData_Gps} />}
 
         {deleteTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div
-              className="absolute inset-0 bg-slate-900/40"
-              onClick={() => setDeleteTarget(null)}
-            />
+            <div className="absolute inset-0 bg-slate-900/40" onClick={() => setDeleteTarget(null)} />
             <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xl">
-              <h2 className="text-lg font-semibold text-slate-800">
-                Delete Vehicle GPS
-              </h2>
+              <h2 className="text-lg font-semibold text-slate-800">Delete Vehicle GPS</h2>
               <p className="mt-2 text-sm text-slate-600">
-                Are you sure you want to delete{" "}
-                <span className="font-semibold">{deleteTarget.VehicleNo}</span>?
+                Are you sure you want to delete <span className="font-semibold">{deleteTarget.VehicleNo}</span>?
               </p>
               <div className="mt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                >
+                <button type="button" onClick={() => setDeleteTarget(null)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                   No
                 </button>
                 <button
@@ -476,6 +493,63 @@ const Vichlegps = () => {
           </div>
         )}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-50"></div>
+
+          {/* Modal */}
+          <div className="relative w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-gray-200">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="mb-4 text-lg font-semibold text-gray-800">Assign Permission User</h2>
+              <button type="button" onClick={() => setShowModal(false)} className="text-slate-500 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100" title="Close">
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Dropdown */}
+            <div className="mb-5">
+              <label className="mb-1 block text-sm font-medium text-gray-600">Select User</label>
+
+              <Select
+                options={userOptions}
+                value={selectedUser}
+                isMulti
+                isClearable
+                placeholder="Select users..."
+                className="text-sm"
+                classNamePrefix="react-select"
+                onChange={async (newValue, actionMeta) => {
+                  if (actionMeta.action === "select-option") {
+                    const selected = actionMeta.option;
+                    if (selected?.value) {
+                      await Insert_PermissionUser(selected.value);
+                    }
+                  }
+
+                  if (actionMeta.action === "remove-value") {
+                    const removedUser = actionMeta.removedValue;
+
+                    if (removedUser?.PermissionUserGPSID) {
+                      await Delete_PermissionUser(removedUser.PermissionUserGPSID);
+                    }
+                  }
+                  /* 🧹 DELETE ALL on clear */
+                  if (actionMeta.action === "clear") {
+                    if (selectedUser?.length > 0) {
+                      for (const item of selectedUser) {
+                        if (item.PermissionUserGPSID) {
+                          await Delete_PermissionUser(item.PermissionUserGPSID);
+                        }
+                      }
+                    }
+                  }
+                  setSelectedUser(newValue || []);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
