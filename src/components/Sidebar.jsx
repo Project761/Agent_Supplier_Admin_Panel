@@ -87,6 +87,11 @@ const items = [
     icon: FiUserCheck,
     children: [{ label: "Add Vehicle GPS", to: "/dashboard/vehiclegps" }],
   },
+   {
+    label: "Stoked",
+    icon: FiUserCheck,
+    children: [{ label: "Add Stoked", to: "/dashboard/InItam" }],
+  },
 
 
   {
@@ -111,6 +116,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   useEffect(() => {
     if (pathname.includes("/supplier")) setOpenKey("Supplier");
+    if (pathname.includes("/InItam")) setOpenKey("InItam");
     if (pathname.includes("/agent")) setOpenKey("Agent");
     if (pathname.includes("/MobileList")) setOpenKey("Mobile List");
     if (pathname.includes("/contact")) setOpenKey("Contact");

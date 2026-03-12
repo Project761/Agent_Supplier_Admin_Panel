@@ -28,6 +28,7 @@ import Adminuser from './pages/AdminUser/Adminuser';
 import Vichlegps from './pages/VichleGps/Vichlegps';
 import Otpverify from './components/Otpverify';
 import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
+import InItam from './pages/stoked/InItam';
 
 
 // const PublicRoute = ({ children }) => {
@@ -105,6 +106,7 @@ function App() {
           <Route path="agent" element={<Agent />} />
           <Route path="MobileList" element={<MobileList />} />
           <Route path="supplier" element={<Supplier />} />
+          <Route path="InItam" element={<InItam />} />
           <Route path="contact" element={<Contact />} />
           <Route path="contact/add" element={<ContactModal />} />
           <Route path="bill" element={<Bill />} />
