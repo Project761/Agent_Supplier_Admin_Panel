@@ -6,7 +6,7 @@ import { toastifySuccess } from "../../Utility/Utility";
 import { set } from "date-fns";
 
 const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
-    // console.log("ExpensesModal editData:", editData);
+  // console.log("ExpensesModal editData:", editData);
   const inputCls =
     "w-full rounded-sm border border-slate-200 px-4 py-2.5 text-sm " +
     "outline-none transition " +
@@ -24,7 +24,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [partyOptions, setPartyOptions] = useState([]);
   const [originalRemainingAmt, setOriginalRemainingAmt] = useState(0);
-  const[expeseamount,setExpeseamount]=useState(0);
+  const [expeseamount, setExpeseamount] = useState(0);
 
   const paymentTypeOptions = [
     { value: "CASH", label: "CASH" },
@@ -95,8 +95,8 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
       ) || null;
 
       const today = new Date().toISOString().split("T")[0];
-    //   const initialRemainingAmt = parseFloat(editData.ReamaningAmt) || "";
-    //   setOriginalRemainingAmt(initialRemainingAmt);
+      //   const initialRemainingAmt = parseFloat(editData.ReamaningAmt) || "";
+      //   setOriginalRemainingAmt(initialRemainingAmt);
       setvalue({
         PartyID: partyOption,
         // ReamaningAmt: editData.expensesamount || 0,
@@ -164,7 +164,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
     }
     if (!value.Amt.trim()) {
       newErrors.Amt = "Amount is required";
-    } 
+    }
     // else if (parseFloat(value.Amt) <= 0) {
     //   newErrors.Amt = "Amount must be greater than 0";
     // } else if (parseFloat(value.Amt) > originalRemainingAmt) {
@@ -190,6 +190,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
         ByPayment: value.ByPayment || "",
         PaymentDtTm: value.PaymentDtTm || new Date().toISOString(),
       };
+      // const res = await PostWithToken("ExpensePayment/Update_ExpensePayment", payload);
       const res = await PostWithToken("ExpensePayment/Insert_ExpensePayment", payload);
       if (res) {
         onClose?.();
@@ -303,8 +304,8 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
                 </label>
                 <input
                   type="text"
-                //   value={value.ReamaningAmt}
-                value={expeseamount}
+                  //   value={value.ReamaningAmt}
+                  value={expeseamount}
                   placeholder="Auto calculated"
                   className={inputCls + " bg-slate-50 cursor-not-allowed"}
                   readOnly

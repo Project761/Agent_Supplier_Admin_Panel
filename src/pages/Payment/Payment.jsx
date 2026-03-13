@@ -18,7 +18,8 @@ import WorkStatusModal from "./WorkStatusModal";
 import { MdConstruction } from "react-icons/md";
 import PartySettingModal from "../Party/PartySettingModal";
 import { IoSettingsOutline } from "react-icons/io5";
-import { FaEdit } from "react-icons/fa";
+import { FaCreditCard, FaEdit } from "react-icons/fa";
+import LegearPayment from "./LegearPayment";
 
 const Payment = () => {
   const [search, setSearch] = useState("");
@@ -27,6 +28,10 @@ const Payment = () => {
   const [editRow, setEditRow] = useState(null);
   const [editItemId, setEditItemId] = useState(null);
   const [viewData, setViewData] = useState([]);
+
+
+  const [viewLegearpayment, setviewLegearpayment] = useState(false);
+
 
   const [viewData2, setViewData2] = useState(null);
 
@@ -173,6 +178,7 @@ const Payment = () => {
       const res = await PostWithToken("ExpensePayment/GetSingalData_PartyExpensePayment", val);
 
       if (res) {
+        console.log(res, 'res')
         setViewData2(res);
         setViewOpen2(true);
       } else {
@@ -337,6 +343,22 @@ const Payment = () => {
     setOpen(true);
   };
 
+
+  const onAddLegearPayment = (row) => {
+    const today = new Date().toISOString().split("T")[0];
+    setEditRow({
+      PartyID: row.PartyID || "",
+      ReamaningAmt: row.RemainingAmt || "",
+      expensesamount: row.TotalExpensePayment || 0,
+      Paymenttype: "",
+      Amt: "",
+      ByPayment: "",
+      PaymentDtTm: today,
+    });
+    setEditItemId(null);
+    setviewLegearpayment(true);
+  };
+
   const onExpeses = (row) => {
     const today = new Date().toISOString().split("T")[0];
     setEditRow({
@@ -436,6 +458,13 @@ const Payment = () => {
         name: "Actions",
         cell: (r) => (
           <div className="flex gap-2">
+
+            <button className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700" onClick={() => onAddLegearPayment(r)} type="button" title="Add Payment">
+              <FaCreditCard className="text-base" />
+            </button>
+
+
+
             <button
               className="rounded-md bg-yellow-600 p-2 text-white hover:bg-yellow-700"
               type="button"
@@ -907,6 +936,17 @@ const Payment = () => {
             </div>
           </div>
 
+          <LegearPayment
+            open={viewLegearpayment}
+            onClose={() => {
+              setviewLegearpayment(false);
+              setEditRow(null);
+            }}
+            editData={editRow}
+            onSuccess={GetData_Payment}
+          />
+
+
           <PaymentModal
             open={open}
             onClose={() => {
@@ -1007,18 +1047,18 @@ const Payment = () => {
                                   ₹
                                   {item.Amt
                                     ? parseFloat(item.Amt).toLocaleString("en-IN", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      })
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
                                     : "0.00"}
                                 </td>
                                 <td className="px-4 py-3 text-sm font-semibold text-orange-700 border-r border-slate-200">
                                   ₹
                                   {item.ReamaningAmt
                                     ? parseFloat(item.ReamaningAmt).toLocaleString("en-IN", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      })
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
                                     : "0.00"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">{item.Paymenttype || "-"}</td>
@@ -1026,10 +1066,10 @@ const Payment = () => {
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                   {item.PaymentDtTm
                                     ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                      })
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
                                     : "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800">{item.CreatedDtTm || "-"}</td>
@@ -1148,13 +1188,18 @@ const Payment = () => {
                           <tbody className="bg-white divide-y divide-slate-200">
                             {viewData2.map((item, index) => (
                               <tr key={item.PaymentID || index} className="hover:bg-blue-50 transition-colors">
-                                <td className="px-4 py-3 text-sm font-semibold text-red-700 border-r border-slate-200">
+
+
+                                <td
+                                  className={`px-4 py-3 text-sm font-semibold ${item?.CreditDebit == "DR" ? "text-green-700" : "text-red-700"
+                                    } border-r border-slate-200`}
+                                >
                                   ₹
                                   {item.Amt
                                     ? parseFloat(item.Amt).toLocaleString("en-IN", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      })
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
                                     : "0.00"}
                                 </td>
 
@@ -1163,10 +1208,10 @@ const Payment = () => {
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                   {item.PaymentDtTm
                                     ? new Date(item.PaymentDtTm).toLocaleString("en-IN", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                      })
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
                                     : "-"}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-slate-800">{item.CreatedDtTm || "-"}</td>
@@ -1318,7 +1363,7 @@ const Payment = () => {
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-50"
-              // onClick={() => setShowModal(false)}
+            // onClick={() => setShowModal(false)}
             ></div>
 
             {/* Modal */}
