@@ -81,10 +81,10 @@ const GetData_location = async () => {
     };
     const GetData_Itemlist = async () => {
            const val = {
-               LocationID: "",
+               LocationID: value.LocationID,
            };
            try {
-               const res = await PostWithToken("MasterItems/GetData_MasterItems", val);
+               const res = await PostWithToken("MasterItems/GetDropDownData_MasterItems", val);
                console.log(res, "itemlist");
                if (res) {
                    setItemList(res);
@@ -100,8 +100,11 @@ useEffect(()=>{
     GetData_location();
     GetData_Driver();
     GetData_Party();
-    GetData_Itemlist();
+    
 },[])
+useEffect(()=>{
+    GetData_Itemlist();
+},[value.LocationID])
 
 const options = itemlist.map(item => ({
   value: item.ItemID,
