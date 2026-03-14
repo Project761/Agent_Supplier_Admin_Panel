@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
+import CreatableSelect from "react-select/creatable";
 
 const AddStockModal  = ({ open, onClose, editData, onSuccess }) => {
 
@@ -47,7 +48,7 @@ const handleLocationChange = (e) => {
         if (!value.ItemName) e.ItemName = "Item Name required";
         // if (!value.Price) e.Price = "Price required";
         if (!value.Qty) e.Qty = "Quantity required";
-        if (!value.LocationID) e.LocationID = "Location required";
+        // if (!value.LocationID) e.LocationID = "Location required";
 
 
         setErrors(e);
@@ -122,6 +123,22 @@ useEffect(()=>{
 
     if (!open) return null;
 
+const selectStyles = {
+  control: (base, state) => ({
+    ...base,
+    borderRadius: 6,
+    borderColor: state.isFocused ? "#2563eb" : "#e2e8f0",
+    boxShadow: state.isFocused ? "0 0 0 1px #2563eb" : "none",
+    minHeight: 40,
+  }),
+};
+
+const locationOptions = items.map((loc) => ({
+  value: loc.LocationID,
+  label: loc.LocationName
+}));
+
+
     return (
         <div className="fixed inset-0 z-50">
 
@@ -185,29 +202,38 @@ useEffect(()=>{
     Location
   </label>
 
-  <select
-    value={value.LocationID}
-    onChange={handleLocationChange}
-    className={inputCls}
-  >
+ <CreatableSelect
+  value={
+    value.LocationName
+      ? { label: value.LocationName, value: value.LocationID }
+      : null
+  }
+  onChange={(opt) =>
+    setValue((prev) => ({
+      ...prev,
+      LocationID: opt?.value || "",
+      LocationName: opt?.label || ""
+    }))
+  }
+  onCreateOption={(inputValue) =>
+    setValue((prev) => ({
+      ...prev,
+      LocationID: "",        // new location
+      LocationName: inputValue
+    }))
+  }
+  options={locationOptions}
+  placeholder="Select or create location..."
+  styles={selectStyles}
+  isClearable
+  formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+/>
 
-    <option value="">Select Location</option>
-
-    {items.map((loc) => (
-      <option
-        key={loc.LocationID}
-        value={loc.LocationID}
-      >
-        {loc.LocationName}
-      </option>
-    ))}
-
-  </select>
-    {errors.LocationID && (
-        <p className="text-red-500 text-xs">
-            {errors.LocationID}
-        </p>
-    )}
+  {errors.LocationID && (
+    <p className="text-red-500 text-xs">
+      {errors.LocationID}
+    </p>
+  )}
 </div>
 
 

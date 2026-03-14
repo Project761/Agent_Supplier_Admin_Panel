@@ -3,6 +3,7 @@ import { FiX } from "react-icons/fi";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
 const OutItemModal = ({ open, onClose, editData, onSuccess }) => {
 
@@ -267,6 +268,50 @@ const handleDriverChange = (e) => {
 
 };
 
+const selectStyles = {
+  control: (base, state) => ({
+    ...base,
+    borderRadius: 6,
+    borderColor: state.isFocused ? "#2563eb" : "#e2e8f0",
+    boxShadow: state.isFocused ? "0 0 0 1px #2563eb" : "none",
+    minHeight: 40,
+  }),
+};
+const driverOptions = items2.map((d) => ({
+  value: d.DriverID,
+  label: d.DriverName
+}));
+
+const handleCreateDriver = async (inputValue) => {
+
+  try {
+
+    const payload = {
+      DriverName: inputValue
+    };
+
+    const res = await PostWithToken("ItemOut/Insert_Driver", payload);
+
+    if (res) {
+
+      // dropdown refresh
+      await GetData_Driver();
+
+      // newly created driver select karna
+      setValue((prev) => ({
+        ...prev,
+        DriverID: "", 
+        DriverName: inputValue
+      }));
+
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+
+};
+
 
 
     return (
@@ -344,29 +389,37 @@ const handleDriverChange = (e) => {
     Driver
   </label>
 
-  <select
-  value={value.DriverID}
-  onChange={handleDriverChange}
-  className={inputCls}
->
-
-    <option value="">Select Driver</option>
-
-    {items2.map((loc) => (
-      <option
-        key={loc.DriverID}
-        value={loc.DriverID}
-      >
-        {loc.DriverName||"NaN"}
-      </option>
-    ))}
-
-  </select>
-    {errors.DriverID && (
-        <p className="text-red-500 text-xs">
-            {errors.DriverID}
-        </p>
-    )}
+<CreatableSelect
+  value={
+    value.DriverName
+      ? { label: value.DriverName, value: value.DriverID }
+      : null
+  }
+  onChange={(opt) =>
+    setValue((prev) => ({
+      ...prev,
+      DriverID: opt?.value || "",
+      DriverName: opt?.label || ""
+    }))
+  }
+  onCreateOption={(inputValue) =>
+    setValue((prev) => ({
+      ...prev,
+      DriverID: "",       // new driver hai
+      DriverName: inputValue
+    }))
+  }
+  options={driverOptions}
+  placeholder="Select or create driver..."
+  styles={selectStyles}
+  isClearable
+  formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+/>
+  {errors.DriverID && (
+    <p className="text-red-500 text-xs">
+      {errors.DriverID}
+    </p>
+  )}
 </div>
 
 <div>
