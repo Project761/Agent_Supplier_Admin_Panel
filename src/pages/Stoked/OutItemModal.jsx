@@ -108,7 +108,8 @@ useEffect(()=>{
 
 const options = itemlist.map(item => ({
   value: item.ItemID,
-  label: item.ItemName
+  label: item.ItemName,
+  Remaining:item.RemaingStock,
 }));
     const [errors, setErrors] = useState({});
 
@@ -180,6 +181,7 @@ const options = itemlist.map(item => ({
       toastifySuccess("Item Out Added Successfully");
       onClose?.();
       onSuccess?.();
+      refershdvalues();
     }
 
   } catch (error) {
@@ -297,10 +299,10 @@ const handleCreateDriver = async (inputValue) => {
 
     if (res) {
 
-      // dropdown refresh
+      
       await GetData_Driver();
 
-      // newly created driver select karna
+      
       setValue((prev) => ({
         ...prev,
         DriverID: "", 
@@ -314,6 +316,18 @@ const handleCreateDriver = async (inputValue) => {
   }
 
 };
+
+const refershdvalues=()=>{
+  setValue((prev)=>({
+    ...prev,
+         LocationID: "",
+        LocationName: "",
+        DriverID: "",
+        DriverName: "",
+        PartyID: "",
+        PartyName: ""
+  }))
+}
 
 
 
@@ -496,7 +510,7 @@ const handleCreateDriver = async (inputValue) => {
             />
 
             <span className="font-medium">
-              {item.ItemName}
+              {item.ItemName} {`(Remaining: ${item.RemaingStock})`}
             </span>
 
           </div>
