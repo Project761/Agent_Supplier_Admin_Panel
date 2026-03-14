@@ -29,6 +29,7 @@ import Vichlegps from './pages/VichleGps/Vichlegps';
 import Otpverify from './components/Otpverify';
 import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
 import InItam from './pages/stoked/InItam';
+import OutItem from './pages/Stoked/OutItem';
 
 
 // const PublicRoute = ({ children }) => {
@@ -107,6 +108,7 @@ function App() {
           <Route path="MobileList" element={<MobileList />} />
           <Route path="supplier" element={<Supplier />} />
           <Route path="InItam" element={<InItam />} />
+          <Route path="OutItem" element={<OutItem />} />
           <Route path="contact" element={<Contact />} />
           <Route path="contact/add" element={<ContactModal />} />
           <Route path="bill" element={<Bill />} />

@@ -189,6 +189,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
         Amt: value.Amt || "0",
         ByPayment: value.ByPayment || "",
         PaymentDtTm: value.PaymentDtTm || new Date().toISOString(),
+          CreditDebit: "",
       };
       // const res = await PostWithToken("ExpensePayment/Update_ExpensePayment", payload);
       const res = await PostWithToken("ExpensePayment/Insert_ExpensePayment", payload);
