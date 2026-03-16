@@ -178,7 +178,7 @@ const Payment = () => {
       const res = await PostWithToken("ExpensePayment/GetSingalData_PartyExpensePayment", val);
 
       if (res) {
-        console.log(res, 'res')
+        // console.log(res, 'res')
         setViewData2(res);
         setViewOpen2(true);
       } else {
@@ -781,6 +781,19 @@ const Payment = () => {
     navigate(`/dashboard/PaymentReceiptPrint?PartyID=${item.PartyID ? item.PartyID : item}&PaymentID=${item.PaymentID ? item.PaymentID : "0"}`);
   };
 
+
+  const totalDR = viewData2?.reduce(
+    (acc, item) => acc + (item.CreditDebit === "DR" ? Number(item.Amt) : 0),
+    0
+  );
+
+  const totalCR = viewData2?.reduce(
+    (acc, item) => acc + (item.CreditDebit === "CR" ? Number(item.Amt) : 0),
+    0
+  );
+
+  const remainingAmount = totalCR - totalDR;
+
   return (
     <>
       <div className="flex-1 space-y-3 overflow-y-auto px-2 py-3">
@@ -1191,7 +1204,7 @@ const Payment = () => {
 
 
                                 <td
-                                  className={`px-4 py-3 text-sm font-semibold ${item?.CreditDebit == "DR" ? "text-green-700" : "text-red-700"
+                                  className={`px-4 py-3 text-sm font-semibold ${item?.CreditDebit == "CR" ? "text-green-700" : "text-red-700"
                                     } border-r border-slate-200`}
                                 >
                                   ₹
@@ -1254,23 +1267,52 @@ const Payment = () => {
                       </button>
                     </div> */}
 
-                    <div className="mt-6 flex items-center justify-between gap-3">
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t pt-4">
+
                       {/* LEFT SIDE */}
-                      <p className="text-sm font-medium text-slate-700">
-                        Total Expenses Amount:
-                        <span className="ml-1 font-semibold text-red-600">₹{viewData2.reduce((acc, item) => acc + Number(item.Amt || 0), 0).toFixed(2)}</span>
-                      </p>
+                      <div className="flex flex-wrap gap-6">
+
+                        <p className="text-sm font-medium text-slate-700">
+                          Total Expenses Amount:
+                          <span className="ml-2 font-semibold text-red-600">
+                            ₹{totalDR.toFixed(2)}
+                          </span>
+                        </p>
+
+                        <p className="text-sm font-medium text-slate-700">
+                          Total Ledger Expense Amount:
+                          <span className="ml-2 font-semibold text-green-600">
+                            ₹{totalCR.toFixed(2)}
+                          </span>
+                        </p>
+
+                        <p className="text-sm font-medium text-slate-700">
+                          Total Remaining Amount:
+                          <span className={`ml-2 font-semibold ${remainingAmount < 0 ? "text-red-600" : "text-blue-600"}`}>
+                            ₹{remainingAmount.toFixed(2)}
+                          </span>
+                        </p>
+
+                      </div>
 
                       {/* RIGHT SIDE */}
                       <div className="flex gap-3">
-                        <button onClick={SingleExportToExcel2} className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                        <button
+                          onClick={SingleExportToExcel2}
+                          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
                           Export Excel
                         </button>
 
-                        <button type="button" onClick={() => setViewOpen2(false)} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                        <button
+                          type="button"
+                          onClick={() => setViewOpen2(false)}
+                          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
                           Close
                         </button>
                       </div>
+
                     </div>
                   </div>
                 </div>
