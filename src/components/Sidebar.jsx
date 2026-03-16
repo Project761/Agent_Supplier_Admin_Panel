@@ -90,7 +90,8 @@ const items = [
    {
     label: "Stoked",
     icon: FiUserCheck,
-    children: [{ label: "Add Stoked", to: "/dashboard/InItam" }],
+    children: [{ label: "Add Stoked", to: "/dashboard/InItam" },{ label: "Out Stoked", to: "/dashboard/OutItem" }]
+   
   },
 
 
@@ -117,6 +118,7 @@ export default function Sidebar({ isOpen, onClose }) {
   useEffect(() => {
     if (pathname.includes("/supplier")) setOpenKey("Supplier");
     if (pathname.includes("/InItam")) setOpenKey("InItam");
+    if (pathname.includes("/OutItem")) setOpenKey("OutItem");
     if (pathname.includes("/agent")) setOpenKey("Agent");
     if (pathname.includes("/MobileList")) setOpenKey("Mobile List");
     if (pathname.includes("/contact")) setOpenKey("Contact");

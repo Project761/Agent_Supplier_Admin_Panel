@@ -4,18 +4,16 @@ import { FiTrash2 } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
-
+import InItamModal from "./InItamModal";
 import { FaLocationPin } from "react-icons/fa6";
 import { FiEye } from "react-icons/fi";
 import { FiPlus } from "react-icons/fi";
-import InItamModal from "./InItamModal";
 import AddStockModal from "./AddStockModal ";
-// import AddStockModal from "./AddStockModal";
+import OutItemModal from "./OutItemModal";
 
 
 
-
-const InItam = () => {
+const OutItem = () => {
 
     const [items, setItems] = useState([]);
 
@@ -26,10 +24,14 @@ const InItam = () => {
 
     const GetData_Adminuser = async () => {
         const val = {
-            LocationID: "",
+            PartyID: "",
+            DriverID: "",
+            DriverName: "",
+            CreatedDtTmFrom: "",
+            CreatedDtTmTo: "",
         };
         try {
-            const res = await PostWithToken("MasterItems/GetData_MasterItems", val);
+            const res = await PostWithToken("ItemOut/GetData_ItemOut", val);
             console.log(res, "res");
             if (res) {
                 setItems(res);
@@ -114,59 +116,90 @@ const InItam = () => {
         });
     }, [items, search]);
 
+
+
+     const formatUrl = (url) => {
+    if (!url) return "";
+
+    let fixedUrl = url.replace(/\\/g, "/");
+
+    if (!fixedUrl.startsWith("http://") && !fixedUrl.startsWith("https://")) {
+      fixedUrl = "http://" + fixedUrl;
+    }
+
+    return fixedUrl;
+  };
     const columns = [
         {
-            name: <span className="font-semibold">Item Name</span>,
-            selector: (row) => row.ItemName,
+            name: <span className="font-semibold">Driver Name</span>,
+            selector: (row) => row.DriverName,
             sortable: true,
         },
         {
-            name: <span className="font-semibold">StockData</span>,
-            selector: (row) => row.StockData || "-",
+            name: <span className="font-semibold">Handler Name</span>,
+            selector: (row) => row.HandlerName || "-",
             sortable: true,
         },
+        
          {
-            name: <span className="font-semibold">OutStock</span>,
-            selector: (row) => row.OutStock || "-",
-            sortable: true,
-        },
-         {
-            name: <span className="font-semibold">RemaingStock</span>,
-            selector: (row) => row.RemaingStock || "-",
+            name: <span className="font-semibold">Quantity</span>,
+            selector: (row) => row.Qty || "-",
             sortable: true,
         },
         {
-            name: <span className="font-semibold">Price</span>,
-            selector: (row) => row.Price || "-",
+  name: <span className="font-semibold">DropPhoto</span>,
+  cell: (row) => (
+    <img
+      src={formatUrl(row.DropPhoto)}
+      alt="drop"
+      className="w-16 h-16 object-cover rounded"
+    />
+  ),
+  sortable: true,
+},
+       {
+  name: <span className="font-semibold">PickupPhoto</span>,
+  cell: (row) => (
+    <img
+      src={formatUrl(row.PickupPhoto)}
+      alt="pickup"
+      className="w-16 h-16 object-cover rounded"
+    />
+  ),
+  sortable: true,
+},
+ {
+            name: <span className="font-semibold">OutDate</span>,
+            selector: (row) => row.OutDate || "-",
             sortable: true,
         },
        
-        {
-            name: "Actions",
-            cell: (r) => (
-                <div className="flex gap-2">
-                    <button
-                        className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-                        onClick={() => onEditItem(r)}
-                        type="button"
-                         title="Add Stock"
-                    >
+        // {
+        //     name: "Actions",
+        //     cell: (r) => (
+        //         <div className="flex gap-2">
+        //             <button
+        //                 className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
+        //                 onClick={() => onEditItem(r)}
+        //                 type="button"
+        //                  title="Add Stock"
+        //             >
                         
-                         <FiPlus className="text-base" /> 
+        //                  <FiPlus className="text-base" /> 
                          
-                    </button>
+        //             </button>
 
-                    <button
-                        className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-                        onClick={() => onViewItem(r)}
-                        type="button"
-                         title="View Stock"
-                    >
-                   <FiEye className="text-base" />
-                    </button>
-                </div>
-            ),
-        },
+        //             <button
+        //                 className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
+        //                 onClick={() => onViewItem(r)}
+        //                 type="button"
+        //                  title="View Stock"
+        //             >
+        //            <FiEye className="text-base" />
+        //             </button>
+        //         </div>
+        //     ),
+        // },
     ];
 
     const tableStyles = {
@@ -230,7 +263,7 @@ const InItam = () => {
                             }}
                             className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap"
                         >
-                            Add Item
+                            Insert Out Stock
                         </button>
                     </div>
 
@@ -252,7 +285,7 @@ const InItam = () => {
                 </div>
 
 
-                <InItamModal
+                <OutItemModal
                     open={open}
                     onClose={() => setOpen(false)}
                     onSave={handleSaveItem}
@@ -402,4 +435,4 @@ const InItam = () => {
     );
 }
 
-export default InItam;
+export default OutItem;
