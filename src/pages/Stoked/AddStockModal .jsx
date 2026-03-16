@@ -118,6 +118,7 @@ useEffect(()=>{
             toastifySuccess( "Stock Added Successfully");
             onClose?.();
             onSuccess?.();
+            refreshvalues();
         }
     };
 
@@ -138,6 +139,15 @@ const locationOptions = items.map((loc) => ({
   label: loc.LocationName
 }));
 
+const refreshvalues=()=>{
+    setValue({
+        ItemName: "",
+        Price: "",
+        Qty: "",
+            LocationID: "",
+            LocationName: ""
+    });
+}
 
     return (
         <div className="fixed inset-0 z-50">

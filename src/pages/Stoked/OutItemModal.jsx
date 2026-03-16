@@ -327,6 +327,8 @@ const refershdvalues=()=>{
         PartyID: "",
         PartyName: ""
   }))
+  setSelectedItems([]);
+  setItemList([]);
 }
 
 
