@@ -156,7 +156,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
             newErrors.Paymenttype = "Payment Type is required";
         }
         if (!value.ByPayment) {
-            newErrors.ByPayment = "By Payment is required";
+            newErrors.ByPayment = "Description is required";
         }
         if (!value.Amt.trim()) {
             newErrors.Amt = "Amount is required";
@@ -185,7 +185,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
                 Amt: value.Amt || "0",
                 ByPayment: value.ByPayment || "",
                 PaymentDtTm: value.PaymentDtTm || new Date().toISOString(),
-                CreditDebit: "DR",
+                CreditDebit: "CR",
             };
             // const res = await PostWithToken("ExpensePayment/Update_ExpensePayment", payload);
             const res = await PostWithToken("ExpensePayment/Insert_ExpensePayment", payload);
@@ -201,7 +201,7 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
                     Amt: "",
                     ByPayment: "",
                     PaymentDtTm: today,
-                    CreditDebit: "DR",
+                    CreditDebit: "CR",
                 });
                 setErrors({});
             }
@@ -315,13 +315,13 @@ const ExpensesModal = ({ open, onClose, editData, onSuccess }) => {
 
                             <div className="flex flex-col">
                                 <label className="mb-1 text-sm font-medium text-slate-600">
-                                    By Payment
+                                    Description
                                 </label>
                                 <input
                                     type="text"
                                     value={value.ByPayment}
                                     onChange={handleChange("ByPayment")}
-                                    placeholder="Enter by payment"
+                                    placeholder="Enter Description"
                                     className={inputCls}
                                 />
                                 {errors.ByPayment && (
