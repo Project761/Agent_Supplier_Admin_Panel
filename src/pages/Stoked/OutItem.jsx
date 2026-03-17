@@ -130,6 +130,11 @@ const OutItem = () => {
     return fixedUrl;
   };
     const columns = [
+      {
+            name: <span className="font-semibold">Party Name</span>,
+            selector: (row) => row.partyName || "-",
+            sortable: true,
+        },
         {
             name: <span className="font-semibold">Driver Name</span>,
             selector: (row) => row.DriverName,
@@ -140,12 +145,13 @@ const OutItem = () => {
             selector: (row) => row.HandlerName || "-",
             sortable: true,
         },
-        
          {
             name: <span className="font-semibold">Quantity</span>,
             selector: (row) => row.Qty || "-",
             sortable: true,
         },
+        
+         
         {
   name: <span className="font-semibold">DropPhoto</span>,
   cell: (row) => (

@@ -37,6 +37,7 @@ const AdminUserModel = ({ open, onClose, editData, onSuccess }) => {
     if (!value.Passwords && !editData) e.Passwords = "Passwords is required";
     if (!value.MobileNo || value.MobileNo.length < 10) e.MobileNo = "Valid MobileNo required";
     if (!value.FullName) e.FullName = "FullName is required";
+    if(!value.EmailID || !/\S+@\S+\.\S+/.test(value.EmailID)) e.EmailID = "Valid EmailID is required";
 
     setErrors(e);
     return Object.keys(e).length === 0;
