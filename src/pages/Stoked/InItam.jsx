@@ -30,7 +30,7 @@ const InItam = () => {
         };
         try {
             const res = await PostWithToken("MasterItems/GetData_MasterItems", val);
-            console.log(res, "res");
+            // console.log(res, "res");
             if (res) {
                 setItems(res);
             } else {

@@ -4,17 +4,17 @@ import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
 import CreatableSelect from "react-select/creatable";
 
-const AddStockModal  = ({ open, onClose, editData, onSuccess }) => {
+const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
 
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
- const [items, setItems] = useState([]);
+    const [items, setItems] = useState([]);
     const [value, setValue] = useState({
         ItemName: "",
         Price: "",
         Qty: "",
-         LocationID: "",
-         LocationName: ""
+        LocationID: "",
+        LocationName: ""
     });
 
     const [errors, setErrors] = useState({});
@@ -26,22 +26,22 @@ const AddStockModal  = ({ open, onClose, editData, onSuccess }) => {
         }));
     };
     const handleChanges = (field) => (e) => {
-  setValue({ ...value, [field]: e.target.value });
-};
-const handleLocationChange = (e) => {
+        setValue({ ...value, [field]: e.target.value });
+    };
+    const handleLocationChange = (e) => {
 
-  const id = e.target.value;
+        const id = e.target.value;
 
-  const location = items.find(
-    (item) => item.LocationID == id
-  );
+        const location = items.find(
+            (item) => item.LocationID == id
+        );
 
-  setValue({
-    ...value,
-    LocationID: location.LocationID,
-    LocationName: location.LocationName
-  });
-};
+        setValue({
+            ...value,
+            LocationID: location.LocationID,
+            LocationName: location.LocationName
+        });
+    };
 
     const validate = () => {
         const e = {};
@@ -64,13 +64,13 @@ const handleLocationChange = (e) => {
         }
     }, [editData]);
 
- const GetData_location = async () => {
+    const GetData_location = async () => {
         const val = {
             LocationID: "",
         };
         try {
             const res = await PostWithToken("ItemOut/GetDropDownData_Locations", val);
-            console.log(res, "res");
+            // console.log(res, "res");
             if (res) {
                 setItems(res);
             } else {
@@ -81,9 +81,9 @@ const handleLocationChange = (e) => {
         }
     };
 
-useEffect(()=>{
-    GetData_location();
-},[])
+    useEffect(() => {
+        GetData_location();
+    }, [])
     useEffect(() => {
         if (!editData && open) {
             setValue({
@@ -98,24 +98,24 @@ useEffect(()=>{
 
         if (!validate()) return;
 
-        const api = 
+        const api =
             "ItemStock/Insert_ItemStock";
-           
+
 
         const payload = {
             ItemID: editData?.ItemID,
             ItemName: value.ItemName,
             Qty: value.Qty,
-            CreatedByUser :1,
+            CreatedByUser: 1,
             LocationID: value.LocationID,
             LocationName: value.LocationName
         };
 
-        
+
         const res = await PostWithToken(api, payload);
 
         if (res) {
-            toastifySuccess( "Stock Added Successfully");
+            toastifySuccess("Stock Added Successfully");
             onClose?.();
             onSuccess?.();
             refreshvalues();
@@ -124,30 +124,30 @@ useEffect(()=>{
 
     if (!open) return null;
 
-const selectStyles = {
-  control: (base, state) => ({
-    ...base,
-    borderRadius: 6,
-    borderColor: state.isFocused ? "#2563eb" : "#e2e8f0",
-    boxShadow: state.isFocused ? "0 0 0 1px #2563eb" : "none",
-    minHeight: 40,
-  }),
-};
+    const selectStyles = {
+        control: (base, state) => ({
+            ...base,
+            borderRadius: 6,
+            borderColor: state.isFocused ? "#2563eb" : "#e2e8f0",
+            boxShadow: state.isFocused ? "0 0 0 1px #2563eb" : "none",
+            minHeight: 40,
+        }),
+    };
 
-const locationOptions = items.map((loc) => ({
-  value: loc.LocationID,
-  label: loc.LocationName
-}));
+    const locationOptions = items.map((loc) => ({
+        value: loc.LocationID,
+        label: loc.LocationName
+    }));
 
-const refreshvalues=()=>{
-    setValue({
-        ItemName: "",
-        Price: "",
-        Qty: "",
+    const refreshvalues = () => {
+        setValue({
+            ItemName: "",
+            Price: "",
+            Qty: "",
             LocationID: "",
             LocationName: ""
-    });
-}
+        });
+    }
 
     return (
         <div className="fixed inset-0 z-50">
@@ -207,44 +207,44 @@ const refreshvalues=()=>{
                             )}
                         </div>
 
-<div>
-  <label className="text-sm font-medium">
-    Location
-  </label>
+                        <div>
+                            <label className="text-sm font-medium">
+                                Location
+                            </label>
 
- <CreatableSelect
-  value={
-    value.LocationName
-      ? { label: value.LocationName, value: value.LocationID }
-      : null
-  }
-  onChange={(opt) =>
-    setValue((prev) => ({
-      ...prev,
-      LocationID: opt?.value || "",
-      LocationName: opt?.label || ""
-    }))
-  }
-  onCreateOption={(inputValue) =>
-    setValue((prev) => ({
-      ...prev,
-      LocationID: "",        // new location
-      LocationName: inputValue
-    }))
-  }
-  options={locationOptions}
-  placeholder="Select or create location..."
-  styles={selectStyles}
-  isClearable
-  formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
-/>
+                            <CreatableSelect
+                                value={
+                                    value.LocationName
+                                        ? { label: value.LocationName, value: value.LocationID }
+                                        : null
+                                }
+                                onChange={(opt) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        LocationID: opt?.value || "",
+                                        LocationName: opt?.label || ""
+                                    }))
+                                }
+                                onCreateOption={(inputValue) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        LocationID: "",        // new location
+                                        LocationName: inputValue
+                                    }))
+                                }
+                                options={locationOptions}
+                                placeholder="Select or create location..."
+                                styles={selectStyles}
+                                isClearable
+                                formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                            />
 
-  {errors.LocationID && (
-    <p className="text-red-500 text-xs">
-      {errors.LocationID}
-    </p>
-  )}
-</div>
+                            {errors.LocationID && (
+                                <p className="text-red-500 text-xs">
+                                    {errors.LocationID}
+                                </p>
+                            )}
+                        </div>
 
 
                     </div>
@@ -267,4 +267,4 @@ const refreshvalues=()=>{
     );
 };
 
-export default AddStockModal ;
+export default AddStockModal;

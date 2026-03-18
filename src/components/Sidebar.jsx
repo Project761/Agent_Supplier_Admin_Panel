@@ -6,22 +6,35 @@ import { FiMapPin } from "react-icons/fi";
 
 const items = [
   {
-    label: "Supplier",
-    icon: FiTruck,
+    label: "Party",
+    icon: FiUsers,
+    children: [{ label: "Add Party", to: "/dashboard/party" }],
+  },
+  {
+    label: "Party Payment",
+    icon: FiCreditCard,
     children: [
-      { label: "Add Supplier", to: "/dashboard/supplier", icon: FiPlus },
+      { label: "Party Payment", to: "/dashboard/payment" },
+      { label: "Remaining Payment", to: "/dashboard/remainderpaymentreport" }
     ],
   },
-  {
-    label: "Purchase Order",
-    icon: FiShoppingCart,
-    children: [{ label: "Add Purchase Order", to: "/dashboard/purchaseorder" }],
-  },
-  {
-    label: "PO Payment",
-    icon: FiShoppingCart,
-    children: [{ label: "Add PO Payment", to: "/dashboard/POPayment" }],
-  },
+  // {
+  //   label: "Supplier",
+  //   icon: FiTruck,
+  //   children: [
+  //     { label: "Add Supplier", to: "/dashboard/supplier", icon: FiPlus },
+  //   ],
+  // },
+  // {
+  //   label: "Purchase Order",
+  //   icon: FiShoppingCart,
+  //   children: [{ label: "Add Purchase Order", to: "/dashboard/purchaseorder" }],
+  // },
+  // {
+  //   label: "PO Payment",
+  //   icon: FiShoppingCart,
+  //   children: [{ label: "Add PO Payment", to: "/dashboard/POPayment" }],
+  // },
   {
     label: "Agent",
     icon: FiUserCheck,
@@ -32,24 +45,17 @@ const items = [
     icon: FiUserCheck,
     children: [{ label: "Add Mobile List", to: "/dashboard/MobileList" }],
   },
+  {
+    label: "Stoked",
+    icon: FiUserCheck,
+    children: [{ label: "Add Stoked", to: "/dashboard/InItam" }, { label: "Out Stoked", to: "/dashboard/OutItem" }]
+
+  },
   // {
   //   label: "Contact",
   //   icon: FiPhone,
   //   children: [{ label: "Add Contact", to: "/dashboard/contact" }],
   // },
-  {
-    label: "Party",
-    icon: FiUsers,
-    children: [{ label: "Add Party", to: "/dashboard/party" }],
-  },
-  {
-    label: "Party Payment",
-    icon: FiCreditCard,
-     children: [
-    { label: "Party Payment", to: "/dashboard/payment" },
-    { label: "Remaining Payment", to: "/dashboard/remainderpaymentreport" }
-  ],
-  },
   // {
   //   label: "Temp",
   //   icon: FiClock,
@@ -77,21 +83,15 @@ const items = [
   //   icon: FiDollarSign,
   //   children: [{ label: "Add Transaction", to: "/dashboard/expense" }],
   // },
- {
+  {
     label: "Admin User",
     icon: FiUserCheck,
     children: [{ label: "Add Admin User", to: "/dashboard/adminuser" }],
   },
-   {
+  {
     label: "Vehicle GPS",
     icon: FiUserCheck,
     children: [{ label: "Add Vehicle GPS", to: "/dashboard/vehiclegps" }],
-  },
-   {
-    label: "Stoked",
-    icon: FiUserCheck,
-    children: [{ label: "Add Stoked", to: "/dashboard/InItam" },{ label: "Out Stoked", to: "/dashboard/OutItem" }]
-   
   },
 
 
@@ -126,7 +126,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/temp")) setOpenKey("Temp");
     if (pathname.includes("/paymentreminder")) setOpenKey("Payment Reminder");
     if (pathname.includes("/payment")) setOpenKey("Payment");
-    if(pathname.includes("/remainderpaymentreport")) setOpenKey("Payment");
+    if (pathname.includes("/remainderpaymentreport")) setOpenKey("Payment");
     if (pathname.includes("/bill")) setOpenKey("Bill");
     if (pathname.includes("/taxinvoice") || pathname.includes("/invoice")) setOpenKey("Tax Invoice");
     if (pathname.includes("/purchaseorder")) setOpenKey("Purchase Order");
@@ -136,7 +136,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/vehiclegps")) setOpenKey("Vehicle GPS");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
     if (pathname.includes("/gpsdevicepayment")) setOpenKey("Gps Device Payment");
-    
+
   }, [pathname]);
 
   useEffect(() => {
