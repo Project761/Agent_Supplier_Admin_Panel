@@ -571,7 +571,7 @@ const Payment = () => {
   const netBalance = totals.totalPaid - totals.TotalExpensePayment;
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(items);
+    const worksheet = XLSX.utils.json_to_sheet(filteredItems);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
 
