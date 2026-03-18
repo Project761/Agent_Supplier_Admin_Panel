@@ -32,7 +32,7 @@ const OutItem = () => {
         };
         try {
             const res = await PostWithToken("ItemOut/GetData_ItemOut", val);
-            console.log(res, "res");
+            // console.log(res, "res");
             if (res) {
                 setItems(res);
             } else {
