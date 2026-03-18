@@ -8,6 +8,7 @@ import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
 import { IoMdSettings } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
+import Otpverify from "../../components/Otpverify";
 
 const Party = () => {
   const [search, setSearch] = useState("");
@@ -18,6 +19,9 @@ const Party = () => {
   const [items, setItems] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedPartyID, setSelectedPartyID] = useState(null);
+
+   const [otpverifyOpen, setOtpverifyOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     GetData_Party();
@@ -185,18 +189,9 @@ const Party = () => {
   };
 
   const Delete_Party = async (PartyID) => {
-    try {
-      const val = {
-        PartyID: PartyID,
-      };
-      const res = await PostWithToken("Party/Delete_Party", val);
-      if (res) {
-        toastifySuccess("Party successfully Deleted");
-        await GetData_Party();
-      }
-    } catch (error) {
-      console.error("Delete_Party error:", error);
-    }
+    console.log("Delete_Party called with PartyID:", PartyID);
+    setDeleteId(PartyID);
+   setOtpverifyOpen(true);
   };
 
   return (
@@ -224,6 +219,20 @@ const Party = () => {
               Add Party
             </button>
           </div>
+
+ {otpverifyOpen && (
+            <Otpverify
+              open={otpverifyOpen}
+              onClose={() => setOtpverifyOpen(false)}
+              editItemId={deleteId}
+              deletename="Party"
+              onSuccess={async () => {
+                setOtpverifyOpen(false);
+                await GetData_Party();
+              }}
+            />
+          )}
+
 
           <div className="overflow-x-auto">
             <DataTable

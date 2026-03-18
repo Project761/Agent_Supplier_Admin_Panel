@@ -5,6 +5,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import Topbar from "../../components/Topbar";
 import * as XLSX from "xlsx";
+import { useNavigate } from "react-router-dom";
 
 const Userpage = () => {
   const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
@@ -12,6 +13,10 @@ const Userpage = () => {
   const [search, setSearch] = useState("");
   const [itemsGps, setItemsGps] = useState([]);
   const [activeTab, setActiveTab] = useState("party");
+
+
+
+
 
   // "party" | "gps"
   useEffect(() => {
@@ -232,6 +237,34 @@ const Userpage = () => {
 
     saveAs(data, fileName);
   };
+
+
+
+
+const navigate = useNavigate();
+
+ useEffect(() => {
+  const push = () => {
+    window.history.pushState(null, "", window.location.href);
+  };
+
+  
+  for (let i = 0; i < 20; i++) push();
+
+  const handlePopState = () => {
+    push();
+  };
+
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, []);
+
+
+
+
   return (
     <>
       <Topbar />

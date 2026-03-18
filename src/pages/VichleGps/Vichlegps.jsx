@@ -441,6 +441,7 @@ const Vichlegps = () => {
               open={otpverifyOpen}
               onClose={() => setOtpverifyOpen(false)}
               editItemId={deleteId}
+              deletename="Vehicle GPS"
               onSuccess={async () => {
                 setOtpverifyOpen(false);
                 await GetData_Gps();
