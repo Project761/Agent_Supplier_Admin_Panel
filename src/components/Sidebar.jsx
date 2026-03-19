@@ -93,6 +93,11 @@ const items = [
     icon: FiUserCheck,
     children: [{ label: "Add Vehicle GPS", to: "/dashboard/vehiclegps" }],
   },
+   {
+    label: "Work Status",
+    icon: FiUserCheck,
+    children: [{ label: "Add Work Status", to: "/dashboard/workstatus" }],
+  },
 
 
   {
@@ -134,6 +139,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (pathname.includes("/expense")) setOpenKey("Transactions");
     if (pathname.includes("/adminuser")) setOpenKey("Admin User");
     if (pathname.includes("/vehiclegps")) setOpenKey("Vehicle GPS");
+    if(pathname.includes("/workstatus")) setOpenKey("Work Status");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
     if (pathname.includes("/gpsdevicepayment")) setOpenKey("Gps Device Payment");
 
