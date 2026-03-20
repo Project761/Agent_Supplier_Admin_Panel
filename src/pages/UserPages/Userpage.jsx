@@ -69,36 +69,58 @@ const Userpage = () => {
         selector: (row) => row.no,
         sortable: true,
       },
-      {
-        name: "No.",
-        selector: (row) => row.Name,
+       {
+        name: "Web.Name",
+        selector: (row) => row.WebName||"-",
+        sortable: true,
+      },
+       {
+        name: "Reg.No.",
+        selector: (row) => row.RegNo ||"-",
+        sortable: true,
+      },
+       {
+        name: "Lease.No.",
+        selector: (row) => row.LeaseNo || "-",
+        sortable: true,
+      },
+       {
+        name: "Lease Name",
+        selector: (row) => row.LeaseName || "-",
         sortable: true,
       },
       {
-        name: "Weighbridge No",
-        selector: (row) => row.WeighbridgeNo,
+        name: "ReQ. No",
+        selector: (row) => row.RequestNo || "-",
+        sortable: true,
+      },
+      {
+        name: "Web. No",
+        selector: (row) => row.WeighbridgeNo || "-",
         sortable: true,
         wrap: true,
       },
       {
         name: "Owner Name",
-        selector: (row) => row.OwnerName,
+        selector: (row) => row.OwnerName || "-",
         sortable: true,
       },
       {
-        name: "Owner Mobile No",
+        name: "Owner Mob.No",
         selector: (row) => row.OwnerMobileNo || "-",
+        sortable: true,
       },
       {
         name: "Status",
         cell: (row) => (
           <span
             className={`px-2 py-1 text-xs rounded-full font-semibold
-            ${row.WorkStatus === "Close" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
+            ${row.DMGWorkStatus === "Close" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
           >
-            {row.WorkStatus}
+            {row.DMGWorkStatus}
           </span>
         ),
+        sortable: true,
       },
       // {
       //   name: "District",

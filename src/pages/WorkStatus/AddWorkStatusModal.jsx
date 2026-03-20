@@ -104,8 +104,10 @@ const options = itemlist.map(item => ({
 
     const validate = () => {
         const e = {};
+      
+        if (!value.PartyID) e.PartyID = "Party is required";
         
-        if (!value.Datetime) e.Datetime = "Datetime required";
+        // if (!value.Datetime) e.Datetime = "Datetime required";
 
         setErrors(e);
         return Object.keys(e).length === 0;
@@ -404,11 +406,7 @@ const refershdvalues=()=>{
     className={inputCls}
   />
 
-  {errors.Description && (
-    <p className="text-red-500 text-xs">
-      {errors.Description}
-    </p>
-  )}
+ 
 </div>
 
 

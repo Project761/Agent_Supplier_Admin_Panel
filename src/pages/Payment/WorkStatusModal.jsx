@@ -5,6 +5,7 @@ import { PostWithToken, Comman_changeArrayFormat } from "../../ApiMethods/ApiMet
 import { toastifySuccess } from "../../Utility/Utility";
 
 const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
+  console.log(editData,"editData")
   const inputCls =
     "w-full rounded-sm border border-slate-200 px-4 py-2.5 text-sm " +
     "outline-none transition " +
@@ -17,6 +18,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
     Amt: "",
     ByPayment: "",
     PaymentDtTm: "",
+    DMGWorkStatus: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -32,6 +34,16 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
     { value: "Testing Close-Payment Remaining", label: "Testing Close-Payment Remaining" },
     { value: "Testing Close-Payment Done", label: "Testing Close-Payment Done" },
   ];
+
+  const DMGStatusOptions = [
+    { value: "Work Order Received", label: "Work Order Received" },
+    { value: "Civil Work Started", label: "Civil Work Started" },
+    { value: "Hardware Started", label: "Hardware Started" },
+    { value: "Hardware Done", label: "Hardware-Done" },
+    { value: "Testing Pending", label: "Testing Pending" },
+    { value: "Testing Done", label: "Testing Done" }
+  ];
+
 
  const selectStyles = {
   menuList: (base) => ({
@@ -55,6 +67,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
         PartyID: null,
         Paymenttype: "",
         PaymentDtTm: "",
+        DMGWorkStatus: "",
       });
       setErrors({});
     
@@ -89,7 +102,10 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
       ) || null;
 
       const paymentTypeOption = paymentTypeOptions.find(
-        (opt) => opt.value === editData.Paymenttype || opt.label === editData.Paymenttype
+        (opt) => opt.value === editData.WorkStatus || opt.label === editData.WorkStatus
+      ) || null;
+       const DMGWorkStatusOption = DMGStatusOptions.find(
+        (opt) => opt.value === editData.DMGWorkStatus || opt.label === editData.DMGWorkStatus
       ) || null;
 
       const today = new Date().toISOString().split("T")[0];
@@ -99,6 +115,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
         PartyID: partyOption,
         ReamaningAmt: editData.ReamaningAmt || "",
         Paymenttype: paymentTypeOption,
+          DMGWorkStatus: DMGWorkStatusOption,
         Amt: "",
         ByPayment: editData.ByPayment || "",
         PaymentDtTm: editData.PaymentDtTm || today,
@@ -111,6 +128,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
         PartyID: null,
         ReamaningAmt: "",
         Paymenttype: null,
+          DMGWorkStatus: null,
         Amt: "",
         ByPayment: "",
         PaymentDtTm: today,
@@ -152,8 +170,9 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
     if (!value.Paymenttype) {
       newErrors.Paymenttype = "Work Status is required";
     }
-    
-  
+    if (!value.DMGWorkStatus) {
+      newErrors.DMGWorkStatus = "DMG Work Status is required";
+    }
     if (!value.PaymentDtTm.trim()) {
       newErrors.PaymentDtTm = "Work Status Date is required";
     }
@@ -169,10 +188,12 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
       const payload = {
         PartyID: value.PartyID?.value || value.PartyID || "",
         WorkStatus: value.Paymenttype?.value || value.Paymenttype || "",
+        DMGWorkStatus: value.DMGWorkStatus?.value || value.DMGWorkStatus || "",
         PaymentDtTm: value.PaymentDtTm || new Date().toISOString(),
       };
       const res = await PostWithToken("Payment/Insert_Payment", payload);
-      if (res) {
+      const res2= await PostWithToken("Party/Update_DMGWorkStatus", { PartyID: value.PartyID?.value || value.PartyID || "", DMGWorkStatus: value.DMGWorkStatus?.value || value.DMGWorkStatus || "" });
+      if (res && res2) {
         onClose?.();
         onSuccess?.();
         toastifySuccess("Work Status  inserted successfully");
@@ -181,6 +202,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
           PartyID: null,
           Paymenttype: null,
           PaymentDtTm: today,
+          DMGWorkStatus: null,
         });
         setErrors({});
       }
@@ -214,28 +236,7 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-              <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium text-slate-600">
-                  Party <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  value={value.PartyID}
-                  onChange={(option) => {
-                    setvalue((p) => ({ ...p, PartyID: option }));
-                    if (errors.PartyID) {
-                      setErrors((prev) => ({ ...prev, PartyID: "" }));
-                    }
-                  }}
-                  options={partyOptions}
-                  placeholder="Select party..."
-                  styles={selectStyles}
-                  isClearable
-                  isDisabled={Boolean(editData)}
-                />
-                {errors.PartyID && (
-                  <p className="mt-1 text-xs text-red-500">{errors.PartyID}</p>
-                )}
-              </div>
+          
 
               <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium text-slate-600">
@@ -259,11 +260,56 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
                 )}
               </div>
 
+ <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-slate-600">
+                DMG Work Status <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={value.DMGWorkStatus}
+                  onChange={(option) => {
+                    setvalue((p) => ({ ...p, DMGWorkStatus: option }));
+                    if (errors.DMGWorkStatus) {
+                      setErrors((prev) => ({ ...prev, DMGWorkStatus: "" }));
+                    }
+                  }}
+                  options={DMGStatusOptions}
+                  placeholder="Select DMG Work Status..."
+                  styles={selectStyles}
+                  isClearable
+                />
+                {errors.DMGWorkStatus && (
+                  <p className="mt-1 text-xs text-red-500">{errors.DMGWorkStatus}</p>
+                )}
+              </div>
+
             
+    <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-slate-600">
+                  Party <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={value.PartyID}
+                  onChange={(option) => {
+                    setvalue((p) => ({ ...p, PartyID: option }));
+                    if (errors.PartyID) {
+                      setErrors((prev) => ({ ...prev, PartyID: "" }));
+                    }
+                  }}
+                  options={partyOptions}
+                  placeholder="Select party..."
+                  styles={selectStyles}
+                  isClearable
+                  isDisabled={Boolean(editData)}
+                />
+                {errors.PartyID && (
+                  <p className="mt-1 text-xs text-red-500">{errors.PartyID}</p>
+                )}
+              </div>
+
 
               <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium text-slate-600">
-                  Work Status Date <span className="text-red-500">*</span>
+                  Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -275,6 +321,10 @@ const WorkStatusModal = ({ open, onClose, editData, onSuccess }) => {
                   <p className="mt-1 text-xs text-red-500">{errors.PaymentDtTm}</p>
                 )}
               </div>
+
+  
+
+
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
