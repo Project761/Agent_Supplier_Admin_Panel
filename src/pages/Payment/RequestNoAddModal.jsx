@@ -105,7 +105,7 @@ console.log(editData,"editData")
         RegNo: value.RegNo,
         LeaseNo: value.LeaseNo,
         LeaseName: value.LeaseName,
-        WebName: value.WebName,
+        // WebName: value.WebName,
         WeighbridgeNo: value.WeighbridgeNo,
 
         PartyID: value.PartyID?.value || "",
@@ -144,7 +144,7 @@ console.log(editData,"editData")
 
   
   <div className="flex flex-col">
-    <label className="mb-1 text-sm font-medium">Party Name</label>
+    <label className="mb-1 text-sm font-medium">Webbridge Name</label>
     <Select
       value={value.PartyID}
       onChange={(option) =>
@@ -209,7 +209,7 @@ console.log(editData,"editData")
   </div>
 
 
-  <div className="flex flex-col">
+  {/* <div className="flex flex-col">
     <label className="mb-1 text-sm font-medium">Webbridge Name</label>
     <input
       className={inputCls}
@@ -218,7 +218,7 @@ console.log(editData,"editData")
       onChange={handleChange("WebName")}
     />
    
-  </div>
+  </div> */}
    <div className="flex flex-col">
     <label className="mb-1 text-sm font-medium">Webbridge Number</label>
     <input

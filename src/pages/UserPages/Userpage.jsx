@@ -71,7 +71,7 @@ const Userpage = () => {
       },
        {
         name: "Web.Name",
-        selector: (row) => row.WebName||"-",
+        selector: (row) => row.Name||"-",
         sortable: true,
       },
        {

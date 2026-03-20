@@ -21,6 +21,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { FaCreditCard, FaEdit } from "react-icons/fa";
 import LegearPayment from "./LegearPayment";
 import RequestNoAddModal from "./RequestNoAddModal";
+import { RiAdminLine } from "react-icons/ri";
 
 const Payment = () => {
   const [search, setSearch] = useState("");
@@ -486,7 +487,8 @@ const onAddRequestNo = (row) => {
           <div className="flex gap-2">
 
  <button className="rounded-md bg-orange-600 p-2 text-white hover:bg-orange-700" onClick={() => onAddRequestNo(r)} type="button" title="Add Req. No.">
-              <FiPlus className="text-base" />
+             
+               <FaEdit className="text-base" />
             </button>
 
 
@@ -505,7 +507,7 @@ const onAddRequestNo = (row) => {
                 setPartyID(r.PartyID);
               }}
             >
-              <FaEdit className="text-base" />
+              <RiAdminLine className="text-base" />
             </button>
 
             <button
@@ -557,7 +559,7 @@ const onAddRequestNo = (row) => {
             </button>
           </div>
         ),
-        minWidth: "300px",
+        minWidth: "400px",
         grow: 2,
       },
     ],
