@@ -68,47 +68,56 @@ const Userpage = () => {
         name: "S.No.",
         selector: (row) => row.no,
         sortable: true,
+        width: "81px",
       },
        {
         name: "Web.Name",
         selector: (row) => row.Name||"-",
         sortable: true,
+        width: "200px",
       },
        {
         name: "Reg.No.",
         selector: (row) => row.RegNo ||"-",
         sortable: true,
+        width: "100px",
       },
        {
         name: "Lease.No.",
         selector: (row) => row.LeaseNo || "-",
         sortable: true,
+        width: "150px",
       },
        {
         name: "Lease Name",
         selector: (row) => row.LeaseName || "-",
         sortable: true,
+        width: "200px",
       },
       {
         name: "ReQ. No",
         selector: (row) => row.RequestNo || "-",
         sortable: true,
+        width: "100px",
       },
       {
         name: "Web. No",
         selector: (row) => row.WeighbridgeNo || "-",
         sortable: true,
         wrap: true,
+        width: "150px",
       },
       {
         name: "Owner Name",
         selector: (row) => row.OwnerName || "-",
         sortable: true,
+          width: "200px",
       },
       {
         name: "Owner Mob.No",
         selector: (row) => row.OwnerMobileNo || "-",
         sortable: true,
+          width: "150px",
       },
       {
         name: "Status",
@@ -121,6 +130,7 @@ const Userpage = () => {
           </span>
         ),
         sortable: true,
+          width: "120px",
       },
       // {
       //   name: "District",
@@ -225,11 +235,20 @@ const Userpage = () => {
     if (activeTab === "party") {
       formattedData = filteredItems.map((item, index) => ({
         "S.No.": index + 1,
-        "No.": item.Name,
-        "Weighbridge No": item.WeighbridgeNo,
-        "Owner Name": item.OwnerName,
+        "Web Name": item.Name || "-",
+         "Reg No": item.RegNo || "-",
+         "Lease No": item.LeaseNo || "-",
+         "Lease Name": item.LeaseName || "-",
+         "Request No": item.RequestNo || "-",
+         "Web. No": item.WeighbridgeNo || "-",
+        "Owner Name": item.OwnerName || "-",
         "Owner Mobile No": item.OwnerMobileNo || "-",
-        Status: item.WorkStatus,
+      //  "Status": item.DMGWorkStatus || "-",
+
+
+
+
+        Status: item.DMGWorkStatus,
       }));
 
       fileName = "Party_Master.xlsx";
