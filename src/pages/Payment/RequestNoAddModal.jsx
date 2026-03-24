@@ -88,7 +88,7 @@ console.log(editData,"editData")
   const Check_validate = () => {
     const newErrors = {};
 
-    if (!value.RequestNo) newErrors.RequestNo = " Request no is Required";
+    // if (!value.RequestNo) newErrors.RequestNo = " Request no is Required";
    
     setErrors(newErrors);
 
@@ -165,11 +165,11 @@ console.log(editData,"editData")
       value={value.RequestNo}
       onChange={handleChange("RequestNo")}
     />
-    {errors.RequestNo && (
+    {/* {errors.RequestNo && (
       <p className="mt-1 text-xs text-red-500">
         {errors.RequestNo}
       </p>
-    )}
+    )} */}
   </div>
 
   

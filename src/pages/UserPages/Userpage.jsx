@@ -1,11 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+// import React, { useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { FiTrash2 } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
-import { PostWithToken } from "../../ApiMethods/ApiMethods";
+import { PostWithToken } from "../../ApiMethods/ApiMethods";   
 import Topbar from "../../components/Topbar";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 
 const Userpage = () => {
   const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
@@ -42,7 +51,7 @@ const Userpage = () => {
       setItemsGps(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error(error);
-      setItemsGps([]);
+      setItemsGps([]); 
     }
   };
 
@@ -62,106 +71,187 @@ const Userpage = () => {
     return dataToFilter.filter((r) => Object.values(r).join(" ").toLowerCase().includes(q));
   }, [items, itemsGps, search, activeTab]);
 
-  const columns = useMemo(
-    () => [
-      {
-        name: "S.No.",
-        selector: (row) => row.no,
-        sortable: true,
-        width: "81px",
-      },
-       {
-        name: "Web.Name",
-        selector: (row) => row.Name||"-",
-        sortable: true,
-        width: "200px",
-      },
-       {
-        name: "Reg.No.",
-        selector: (row) => row.RegNo ||"-",
-        sortable: true,
-        width: "100px",
-      },
-       {
-        name: "Lease.No.",
-        selector: (row) => row.LeaseNo || "-",
-        sortable: true,
-        width: "150px",
-      },
-       {
-        name: "Lease Name",
-        selector: (row) => row.LeaseName || "-",
-        sortable: true,
-        width: "200px",
-      },
-      {
-        name: "ReQ. No",
-        selector: (row) => row.RequestNo || "-",
-        sortable: true,
-        width: "100px",
-      },
-      {
-        name: "Web. No",
-        selector: (row) => row.WeighbridgeNo || "-",
-        sortable: true,
-        wrap: true,
-        width: "150px",
-      },
-      {
-        name: "Owner Name",
-        selector: (row) => row.OwnerName || "-",
-        sortable: true,
-          width: "200px",
-      },
-      {
-        name: "Owner Mob.No",
-        selector: (row) => row.OwnerMobileNo || "-",
-        sortable: true,
-          width: "150px",
-      },
-      {
-        name: "Status",
-        cell: (row) => (
-          <span
-            className={`px-2 py-1 text-xs rounded-full font-semibold
-            ${row.DMGWorkStatus === "Close" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
-          >
-            {row.DMGWorkStatus}
-          </span>
-        ),
-        sortable: true,
-          width: "120px",
-      },
-      // {
-      //   name: "District",
-      //   selector: (row) => row.District || "-",
-      // },
-      // {
-      //   name: "Address",
-      //   selector: (row) => row.Address || "-",
-      // },
-      // {
-      //   name: "Actions",
-      //   cell: (row) => (
-      //     <div className="flex gap-2">
-      //       <button
-      //         className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-      //         title="Edit"
-      //       >
-      //         <FaRegEdit />
-      //       </button>
-      //       <button
-      //         className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-      //         title="Delete"
-      //       >
-      //         <FiTrash2 />
-      //       </button>
-      //     </div>
-      //   ),
-      // },
-    ],
-    [],
-  );
+//   const columns = useMemo(
+//   () => [
+//     {
+//       name: "S.No.",
+//       selector: (row) => row.no,
+//       sortable: true,
+//       minWidth: "80px",
+//       grow: 0,
+//     },
+//     {
+//       name: "Web.Name",
+//       selector: (row) => row.Name || "-",
+//       sortable: true,
+//       minWidth: "180px",
+//       grow: 2,
+//     },
+//     {
+//       name: "Reg.No.",
+//       selector: (row) => row.RegNo || "-",
+//       sortable: true,
+//       minWidth: "120px",
+//       grow: 1,
+//     },
+//     {
+//       name: "Lease.No.",
+//       selector: (row) => row.LeaseNo || "-",
+//       sortable: true,
+//       minWidth: "150px",
+//       grow: 1,
+//     },
+//     {
+//       name: "Lease Name",
+//       selector: (row) => row.LeaseName || "-",
+//       sortable: true,
+//       minWidth: "200px",
+//       grow: 2,
+//     },
+//     {
+//       name: "ReQ. No",
+//       selector: (row) => row.RequestNo || "-",
+//       sortable: true,
+//       minWidth: "120px",
+//       grow: 1,
+//     },
+//     {
+//       name: "Web. No",
+//       selector: (row) => row.WeighbridgeNo || "-",
+//       sortable: true,
+//       wrap: true,
+//       minWidth: "150px",
+//       grow: 2,
+//     },
+//     {
+//       name: "Owner Name",
+//       selector: (row) => row.OwnerName || "-",
+//       sortable: true,
+//       minWidth: "180px",
+//       grow: 2,
+//     },
+//     {
+//       name: "Owner Mob.No",
+//       selector: (row) => row.OwnerMobileNo || "-",
+//       sortable: true,
+//       minWidth: "150px",
+//       grow: 1,
+//     },
+//     {
+//       name: "Status",
+//       cell: (row) => (
+//         <span
+//           className={`px-2 py-1 text-xs rounded-full font-semibold
+//           ${
+//             row.DMGWorkStatus === "Close"
+//               ? "bg-red-100 text-red-600"
+//               : "bg-green-100 text-green-600"
+//           }`}
+//         >
+//           {row.DMGWorkStatus}
+//         </span>
+//       ),
+//       sortable: true,
+//       minWidth: "120px",
+//       grow: 0,
+//     },
+//   ],
+//   []
+// );
+
+const columnDefs = useMemo(() => [
+ {
+  headerName: "S.No.",
+  valueGetter: (params) => params.data?.no ?? "-",
+  minWidth: 60
+},
+ {
+    headerName: "Status",
+    field: "DMGWorkStatus",
+    minWidth: 200,
+    cellRenderer: (params) => {
+      const value = params.value ?? "-";
+      const isClose = value === "Close";
+
+      return (
+        <span
+          style={{
+            padding: "4px 8px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            backgroundColor: isClose ? "#fee2e2" : "#dcfce7",
+            color: isClose ? "#dc2626" : "#16a34a",
+          }}
+        >
+          {value}
+        </span>
+      );
+    },
+  },
+{
+  headerName: "Web.Name",
+  field: "Name",
+  flex: 1,
+  minWidth: 250,
+  valueGetter: (params) => params.data?.Name ?? "-"
+},
+
+  {
+    headerName: "Reg.No.",
+    field: "RegNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.RegNo ?? "-"
+  },
+
+  {
+    headerName: "Lease.No.",
+    field: "LeaseNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.LeaseNo ?? "-"
+  },
+
+  {
+    headerName: "Lease Name",
+    field: "LeaseName",
+    flex: 1,
+    minWidth: 200,
+    valueGetter: (p) => p.data?.LeaseName ?? "-"
+  },
+
+  {
+    headerName: "ReQ. No",
+    field: "RequestNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.RequestNo ?? "-"
+  },
+
+  {
+    headerName: "Web. No",
+    field: "WeighbridgeNo",
+    minWidth: 150,
+    wrapText: true,
+    autoHeight: true,
+    valueGetter: (p) => p.data?.WeighbridgeNo ?? "-"
+  },
+
+  {
+    headerName: "Owner Name",
+    field: "OwnerName",
+    flex: 1,
+    minWidth: 200,
+    valueGetter: (p) => p.data?.OwnerName ?? "-"
+  },
+
+  {
+    headerName: "Owner Mob.No",
+    field: "OwnerMobileNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.OwnerMobileNo ?? "-"
+  },
+
+ 
+], []);
 
   const columnsGps = useMemo(
     () => [
@@ -188,6 +278,29 @@ const Userpage = () => {
     ],
     [],
   );
+
+  const columnDefsGps = [
+  {
+    headerName: "S.No.",
+    field: "no",
+    valueGetter: (p) => p.data?.no ?? "-"
+  },
+  {
+    headerName: "IEMI No",
+    field: "IEMINo",
+    valueGetter: (p) => p.data?.IEMINo ?? "-"
+  },
+  {
+    headerName: "Vehicle No",
+    field: "VehicleNo",
+    valueGetter: (p) => p.data?.VehicleNo ?? "-"
+  },
+  {
+    headerName: "Owner Name",
+    field: "OwnerName",
+    valueGetter: (p) => p.data?.OwnerName ?? "-"
+  },
+];
   /* ================= TABLE STYLES ================= */
   const tableStyles = {
     headRow: {
@@ -235,6 +348,7 @@ const Userpage = () => {
     if (activeTab === "party") {
       formattedData = filteredItems.map((item, index) => ({
         "S.No.": index + 1,
+          Status: item.DMGWorkStatus|| "-",
         "Web Name": item.Name || "-",
          "Reg No": item.RegNo || "-",
          "Lease No": item.LeaseNo || "-",
@@ -248,7 +362,7 @@ const Userpage = () => {
 
 
 
-        Status: item.DMGWorkStatus,
+      
       }));
 
       fileName = "Party_Master.xlsx";
@@ -348,22 +462,26 @@ const navigate = useNavigate();
           </div>
 
           {/* Table */}
-          <DataTable
-            columns={activeTab === "party" ? columns : columnsGps}
-            data={filteredItems}
-            pagination
-            paginationPerPage={5}
-            paginationRowsPerPageOptions={[5, 10, 25]}
-            highlightOnHover
-            striped
-            responsive
-            fixedHeader
-            persistTableHead
-            noDataComponent={"No Data Available"}
-            fixedHeaderScrollHeight="420px"
-            customStyles={tableStyles}
-            // noDataComponent={<div className="py-6 text-gray-500 text-sm">No records found</div>}
-          />
+      <div className="ag-theme-alpine rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+  <AgGridReact
+    rowData={filteredItems}
+    columnDefs={activeTab === "party" ? columnDefs : columnDefsGps}
+    pagination={true}
+    paginationPageSize={5}
+    paginationPageSizeSelector={[5, 10, 25, 50, 100]}
+    domLayout="autoHeight"
+    headerHeight={45}
+    rowHeight={45}
+    defaultColDef={{
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      minWidth: 120,
+      //  cellStyle: { textAlign: "center" }
+
+    }}
+  />
+</div>
         </div>
       </div>
     </>
