@@ -1,11 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
 import { FiTrash2 } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
-import { PostWithToken } from "../../ApiMethods/ApiMethods";
+import { PostWithToken } from "../../ApiMethods/ApiMethods";   
 import Topbar from "../../components/Topbar";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 
 const Userpage = () => {
   const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
@@ -18,22 +26,39 @@ const Userpage = () => {
 
 
 
-  // "party" | "gps"
+ 
   useEffect(() => {
     getPermissionUsers();
     getPermissionUsersGps();
   }, []);
 
+  // const getPermissionUsers = async () => {
+  //   try {
+  //     const val = { UserID: parsedUserData?.UserID };
+  //     const res = await PostWithToken("PermissionUser/GetData_PermissionUser", val);
+  //     setItems(Array.isArray(res) ? res : []);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setItems([]);
+  //   }
+  // };
+
   const getPermissionUsers = async () => {
-    try {
-      const val = { UserID: parsedUserData?.UserID };
-      const res = await PostWithToken("PermissionUser/GetData_PermissionUser", val);
-      setItems(Array.isArray(res) ? res : []);
-    } catch (error) {
-      console.error(error);
-      setItems([]);
-    }
-  };
+  try {
+    const val = { UserID: parsedUserData?.UserID };
+    const res = await PostWithToken("PermissionUser/GetData_PermissionUser", val);
+
+    const updatedData = (Array.isArray(res) ? res : []).map((item, index) => ({
+      ...item,
+      serialNo: index + 1
+    }));
+
+    setItems(updatedData);   
+  } catch (error) {
+    console.error(error);
+    setItems([]);
+  }
+};
 
   const getPermissionUsersGps = async () => {
     try {
@@ -42,15 +67,10 @@ const Userpage = () => {
       setItemsGps(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error(error);
-      setItemsGps([]);
+      setItemsGps([]); 
     }
   };
 
-  // const filteredItems = useMemo(() => {
-  //   if (!search) return items;
-  //   const q = search.toLowerCase();
-  //   return items.filter((r) => `${r.Name} ${r.OwnerName} ${r.OfficeMobileNo} ${r.District}`.toLowerCase().includes(q));
-  // }, [items, search]);
 
   const filteredItems = useMemo(() => {
     const dataToFilter = activeTab === "party" ? items : itemsGps;
@@ -62,74 +82,164 @@ const Userpage = () => {
     return dataToFilter.filter((r) => Object.values(r).join(" ").toLowerCase().includes(q));
   }, [items, itemsGps, search, activeTab]);
 
-  const columns = useMemo(
-    () => [
-      {
-        name: "S.No.",
-        selector: (row) => row.no,
-        sortable: true,
-      },
-      {
-        name: "No.",
-        selector: (row) => row.Name,
-        sortable: true,
-      },
-      {
-        name: "Weighbridge No",
-        selector: (row) => row.WeighbridgeNo,
-        sortable: true,
-        wrap: true,
-      },
-      {
-        name: "Owner Name",
-        selector: (row) => row.OwnerName,
-        sortable: true,
-      },
-      {
-        name: "Owner Mobile No",
-        selector: (row) => row.OwnerMobileNo || "-",
-      },
-      {
-        name: "Status",
-        cell: (row) => (
-          <span
-            className={`px-2 py-1 text-xs rounded-full font-semibold
-            ${row.WorkStatus === "Close" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
-          >
-            {row.WorkStatus}
-          </span>
-        ),
-      },
-      // {
-      //   name: "District",
-      //   selector: (row) => row.District || "-",
-      // },
-      // {
-      //   name: "Address",
-      //   selector: (row) => row.Address || "-",
-      // },
-      // {
-      //   name: "Actions",
-      //   cell: (row) => (
-      //     <div className="flex gap-2">
-      //       <button
-      //         className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
-      //         title="Edit"
-      //       >
-      //         <FaRegEdit />
-      //       </button>
-      //       <button
-      //         className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
-      //         title="Delete"
-      //       >
-      //         <FiTrash2 />
-      //       </button>
-      //     </div>
-      //   ),
-      // },
-    ],
-    [],
-  );
+  const statusColors = {
+  "Work Order Received": {
+    bg: "#e0f2fe",
+    text: "#0284c7",
+  },
+  "Civil Work Started": {
+    bg: "#fef9c3",
+    text: "#ca8a04",
+  },
+  "Hardware Started": {
+    bg: "#ede9fe",
+    text: "#7c3aed",
+  },
+  "Hardware Done": {
+    bg: "#dcfce7",
+    text: "#101110",
+  },
+  "Testing Pending": {
+    bg: "#fee2e2",
+    text: "#dc2626",
+  },
+  "Testing Done": {
+    bg: "#bbf7d0",
+    text: "#15803d",
+  },
+};
+
+const columnDefs = useMemo(() => [
+
+{
+  headerName: "S.No.",
+  field: "serialNo",
+  minWidth: 80,
+  sortable: true   
+},
+//  {
+//     headerName: "Status",
+//     field: "DMGWorkStatus",
+//     minWidth: 200,
+//     cellRenderer: (params) => {
+//       const value = params.value ?? "-";
+//       const isClose = value === "Close";
+
+//       return (
+//         <span
+//           style={{
+//             padding: "4px 8px",
+//             borderRadius: "12px",
+//             fontSize: "12px",
+//             fontWeight: "600",
+//             backgroundColor: isClose ? "#fee2e2" : "#dcfce7",
+//             color: isClose ? "#dc2626" : "#16a34a",
+//           }}
+//         >
+//           {value}
+//         </span>
+//       );
+//     },
+//   },
+
+{
+  headerName: "Status",
+  field: "DMGWorkStatus",
+  minWidth: 200,
+  cellRenderer: (params) => {
+    const value = params.value ?? "-";
+
+    const colors = statusColors[value] || {
+      bg: "#e5e7eb",
+      text: "#374151",
+    };
+
+    return (
+      <span
+        style={{
+          padding: "4px 10px",
+          borderRadius: "12px",
+          fontSize: "12px",
+          fontWeight: "600",
+          backgroundColor: colors.bg,
+          color: colors.text,
+        }}
+      >
+        {value}
+      </span>
+    );
+  },
+},
+
+{
+  headerName: "Web.Name",
+  field: "Name",
+  flex: 1,
+  minWidth: 250,
+  valueGetter: (params) => params.data?.Name ?? "-"
+},
+
+  {
+    headerName: "Reg.No.",
+    field: "RegNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.RegNo ?? "-"
+  },
+
+  {
+    headerName: "Lease.No.",
+    field: "LeaseNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.LeaseNo ?? "-"
+  },
+
+  {
+    headerName: "Lease Name",
+    field: "LeaseName",
+    flex: 1,
+    minWidth: 200,
+    valueGetter: (p) => p.data?.LeaseName ?? "-"
+  },
+
+  {
+    headerName: "ReQ. No",
+    field: "RequestNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.RequestNo ?? "-"
+  },
+  {
+    headerName: "Area",
+    field: "Area",
+    minWidth: 200,
+    valueGetter: (p) => p.data?.Area ?? "-"
+  },
+
+  {
+    headerName: "Web. No",
+    field: "WeighbridgeNo",
+    minWidth: 150,
+    wrapText: true,
+    autoHeight: true,
+    valueGetter: (p) => p.data?.WeighbridgeNo ?? "-"
+  },
+
+  {
+    headerName: "Owner Name",
+    field: "OwnerName",
+    flex: 1,
+    minWidth: 200,
+    valueGetter: (p) => p.data?.OwnerName ?? "-"
+  },
+
+  {
+    headerName: "Owner Mob.No",
+    field: "OwnerMobileNo",
+    minWidth: 150,
+    valueGetter: (p) => p.data?.OwnerMobileNo ?? "-"
+  },
+
+ 
+], []);
 
   const columnsGps = useMemo(
     () => [
@@ -156,7 +266,30 @@ const Userpage = () => {
     ],
     [],
   );
-  /* ================= TABLE STYLES ================= */
+
+  const columnDefsGps = [
+  {
+    headerName: "S.No.",
+    field: "no",
+    valueGetter: (p) => p.data?.no ?? "-"
+  },
+  {
+    headerName: "IEMI No",
+    field: "IEMINo",
+    valueGetter: (p) => p.data?.IEMINo ?? "-"
+  },
+  {
+    headerName: "Vehicle No",
+    field: "VehicleNo",
+    valueGetter: (p) => p.data?.VehicleNo ?? "-"
+  },
+  {
+    headerName: "Owner Name",
+    field: "OwnerName",
+    valueGetter: (p) => p.data?.OwnerName ?? "-"
+  },
+];
+  
   const tableStyles = {
     headRow: {
       style: {
@@ -179,22 +312,7 @@ const Userpage = () => {
     },
   };
 
-  // const exportToExcel = () => {
-  //   const worksheet = XLSX.utils.json_to_sheet(items);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
 
-  //   const excelBuffer = XLSX.write(workbook, {
-  //     bookType: "xlsx",
-  //     type: "array",
-  //   });
-
-  //   const data = new Blob([excelBuffer], {
-  //     type: "application/octet-stream",
-  //   });
-
-  //   saveAs(data, "WeighBridge Automation.xlsx");
-  // };
 
   const exportToExcel = () => {
     let formattedData = [];
@@ -203,11 +321,22 @@ const Userpage = () => {
     if (activeTab === "party") {
       formattedData = filteredItems.map((item, index) => ({
         "S.No.": index + 1,
-        "No.": item.Name,
-        "Weighbridge No": item.WeighbridgeNo,
-        "Owner Name": item.OwnerName,
+          Status: item.DMGWorkStatus|| "-",
+        "Web Name": item.Name || "-",
+         "Reg No": item.RegNo || "-",
+         "Lease No": item.LeaseNo || "-",
+         "Lease Name": item.LeaseName || "-",
+         "Request No": item.RequestNo || "-",
+          "Area": item.Area || "-",
+         "Web. No": item.WeighbridgeNo || "-",
+        "Owner Name": item.OwnerName || "-",
         "Owner Mobile No": item.OwnerMobileNo || "-",
-        Status: item.WorkStatus,
+      //  "Status": item.DMGWorkStatus || "-",
+
+
+
+
+      
       }));
 
       fileName = "Party_Master.xlsx";
@@ -287,11 +416,9 @@ const navigate = useNavigate();
           </button>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
-          {/* Header */}
+      
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {/* <h2 className="text-lg font-semibold text-gray-800">
-              Permission Users
-            </h2> */}
+           
 
             <input
               value={search}
@@ -306,23 +433,28 @@ const navigate = useNavigate();
             </div>
           </div>
 
-          {/* Table */}
-          <DataTable
-            columns={activeTab === "party" ? columns : columnsGps}
-            data={filteredItems}
-            pagination
-            paginationPerPage={5}
-            paginationRowsPerPageOptions={[5, 10, 25]}
-            highlightOnHover
-            striped
-            responsive
-            fixedHeader
-            persistTableHead
-            noDataComponent={"No Data Available"}
-            fixedHeaderScrollHeight="420px"
-            customStyles={tableStyles}
-            // noDataComponent={<div className="py-6 text-gray-500 text-sm">No records found</div>}
-          />
+         
+      <div className="ag-theme-alpine rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+  <AgGridReact
+    rowData={filteredItems}
+    columnDefs={activeTab === "party" ? columnDefs : columnDefsGps}
+     enableCellTextSelection={true}
+    pagination={true}
+    paginationPageSize={100}
+    paginationPageSizeSelector={[5, 10, 25, 50, 100]}
+    domLayout="autoHeight"
+    headerHeight={45}
+    rowHeight={45}
+    defaultColDef={{
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      minWidth: 120,
+      
+
+    }}
+  />
+</div>
         </div>
       </div>
     </>

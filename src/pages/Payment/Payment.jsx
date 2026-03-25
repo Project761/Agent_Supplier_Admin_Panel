@@ -20,6 +20,8 @@ import PartySettingModal from "../Party/PartySettingModal";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaCreditCard, FaEdit } from "react-icons/fa";
 import LegearPayment from "./LegearPayment";
+import RequestNoAddModal from "./RequestNoAddModal";
+import { RiAdminLine } from "react-icons/ri";
 
 const Payment = () => {
   const [search, setSearch] = useState("");
@@ -28,6 +30,7 @@ const Payment = () => {
   const [editRow, setEditRow] = useState(null);
   const [editItemId, setEditItemId] = useState(null);
   const [viewData, setViewData] = useState([]);
+  const[reqnoopen,setreqnoopen]=useState(false);
 
 
   const [viewLegearpayment, setviewLegearpayment] = useState(false);
@@ -359,6 +362,24 @@ const Payment = () => {
     setviewLegearpayment(true);
   };
 
+const onAddRequestNo = (row) => {
+    const today = new Date().toISOString().split("T")[0];
+    setEditRow({
+      PartyID: row.PartyID || "",
+      RegNo: row.RegNo || "",
+      LeaseNo: row.LeaseNo || "",
+      LeaseName: row.LeaseName || "",
+      WebName: row.WebName || "",
+      RequestNo: row.RequestNo || "",
+      WeighbridgeNo: row.WeighbridgeNo || "",
+      
+    });
+    setEditItemId(null);
+    setreqnoopen(true);
+  };
+
+
+
   const onExpeses = (row) => {
     const today = new Date().toISOString().split("T")[0];
     setEditRow({
@@ -404,6 +425,12 @@ const Payment = () => {
         selector: (row) => row.Name || "-",
         sortable: true,
         cell: (row) => <div className="font-medium text-slate-800">{row.Name || "-"}</div>,
+      },
+       {
+        name: <span className="font-semibold">Request Number</span>,
+        selector: (row) => row.RequestNo || "-",
+        sortable: true,
+        cell: (row) => <div className="font-medium text-slate-800">{row.RequestNo || "-"}</div>,
       },
       {
         name: <span className="font-semibold">Amount</span>,
@@ -459,6 +486,12 @@ const Payment = () => {
         cell: (r) => (
           <div className="flex gap-2">
 
+ <button className="rounded-md bg-orange-600 p-2 text-white hover:bg-orange-700" onClick={() => onAddRequestNo(r)} type="button" title="Add Req. No.">
+             
+               <FaEdit className="text-base" />
+            </button>
+
+
             <button className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700" onClick={() => onAddLegearPayment(r)} type="button" title="Add Payment">
               <FaCreditCard className="text-base" />
             </button>
@@ -474,7 +507,7 @@ const Payment = () => {
                 setPartyID(r.PartyID);
               }}
             >
-              <FaEdit className="text-base" />
+              <RiAdminLine className="text-base" />
             </button>
 
             <button
@@ -526,7 +559,7 @@ const Payment = () => {
             </button>
           </div>
         ),
-        minWidth: "300px",
+        minWidth: "400px",
         grow: 2,
       },
     ],
@@ -597,6 +630,8 @@ const Payment = () => {
       Amt: "",
       ByPayment: "",
       PaymentDtTm: today,
+        DMGWorkStatus: row.DMGWorkStatus || "",
+        WorkStatus: row.WorkStatus || "",
     });
     setEditItemId(null);
     setWorkstatusopen(true);
@@ -979,6 +1014,19 @@ const Payment = () => {
             editData={editRow}
             onSuccess={GetData_Payment}
           />
+
+
+ <RequestNoAddModal
+            open={reqnoopen}
+            onClose={() => {
+              setreqnoopen(false);
+              setEditRow(null);
+            }}
+            editData={editRow}
+            onSuccess={GetData_Payment}
+          />
+
+
 
           <WorkStatusModal
             open={workstatusopen}

@@ -30,6 +30,7 @@ import Otpverify from './components/Otpverify';
 import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
 import InItam from './pages/stoked/InItam';
 import OutItem from './pages/Stoked/OutItem';
+import WorkStatus from './pages/WorkStatus/WorkStatus';
 
 
 // const PublicRoute = ({ children }) => {
@@ -128,6 +129,7 @@ function App() {
           <Route path="adminuser" element={<Adminuser />} />
           <Route path="vehiclegps" element={<Vichlegps/>} />
           <Route path="otpverify" element={<Otpverify/>} />
+          <Route path="workstatus" element={<WorkStatus />} />
           <Route path="gpsdevicepayment" element={<GpsDevicePayments />} />
         </Route>
         {/* Catch all other routes and redirect to login */}

@@ -119,3 +119,28 @@ div[data-testid="table-header"],
     display: none !important;
   }
 }
+
+/* Css for User page new table */
+.ag-theme-alpine .ag-header {
+  background-color: #2563eb;
+  color: white ;
+  font-weight: 600;
+}
+.ag-theme-alpine .ag-header-cell,
+.ag-theme-alpine .ag-header-cell-label {
+  color: white !important;
+}
+
+
+
+.ag-theme-alpine .ag-row {
+  font-size: 13px;
+}
+
+.ag-theme-alpine .ag-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* .ag-theme-alpine .ag-header-cell-label {
+  justify-content: center !important;   
+} */
