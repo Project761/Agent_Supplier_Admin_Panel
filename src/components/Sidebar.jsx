@@ -51,6 +51,12 @@ const items = [
     children: [{ label: "Add Stoked", to: "/dashboard/InItam" }, { label: "Out Stoked", to: "/dashboard/OutItem" }]
 
   },
+  {
+    label: "Party Stock",
+    icon: FiUserCheck,
+    children: [{ label: "Add/Transfer Stock", to: "/dashboard/addortransfer" }]
+
+  },
   // {
   //   label: "Contact",
   //   icon: FiPhone,
@@ -123,6 +129,7 @@ export default function Sidebar({ isOpen, onClose }) {
   useEffect(() => {
     if (pathname.includes("/supplier")) setOpenKey("Supplier");
     if (pathname.includes("/InItam")) setOpenKey("InItam");
+     if (pathname.includes("/Addortranfer")) setOpenKey("Addortranfer");
     if (pathname.includes("/OutItem")) setOpenKey("OutItem");
     if (pathname.includes("/agent")) setOpenKey("Agent");
     if (pathname.includes("/MobileList")) setOpenKey("Mobile List");
