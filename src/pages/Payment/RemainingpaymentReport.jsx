@@ -1,4 +1,4 @@
-import React, { useEffect,  useState } from 'react'
+import React, { useEffect,  useMemo,  useState } from 'react' 
 import {
   PostWithToken,
 } from "../../ApiMethods/ApiMethods";
@@ -9,11 +9,13 @@ import { saveAs } from "file-saver";
 
 const RemainingpaymentReport = () => {
 const [data,setData]=useState([])
+const [search, setSearch] = useState("");
+const[checkbox,setCheckbox]=useState(false)
 
 
 useEffect(()=>{
   GetData_RemainingReport()
-},[])
+},[checkbox])
 
 
 const tableStyles = {
@@ -50,6 +52,7 @@ const totalRemainingAmt = data.reduce(
 );
 
 
+
    const columns =  [
         {
           name: <span className="font-semibold">Webridge Name</span>,
@@ -80,6 +83,7 @@ const totalRemainingAmt = data.reduce(
         {
           name: <span className="font-semibold">Final Amount</span>,
           selector: (row) => row.FinalAmt || "-",
+          width: "100px",
           sortable: true,
           cell: (row) => (
             <div className="font-medium text-slate-800">₹{row.FinalAmt}</div>
@@ -93,6 +97,8 @@ const totalRemainingAmt = data.reduce(
           name: <span className="font-semibold">Paid Amount</span>,
           selector: (row) => row.PaidAmt || "-",
           sortable: true,
+            width: "100px",
+
           cell: (row) => (
             <div className="font-medium text-slate-800">₹{row.PaidAmt}</div>
           ),
@@ -102,8 +108,17 @@ const totalRemainingAmt = data.reduce(
           name: <span className="font-semibold">Remaining Amount</span>,
           selector: (row) => row.ReamaningAmt || "-",
           sortable: true,
+            width: "120px",
           cell: (row) => (
             <div className="font-medium text-slate-800">₹{row.ReamaningAmt}</div>
+          ),
+        },
+           {
+          name: <span className="font-semibold">Area</span>,
+          selector: (row) => row.Area || "-",
+          sortable: true,
+          cell: (row) => (
+            <div className="font-medium text-slate-800">{row.Area || "-"}</div>
           ),
         },
        
@@ -113,20 +128,22 @@ const totalRemainingAmt = data.reduce(
   
 
 const GetData_RemainingReport = async () => {
-    try {
-      const res = await PostWithToken("Payment/ReamaningReport", {});
-    
-      if (res) {
-       
-        setData(res);
+  try {
+    const payload = {
+      WorkStatus: checkbox ? "Testing Close-Payment Done" : ""
+    };
 
-      } else {
-        setData([]);
-      }
-    } catch (error) {
-      console.error(error);
+    const res = await PostWithToken("Payment/ReamaningReport", payload);
+
+    if (res) {
+      setData(res);
+    } else {
+      setData([]);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
  const exportToExcel = () => {
   if (!data || data.length === 0) {
     alert("No data to export");
@@ -313,6 +330,14 @@ const handlePrint = () => {
   printWindow.focus();
   printWindow.print();
 };
+ const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return data;
+    return data.filter((r) => {
+      const hay = `${r.Name || ""} ${r.OwnerName || ""} ${r.Area || ""} `.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [data, search]);
 
   return (
     <>
@@ -321,11 +346,24 @@ const handlePrint = () => {
     <h2 className="text-xl font-semibold text-gray-800">
       Remaining Payment Report
     </h2>
+    </div>
+<div className="flex items-center gap-3 mb-4">
+ 
 
-
-
-
-  </div>
+  <input
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    placeholder="Search area..."
+    className="w-full sm:w-64 md:w-72 rounded-sm border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    autoComplete="off-district"
+  />
+   <input
+    type="checkbox"
+    checked={checkbox}
+    onChange={(e) => setCheckbox(e.target.checked)}
+  />Testing Close Payment Done
+</div>
+  
  <div id="printable-area">
 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
               <div
@@ -388,7 +426,7 @@ const handlePrint = () => {
      <div className="overflow-x-auto">
                   <DataTable
                     columns={columns}
-                    data={data}
+                    data={filteredItems}
                     pagination
                     paginationRowsPerPageOptions={[5, 10, 25, 50]}
                     paginationPerPage={5}
