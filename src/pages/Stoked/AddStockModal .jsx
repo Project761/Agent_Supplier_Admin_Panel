@@ -119,6 +119,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
             onClose?.();
             onSuccess?.();
             refreshvalues();
+            GetData_location();
         }
     };
 
