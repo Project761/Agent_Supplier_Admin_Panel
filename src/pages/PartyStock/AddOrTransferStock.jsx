@@ -12,6 +12,7 @@ import InItamModal from "../stoked/InItamModal";
 import AddStockModal from "../stoked/AddStockModal ";
 import AddItem from "./AddItem";
 import TransferStock from "./TransferStock";
+import { FaTruck } from "react-icons/fa";
 
 
 
@@ -70,11 +71,16 @@ const AddOrTransferStock = () => {
     };
 
     const onEditItem = (row) => {
-        console.log(row,"rowdata")
-        setEditItemId(row.UserID);
+       
+        setEditItemId(row.LocationID);
         setStokOpen(true);
         setEditRow(row);
     };
+    const Editfunction=(row)=>{
+          setOpen(true);
+          setEditItemId(row.LocationID);
+           setEditRow(row);
+    }
 
     const onDeleteRequest = (row) => {
 
@@ -83,8 +89,9 @@ const AddOrTransferStock = () => {
 
 
      const onViewItem = (row) => {
-        const ItemID = row.ItemID;
-        console.log(row, "view row");
+       
+        const ItemID = row.LocationID;
+        
         if (ItemID) {
           GetSingleData_Stockdata(ItemID);
         } else {
@@ -93,8 +100,8 @@ const AddOrTransferStock = () => {
       };
      const GetSingleData_Stockdata = async (ItemID) => {
         try {
-          const val = { ItemID: ItemID };
-          const res = await PostWithToken("ItemStock/GetData_ItemStock", val);
+          const val = { LocationID: ItemID };
+          const res = await PostWithToken("PartyStock/StockHistory", val);
           if (res) {
             setViewData(res);
             setViewOpen(true);
@@ -123,11 +130,11 @@ const AddOrTransferStock = () => {
             selector: (row) => row.LocationName,
             sortable: true,
         },
-        {
-            name: <span className="font-semibold">Description</span>,
-            selector: (row) => row.Description,
-            sortable: true,
-        },
+        // {
+        //     name: <span className="font-semibold">Description</span>,
+        //     selector: (row) => row.Description,
+        //     sortable: true,
+        // },
         {
             name: <span className="font-semibold">Total In Stock</span>,
             selector: (row) => row.TotalInStock || "-",
@@ -149,25 +156,41 @@ const AddOrTransferStock = () => {
             name: "Actions",
             cell: (r) => (
                 <div className="flex gap-2">
+
+   <button
+                        className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
+                        onClick={() => Editfunction(r)}
+                        type="button"
+                         title="Add Stock"
+                    >
+                         <FiPlus className="text-base" /> 
+                        
+                      
+                         
+                    </button>
+
                     <button
                         className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
                         onClick={() => onEditItem(r)}
                         type="button"
-                         title="Add Stock"
+                         title="Transfer Stock"
                     >
                         
-                         <FiPlus className="text-base" /> 
+                          <FaTruck className="text-base" />
+                         
                          
                     </button>
 
-                    {/* <button
+                 
+
+                    <button
                         className="rounded-md bg-red-600 p-2 text-white hover:bg-red-700"
                         onClick={() => onViewItem(r)}
                         type="button"
                          title="View Stock"
                     >
                    <FiEye className="text-base" />
-                    </button> */}
+                    </button>
                 </div>
             ),
         },
@@ -234,7 +257,7 @@ const AddOrTransferStock = () => {
                             }}
                             className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 sm:px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap"
                         >
-                            Add Item
+                            Add Stock
                         </button>
                     </div>
 
@@ -320,7 +343,7 @@ const AddOrTransferStock = () => {
                 <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 z-10">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-slate-800">
-                        Stock Details - {viewData[0]?.ItemName || "Item"}
+                        Stock Details - {viewData[0]?.LocationName || "Location"}
                     </h2>
                     <button
                       onClick={() => setViewOpen(false)}
@@ -342,7 +365,7 @@ const AddOrTransferStock = () => {
                           <tr className="bg-blue-600">
 
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
-                              Item Name
+                              Description
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
                              Location Name
@@ -352,16 +375,22 @@ const AddOrTransferStock = () => {
                             </th>
                           
                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                              Created Date
+                              Stock
+                            </th>
+                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Sender Location
+                            </th>
+                             <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                              Date
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
                           {viewData.map((item, index) => (
-                            <tr key={item.StockID || index} className="hover:bg-blue-50 transition-colors">
+                            <tr key={item.PartyStockID || index} className="hover:bg-blue-50 transition-colors">
 
                               <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
-                                {item.ItemName || "-"}
+                                {item.Description || "-"}
                               </td>
                                 <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
                                 {item.LocationName || "-"}
@@ -371,8 +400,14 @@ const AddOrTransferStock = () => {
                               </td>
                               
                              
-                              <td className="px-4 py-3 text-sm text-slate-800">
-                                {item.CreatedDtTm || "-"}
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.Stock || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.SenderLocationName || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-800 border-r border-slate-200">
+                                {item.StockDtTm || "-"}
                               </td>
                             </tr>
                           ))}
