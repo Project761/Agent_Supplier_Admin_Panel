@@ -4,20 +4,25 @@ import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
 import CreatableSelect from "react-select/creatable";
 
-const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
+const TransferStock = ({ open, onClose, editData, onSuccess }) => {
+
 
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
     const [items, setItems] = useState([]);
-    const [value, setValue] = useState({
-        ItemName: "",
-        Price: "",
-        Qty: "",
-        LocationID: "",
-        LocationName: ""
-    });
+ const [value, setValue] = useState({
+    ItemName: "",
+    Price: "",
+    Qty: "",
+    LocationID: "",
+    LocationName: "",
+    StockDtTm: "",
+    SenderLocationID: "",        
+    SenderLocationName: ""       
+});
 
     const [errors, setErrors] = useState({});
+    const [partyType, setPartyType] = useState("direct"); 
 
     const handleChange = (key) => (e) => {
         setValue((prev) => ({
@@ -46,9 +51,8 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
     const validate = () => {
         const e = {};
         if (!value.ItemName) e.ItemName = "Item Name required";
-        // if (!value.Price) e.Price = "Price required";
         if (!value.Qty) e.Qty = "Quantity required";
-        // if (!value.LocationID) e.LocationID = "Location required";
+        
 
 
         setErrors(e);
@@ -58,8 +62,9 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
     useEffect(() => {
         if (editData) {
             setValue({
-                ItemName: editData.ItemName ?? "",
-                Price: editData.Price ?? ""
+                ItemName: editData.Description ?? "",
+                Price: editData.Price ?? "",
+                 StockDtTm: editData.StockDtTm ?? ""
             });
         }
     }, [editData]);
@@ -70,7 +75,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         };
         try {
             const res = await PostWithToken("ItemOut/GetDropDownData_Locations", val);
-            // console.log(res, "res");
+          
             if (res) {
                 setItems(res);
             } else {
@@ -94,35 +99,50 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         }
     }, [editData, open]);
 
-    const handleSubmit = async () => {
+   const handleSubmit = async () => {
 
-        if (!validate()) return;
+    if (!validate()) return;
 
-        const api =
-            "ItemStock/Insert_ItemStock";
+    let api = "";
+    let payload = {};
 
+    if (partyType === "direct") {
+     
+        api = "PartyStock/OutStock";
 
-        const payload = {
-            ItemID: editData?.ItemID,
-            ItemName: value.ItemName,
-            Qty: value.Qty,
-            CreatedByUser: 1,
+        payload = {
             LocationID: value.LocationID,
-            LocationName: value.LocationName
+            LocationName: value.LocationName,
+            Description: value.ItemName,
+            Qty: value.Qty,
+            StockDtTm: value.StockDtTm
         };
 
+    } else {
+     
+        api = "PartyStock/TransferStock";
 
-        const res = await PostWithToken(api, payload);
+        payload = {
+            LocationID: value.LocationID,
+            LocationName: value.LocationName,
+            Description: value.ItemName,
+            Qty: value.Qty,
+            StockDtTm: value.StockDtTm,
+            SenderLocationID: value.SenderLocationID,
+            SenderLocationName: value.SenderLocationName
+        };
+    }
 
-        if (res) {
-            toastifySuccess("Stock Added Successfully");
-            onClose?.();
-            onSuccess?.();
-            refreshvalues();
-            GetData_location();
-        }
-    };
+    const res = await PostWithToken(api, payload);
 
+    if (res) {
+        toastifySuccess("Stock Added Successfully");
+        onClose?.();
+        onSuccess?.();
+        refreshvalues();
+         GetData_location();
+    }
+};
     if (!open) return null;
 
     const selectStyles = {
@@ -140,15 +160,18 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         label: loc.LocationName
     }));
 
-    const refreshvalues = () => {
-        setValue({
-            ItemName: "",
-            Price: "",
-            Qty: "",
-            LocationID: "",
-            LocationName: ""
-        });
-    }
+   const refreshvalues = () => {
+    setValue({
+        ItemName: "",
+        Price: "",
+        Qty: "",
+        LocationID: "",
+        LocationName: "",
+        StockDtTm: "",
+        SenderLocationID: "",
+        SenderLocationName: ""
+    });
+};
 
     return (
         <div className="fixed inset-0 z-50">
@@ -157,11 +180,11 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
 
             <div className="relative flex items-center justify-center min-h-screen p-4">
 
-                <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6">
+                <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 max-h-[100vh] overflow-y-auto">
 
                     <div className="flex justify-between mb-4">
                         <h2 className="text-lg font-semibold">
-                            {editData ? "Add Stock" : "Add Stock"}
+                            {editData ? "Transfer Stock" : "Transfer Stock"}
                         </h2>
 
                         <button onClick={onClose}>
@@ -170,6 +193,28 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
                     </div>
 
                     <div className="space-y-4">
+
+                        <div className="flex gap-4 mb-2">
+    
+    <label className="flex items-center gap-2">
+        <input
+            type="radio"
+            checked={partyType === "direct"}
+            onChange={() => setPartyType("direct")}
+        />
+        Direct Party
+    </label>
+
+    <label className="flex items-center gap-2">
+        <input
+            type="radio"
+            checked={partyType === "nodirect"}
+            onChange={() => setPartyType("nodirect")}
+        />
+        No Direct Party
+    </label>
+
+</div>
 
                         <div>
                             <label className="text-sm font-medium">
@@ -247,6 +292,51 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
                             )}
                         </div>
 
+                        <div>
+    <label className="text-sm font-medium">
+        Stock Date
+    </label>
+
+    <input
+        type="date"
+        value={value.StockDtTm}
+        onChange={(e) =>
+            setValue((prev) => ({
+                ...prev,
+                StockDtTm: e.target.value
+            }))
+        }
+        className={inputCls}
+    />
+</div>
+
+
+{partyType === "nodirect" && (
+    <div>
+        <label className="text-sm font-medium">
+            Sender Location
+        </label>
+
+        <CreatableSelect
+            value={
+                value.SenderLocationName
+                    ? { label: value.SenderLocationName, value: value.SenderLocationID }
+                    : null
+            }
+            onChange={(opt) =>
+                setValue((prev) => ({
+                    ...prev,
+                    SenderLocationID: opt?.value || "",
+                    SenderLocationName: opt?.label || ""
+                }))
+            }
+            options={locationOptions}
+            placeholder="Select sender location..."
+            styles={selectStyles}
+            isClearable
+        />
+    </div>
+)}
 
                     </div>
 
@@ -268,4 +358,4 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
     );
 };
 
-export default AddStockModal;
+export default TransferStock;

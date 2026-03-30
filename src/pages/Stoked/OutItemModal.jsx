@@ -182,6 +182,7 @@ const options = itemlist.map(item => ({
       onClose?.();
       onSuccess?.();
       refershdvalues();
+      GetData_Driver();
     }
 
   } catch (error) {

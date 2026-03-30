@@ -4,7 +4,7 @@ import { PostWithToken } from "../../ApiMethods/ApiMethods";
 import { toastifySuccess } from "../../Utility/Utility";
 import CreatableSelect from "react-select/creatable";
 
-const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
+const AddItem = ({ open, onClose, editData, onSuccess }) => {
 
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
@@ -14,7 +14,8 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         Price: "",
         Qty: "",
         LocationID: "",
-        LocationName: ""
+        LocationName: "",
+         StockDtTm: "" 
     });
 
     const [errors, setErrors] = useState({});
@@ -46,9 +47,8 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
     const validate = () => {
         const e = {};
         if (!value.ItemName) e.ItemName = "Item Name required";
-        // if (!value.Price) e.Price = "Price required";
         if (!value.Qty) e.Qty = "Quantity required";
-        // if (!value.LocationID) e.LocationID = "Location required";
+       
 
 
         setErrors(e);
@@ -59,7 +59,8 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         if (editData) {
             setValue({
                 ItemName: editData.ItemName ?? "",
-                Price: editData.Price ?? ""
+                Price: editData.Price ?? "",
+                 StockDtTm: editData.StockDtTm ?? ""
             });
         }
     }, [editData]);
@@ -70,7 +71,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         };
         try {
             const res = await PostWithToken("ItemOut/GetDropDownData_Locations", val);
-            // console.log(res, "res");
+           
             if (res) {
                 setItems(res);
             } else {
@@ -99,16 +100,16 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
         if (!validate()) return;
 
         const api =
-            "ItemStock/Insert_ItemStock";
+            "PartyStock/AddStock";
 
 
         const payload = {
-            ItemID: editData?.ItemID,
-            ItemName: value.ItemName,
+            // ItemID: editData?.ItemID,
+            Description: value.ItemName,
             Qty: value.Qty,
-            CreatedByUser: 1,
             LocationID: value.LocationID,
-            LocationName: value.LocationName
+            LocationName: value.LocationName,
+             StockDtTm: value.StockDtTm 
         };
 
 
@@ -120,6 +121,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
             onSuccess?.();
             refreshvalues();
             GetData_location();
+           
         }
     };
 
@@ -146,7 +148,8 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
             Price: "",
             Qty: "",
             LocationID: "",
-            LocationName: ""
+            LocationName: "",
+             StockDtTm: "" 
         });
     }
 
@@ -161,7 +164,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
 
                     <div className="flex justify-between mb-4">
                         <h2 className="text-lg font-semibold">
-                            {editData ? "Add Stock" : "Add Stock"}
+                            {editData ? "Add Item" : "Add Item"}
                         </h2>
 
                         <button onClick={onClose}>
@@ -229,7 +232,7 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
                                 onCreateOption={(inputValue) =>
                                     setValue((prev) => ({
                                         ...prev,
-                                        LocationID: "",        // new location
+                                        LocationID: "",        
                                         LocationName: inputValue
                                     }))
                                 }
@@ -246,6 +249,24 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
                                 </p>
                             )}
                         </div>
+
+                        <div>
+    <label className="text-sm font-medium">
+        Stock Date
+    </label>
+
+    <input
+        type="date"
+        value={value.StockDtTm}
+        onChange={(e) =>
+            setValue((prev) => ({
+                ...prev,
+                StockDtTm: e.target.value
+            }))
+        }
+        className={inputCls}
+    />
+</div>
 
 
                     </div>
@@ -268,4 +289,4 @@ const AddStockModal = ({ open, onClose, editData, onSuccess }) => {
     );
 };
 
-export default AddStockModal;
+export default AddItem;

@@ -31,6 +31,7 @@ import GpsDevicePayments from './pages/GpsDevicePayments/GpsDevicePayments';
 import InItam from './pages/stoked/InItam';
 import OutItem from './pages/Stoked/OutItem';
 import WorkStatus from './pages/WorkStatus/WorkStatus';
+import AddOrTransferStock from './pages/PartyStock/AddOrTransferStock';
 
 
 // const PublicRoute = ({ children }) => {
@@ -109,6 +110,7 @@ function App() {
           <Route path="MobileList" element={<MobileList />} />
           <Route path="supplier" element={<Supplier />} />
           <Route path="InItam" element={<InItam />} />
+           <Route path="addortransfer" element={<AddOrTransferStock />} />
           <Route path="OutItem" element={<OutItem />} />
           <Route path="contact" element={<Contact />} />
           <Route path="contact/add" element={<ContactModal />} />
