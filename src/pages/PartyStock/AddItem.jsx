@@ -5,7 +5,7 @@ import { toastifySuccess } from "../../Utility/Utility";
 import CreatableSelect from "react-select/creatable";
 
 const AddItem = ({ open, onClose, editData, onSuccess }) => {
-
+ 
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
     const [items, setItems] = useState([]);
@@ -46,7 +46,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
 
     const validate = () => {
         const e = {};
-        if (!value.ItemName) e.ItemName = "Item Name required";
+        if (!value.ItemName) e.ItemName = "Description  required";
         if (!value.Qty) e.Qty = "Quantity required";
        
 
@@ -58,9 +58,11 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
     useEffect(() => {
         if (editData) {
             setValue({
-                ItemName: editData.ItemName ?? "",
+                ItemName: editData.Description ?? "",
                 Price: editData.Price ?? "",
-                 StockDtTm: editData.StockDtTm ?? ""
+                 StockDtTm: editData.StockDtTm ?? "",
+                LocationID: editData.LocationID ?? "",
+                LocationName: editData.LocationName ?? ""
             });
         }
     }, [editData]);
@@ -164,7 +166,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
 
                     <div className="flex justify-between mb-4">
                         <h2 className="text-lg font-semibold">
-                            {editData ? "Add Item" : "Add Item"}
+                            {editData ? "Add Stock" : "Add Stock"}
                         </h2>
 
                         <button onClick={onClose}>
@@ -176,7 +178,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
 
                         <div>
                             <label className="text-sm font-medium">
-                                Item Name
+                                Description
                             </label>
 
                             <input

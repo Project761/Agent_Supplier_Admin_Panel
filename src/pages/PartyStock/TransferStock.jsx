@@ -50,7 +50,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
 
     const validate = () => {
         const e = {};
-        if (!value.ItemName) e.ItemName = "Item Name required";
+        if (!value.ItemName) e.ItemName = "Description required";
         if (!value.Qty) e.Qty = "Quantity required";
         
 
@@ -61,8 +61,11 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
 
     useEffect(() => {
         if (editData) {
+           
             setValue({
                 ItemName: editData.Description ?? "",
+                LocationName: editData.LocationName ?? "",
+                LocationID: editData.LocationID ?? "",
                 Price: editData.Price ?? "",
                  StockDtTm: editData.StockDtTm ?? ""
             });
@@ -218,7 +221,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
 
                         <div>
                             <label className="text-sm font-medium">
-                                Item Name
+                                Description
                             </label>
 
                             <input
