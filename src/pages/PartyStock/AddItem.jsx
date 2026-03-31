@@ -5,7 +5,8 @@ import { toastifySuccess } from "../../Utility/Utility";
 import CreatableSelect from "react-select/creatable";
 
 const AddItem = ({ open, onClose, editData, onSuccess }) => {
- 
+
+
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
     const [items, setItems] = useState([]);
@@ -15,7 +16,8 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
         Qty: "",
         LocationID: "",
         LocationName: "",
-         StockDtTm: "" 
+        StockDtTm: "",
+        Comment: ""
     });
 
     const [errors, setErrors] = useState({});
@@ -44,12 +46,27 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
         });
     };
 
+    // const validate = () => {
+    //     const e = {};
+    //     if (!value.ItemName) e.ItemName = "Description  required";
+    //     if (!value.Qty) e.Qty = "Quantity required";
+
+    //     setErrors(e);
+    //     return Object.keys(e).length === 0;
+    // };
+
     const validate = () => {
         const e = {};
-        if (!value.ItemName) e.ItemName = "Description  required";
-        if (!value.Qty) e.Qty = "Quantity required";
-       
 
+        // if (!value.ItemName) {
+        //     e.ItemName = "Description required";
+        // }
+        if (!value.Qty) {
+            e.Qty = "Quantity required";
+        }
+        // else if (Number(value.Qty) > (editData?.TotalInStock ?? 0)) {
+        //     e.Qty = "Quantity cannot be greater than in stock";
+        // }
 
         setErrors(e);
         return Object.keys(e).length === 0;
@@ -60,7 +77,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
             setValue({
                 ItemName: editData.Description ?? "",
                 Price: editData.Price ?? "",
-                 StockDtTm: editData.StockDtTm ?? "",
+                StockDtTm: editData.StockDtTm ?? "",
                 LocationID: editData.LocationID ?? "",
                 LocationName: editData.LocationName ?? ""
             });
@@ -73,7 +90,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
         };
         try {
             const res = await PostWithToken("ItemOut/GetDropDownData_Locations", val);
-           
+
             if (res) {
                 setItems(res);
             } else {
@@ -111,7 +128,8 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
             Qty: value.Qty,
             LocationID: value.LocationID,
             LocationName: value.LocationName,
-             StockDtTm: value.StockDtTm 
+            Comment: value.Comment,
+            StockDtTm: value.StockDtTm ? value.StockDtTm : new Date().toISOString().split("T")[0]
         };
 
 
@@ -123,7 +141,7 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
             onSuccess?.();
             refreshvalues();
             GetData_location();
-           
+
         }
     };
 
@@ -151,19 +169,16 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
             Qty: "",
             LocationID: "",
             LocationName: "",
-             StockDtTm: "" 
+            StockDtTm: "",
+            Comment: ""
         });
     }
 
     return (
         <div className="fixed inset-0 z-50">
-
             <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
-
             <div className="relative flex items-center justify-center min-h-screen p-4">
-
                 <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6">
-
                     <div className="flex justify-between mb-4">
                         <h2 className="text-lg font-semibold">
                             {editData ? "Add Stock" : "Add Stock"}
@@ -181,11 +196,28 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
                                 Description
                             </label>
 
-                            <input
-                                value={value.ItemName}
-                                onChange={handleChange("ItemName")}
-                                className={inputCls}
-                            />
+                            {
+                                editData ? (
+                                    <input
+                                        type="text"
+                                        value={value.ItemName}
+                                        onChange={handleChange("ItemName")}
+                                        className={`${inputCls} w-full bg-gray-100 cursor-not-allowed`}
+                                        placeholder="Enter description"
+                                        disabled
+                                    />
+                                ) : (
+                                    <input
+
+                                        type="text"
+                                        value={value.ItemName}
+                                        onChange={handleChange("ItemName")}
+                                        className={`${inputCls} w-full`}
+                                        placeholder="Enter description"
+                                    />
+                                )
+
+                            }
 
                             {errors.ItemName && (
                                 <p className="text-red-500 text-xs">
@@ -196,54 +228,71 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
 
                         <div>
                             <label className="text-sm font-medium">
-                                Quantity
-                            </label>
-
-                            <input
-                                type="number"
-                                value={value.Qty}
-                                onChange={handleChange("Qty")}
-                                className={inputCls}
-                            />
-
-                            {errors.Qty && (
-                                <p className="text-red-500 text-xs">
-                                    {errors.Qty}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="text-sm font-medium">
                                 Location
                             </label>
 
-                            <CreatableSelect
-                                value={
-                                    value.LocationName
-                                        ? { label: value.LocationName, value: value.LocationID }
-                                        : null
-                                }
-                                onChange={(opt) =>
-                                    setValue((prev) => ({
-                                        ...prev,
-                                        LocationID: opt?.value || "",
-                                        LocationName: opt?.label || ""
-                                    }))
-                                }
-                                onCreateOption={(inputValue) =>
-                                    setValue((prev) => ({
-                                        ...prev,
-                                        LocationID: "",        
-                                        LocationName: inputValue
-                                    }))
-                                }
-                                options={locationOptions}
-                                placeholder="Select or create location..."
-                                styles={selectStyles}
-                                isClearable
-                                formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
-                            />
+                            {editData ?
+                                (
+                                    <CreatableSelect
+                                        value={
+                                            value.LocationName
+                                                ? { label: value.LocationName, value: value.LocationID }
+                                                : null
+                                        }
+                                        onChange={(opt) =>
+                                            setValue((prev) => ({
+                                                ...prev,
+                                                LocationID: opt?.value || "",
+                                                LocationName: opt?.label || ""
+                                            }))
+                                        }
+                                        onCreateOption={(inputValue) =>
+                                            setValue((prev) => ({
+                                                ...prev,
+                                                LocationID: "",
+                                                LocationName: inputValue
+                                            }))
+                                        }
+                                        options={locationOptions}
+                                        placeholder="Select or create location..."
+                                        styles={selectStyles}
+                                        isClearable
+                                        formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                                        isDisabled
+
+                                    />
+                                ) :
+                                (
+                                    <CreatableSelect
+                                        value={
+                                            value.LocationName
+                                                ? { label: value.LocationName, value: value.LocationID }
+                                                : null
+                                        }
+                                        onChange={(opt) =>
+                                            setValue((prev) => ({
+                                                ...prev,
+                                                LocationID: opt?.value || "",
+                                                LocationName: opt?.label || ""
+                                            }))
+                                        }
+                                        onCreateOption={(inputValue) =>
+                                            setValue((prev) => ({
+                                                ...prev,
+                                                LocationID: "",
+                                                LocationName: inputValue
+                                            }))
+                                        }
+                                        options={locationOptions}
+                                        placeholder="Select or create location..."
+                                        styles={selectStyles}
+                                        isClearable
+                                        formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+
+
+                                    />
+                                )
+                            }
 
                             {errors.LocationID && (
                                 <p className="text-red-500 text-xs">
@@ -252,23 +301,72 @@ const AddItem = ({ open, onClose, editData, onSuccess }) => {
                             )}
                         </div>
 
-                        <div>
-    <label className="text-sm font-medium">
-        Stock Date
-    </label>
+                        <div className="space-y-2">
+                            {/* Label Row */}
+                            <div className="flex justify-between items-center">
+                                <label className="text-sm font-medium text-gray-700">
+                                    Quantity
+                                </label>
 
-    <input
-        type="date"
-        value={value.StockDtTm}
-        onChange={(e) =>
-            setValue((prev) => ({
-                ...prev,
-                StockDtTm: e.target.value
-            }))
-        }
-        className={inputCls}
-    />
-</div>
+                                <span className="text-xs font-semibold px-2 py-1 rounded-md bg-green-100 text-green-700">
+                                    In Stock: {editData?.TotalInStock ?? 0}
+                                </span>
+                            </div>
+
+                            {/* Input */}
+                            <input
+                                type="number"
+                                value={value.Qty}
+                                onChange={handleChange("Qty")}
+                                className={`${inputCls} w-full`}
+                                placeholder="Enter quantity"
+                            />
+
+                            {/* Error */}
+                            {errors.Qty && (
+                                <p className="text-red-500 text-xs">
+                                    {errors.Qty}
+                                </p>
+                            )}
+                        </div>
+
+
+                        <div>
+                            <label className="text-sm font-medium">
+                                Stock Date
+                            </label>
+
+                            <input
+                                type="date"
+                                value={value.StockDtTm ? value.StockDtTm : new Date().toISOString().split("T")[0]}
+                                // value={value.StockDtTm}
+                                onChange={(e) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        StockDtTm: e.target.value
+                                    }))
+                                }
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium">
+                                Comment
+                            </label>
+
+                            <input
+                                type="Comment"
+                                value={value.Comment}
+                                placeholder="Enter Comment"
+                                onChange={(e) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        Comment: e.target.value
+                                    }))
+                                }
+                                className={inputCls}
+                            />
+                        </div>
 
 
                     </div>

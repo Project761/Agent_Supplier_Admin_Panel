@@ -10,19 +10,20 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
     const inputCls =
         "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
     const [items, setItems] = useState([]);
- const [value, setValue] = useState({
-    ItemName: "",
-    Price: "",
-    Qty: "",
-    LocationID: "",
-    LocationName: "",
-    StockDtTm: "",
-    SenderLocationID: "",        
-    SenderLocationName: ""       
-});
+    const [value, setValue] = useState({
+        ItemName: "",
+        Price: "",
+        Qty: "",
+        LocationID: "",
+        LocationName: "",
+        StockDtTm: "",
+        SenderLocationID: "",
+        SenderLocationName: "",
+        Comment: ""
+    });
 
     const [errors, setErrors] = useState({});
-    const [partyType, setPartyType] = useState("direct"); 
+    const [partyType, setPartyType] = useState("direct");
 
     const handleChange = (key) => (e) => {
         setValue((prev) => ({
@@ -50,10 +51,13 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
 
     const validate = () => {
         const e = {};
-        if (!value.ItemName) e.ItemName = "Description required";
-        if (!value.Qty) e.Qty = "Quantity required";
-        
-
+        // if (!value.ItemName) e.ItemName = "Description required";
+        // if (!value.Qty) e.Qty = "Quantity required";
+        if (!value.Qty) {
+            e.Qty = "Quantity required";
+        } else if (Number(value.Qty) > (editData?.RemainingQty ?? 0)) {
+            e.Qty = `Quantity cannot exceed remaining stock (${editData?.RemainingQty ?? 0})`;
+        }
 
         setErrors(e);
         return Object.keys(e).length === 0;
@@ -61,13 +65,13 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
 
     useEffect(() => {
         if (editData) {
-           
+
             setValue({
                 ItemName: editData.Description ?? "",
                 LocationName: editData.LocationName ?? "",
                 LocationID: editData.LocationID ?? "",
                 Price: editData.Price ?? "",
-                 StockDtTm: editData.StockDtTm ?? ""
+                StockDtTm: editData.StockDtTm ?? ""
             });
         }
     }, [editData]);
@@ -78,7 +82,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
         };
         try {
             const res = await PostWithToken("ItemOut/GetDropDownData_Locations", val);
-          
+
             if (res) {
                 setItems(res);
             } else {
@@ -102,50 +106,52 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
         }
     }, [editData, open]);
 
-   const handleSubmit = async () => {
+    const handleSubmit = async () => {
 
-    if (!validate()) return;
+        if (!validate()) return;
 
-    let api = "";
-    let payload = {};
+        let api = "";
+        let payload = {};
 
-    if (partyType === "direct") {
-     
-        api = "PartyStock/OutStock";
+        if (partyType === "direct") {
 
-        payload = {
-            LocationID: value.LocationID,
-            LocationName: value.LocationName,
-            Description: value.ItemName,
-            Qty: value.Qty,
-            StockDtTm: value.StockDtTm
-        };
+            api = "PartyStock/OutStock";
 
-    } else {
-     
-        api = "PartyStock/TransferStock";
+            payload = {
+                LocationID: value.LocationID,
+                LocationName: value.LocationName,
+                Description: value.ItemName,
+                Comment: value.Comment,
+                Qty: value.Qty,
+                StockDtTm: value.StockDtTm ? value.StockDtTm : new Date().toISOString().split("T")[0]
+            };
 
-        payload = {
-            LocationID: value.LocationID,
-            LocationName: value.LocationName,
-            Description: value.ItemName,
-            Qty: value.Qty,
-            StockDtTm: value.StockDtTm,
-            SenderLocationID: value.SenderLocationID,
-            SenderLocationName: value.SenderLocationName
-        };
-    }
+        } else {
 
-    const res = await PostWithToken(api, payload);
+            api = "PartyStock/TransferStock";
 
-    if (res) {
-        toastifySuccess("Stock Added Successfully");
-        onClose?.();
-        onSuccess?.();
-        refreshvalues();
-         GetData_location();
-    }
-};
+            payload = {
+                LocationID: value.LocationID,
+                LocationName: value.LocationName,
+                Description: value.ItemName,
+                Comment: value.Comment,
+                Qty: value.Qty,
+                StockDtTm: value.StockDtTm ? value.StockDtTm : new Date().toISOString().split("T")[0],
+                SenderLocationID: value.SenderLocationID,
+                SenderLocationName: value.SenderLocationName
+            };
+        }
+
+        const res = await PostWithToken(api, payload);
+
+        if (res) {
+            toastifySuccess("Stock Added Successfully");
+            onClose?.();
+            onSuccess?.();
+            refreshvalues();
+            GetData_location();
+        }
+    };
     if (!open) return null;
 
     const selectStyles = {
@@ -163,18 +169,19 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
         label: loc.LocationName
     }));
 
-   const refreshvalues = () => {
-    setValue({
-        ItemName: "",
-        Price: "",
-        Qty: "",
-        LocationID: "",
-        LocationName: "",
-        StockDtTm: "",
-        SenderLocationID: "",
-        SenderLocationName: ""
-    });
-};
+    const refreshvalues = () => {
+        setValue({
+            ItemName: "",
+            Price: "",
+            Qty: "",
+            LocationID: "",
+            LocationName: "",
+            StockDtTm: "",
+            SenderLocationID: "",
+            Comment: "",
+            SenderLocationName: ""
+        });
+    };
 
     return (
         <div className="fixed inset-0 z-50">
@@ -198,26 +205,26 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                     <div className="space-y-4">
 
                         <div className="flex gap-4 mb-2">
-    
-    <label className="flex items-center gap-2">
-        <input
-            type="radio"
-            checked={partyType === "direct"}
-            onChange={() => setPartyType("direct")}
-        />
-        Direct Party
-    </label>
 
-    <label className="flex items-center gap-2">
-        <input
-            type="radio"
-            checked={partyType === "nodirect"}
-            onChange={() => setPartyType("nodirect")}
-        />
-        No Direct Party
-    </label>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    checked={partyType === "direct"}
+                                    onChange={() => setPartyType("direct")}
+                                />
+                                Direct Party
+                            </label>
 
-</div>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    checked={partyType === "nodirect"}
+                                    onChange={() => setPartyType("nodirect")}
+                                />
+                                No Direct Party
+                            </label>
+
+                        </div>
 
                         <div>
                             <label className="text-sm font-medium">
@@ -228,6 +235,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                                 value={value.ItemName}
                                 onChange={handleChange("ItemName")}
                                 className={inputCls}
+                                readOnly
                             />
 
                             {errors.ItemName && (
@@ -236,26 +244,6 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                                 </p>
                             )}
                         </div>
-
-                        <div>
-                            <label className="text-sm font-medium">
-                                Quantity
-                            </label>
-
-                            <input
-                                type="number"
-                                value={value.Qty}
-                                onChange={handleChange("Qty")}
-                                className={inputCls}
-                            />
-
-                            {errors.Qty && (
-                                <p className="text-red-500 text-xs">
-                                    {errors.Qty}
-                                </p>
-                            )}
-                        </div>
-
                         <div>
                             <label className="text-sm font-medium">
                                 Location
@@ -277,7 +265,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                                 onCreateOption={(inputValue) =>
                                     setValue((prev) => ({
                                         ...prev,
-                                        LocationID: "",        // new location
+                                        LocationID: "",
                                         LocationName: inputValue
                                     }))
                                 }
@@ -286,6 +274,7 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                                 styles={selectStyles}
                                 isClearable
                                 formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                                isDisabled
                             />
 
                             {errors.LocationID && (
@@ -294,52 +283,110 @@ const TransferStock = ({ open, onClose, editData, onSuccess }) => {
                                 </p>
                             )}
                         </div>
+                        
+                        {partyType === "nodirect" && (
+                            <div>
+                                <label className="text-sm font-medium">
+                                    Sender Location
+                                </label>
+
+                                <CreatableSelect
+                                    value={
+                                        value.SenderLocationName
+                                            ? { label: value.SenderLocationName, value: value.SenderLocationID }
+                                            : null
+                                    }
+                                    onChange={(opt) =>
+                                        setValue((prev) => ({
+                                            ...prev,
+                                            SenderLocationID: opt?.value || "",
+                                            SenderLocationName: opt?.label || ""
+                                        }))
+                                    }
+                                    options={locationOptions}
+                                    placeholder="Select sender location..."
+                                    styles={selectStyles}
+                                    isClearable
+                                />
+                            </div>
+                        )}
+
+                        {/* <div>
+                            <label className="text-sm font-medium">
+                                Quantity
+                            </label>
+
+                            <input
+                                type="number"
+                                value={value.Qty}
+                                onChange={handleChange("Qty")}
+                                className={inputCls}
+                            />
+
+                            {errors.Qty && (
+                                <p className="text-red-500 text-xs">
+                                    {errors.Qty}
+                                </p>
+                            )}
+                        </div> */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <label className="text-sm font-medium text-gray-700">Quantity</label>
+                                <span className="text-xs font-semibold px-2 py-1 rounded-md bg-green-100 text-green-700">
+                                    Remaining Stock: {editData?.RemainingQty ?? 0}
+                                </span>
+                            </div>
+
+                            <input
+                                type="number"
+                                value={value.Qty}
+                                onChange={handleChange("Qty")}
+                                className={`${inputCls} w-full`}
+                                placeholder="Enter quantity"
+                            />
+
+                            {errors.Qty && (<p className="text-red-500 text-xs"> {errors.Qty}</p>)}
+                        </div>
+
 
                         <div>
-    <label className="text-sm font-medium">
-        Stock Date
-    </label>
+                            <label className="text-sm font-medium">
+                                Stock Date
+                            </label>
 
-    <input
-        type="date"
-        value={value.StockDtTm}
-        onChange={(e) =>
-            setValue((prev) => ({
-                ...prev,
-                StockDtTm: e.target.value
-            }))
-        }
-        className={inputCls}
-    />
-</div>
+                            <input
+                                type="date"
+                                value={value.StockDtTm ? value.StockDtTm : new Date().toISOString().split("T")[0]}
+                                onChange={(e) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        StockDtTm: e.target.value
+                                    }))
+                                }
+                                className={inputCls}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-sm font-medium">
+                                Comment
+                            </label>
+
+                            <input
+                                type="Comment"
+                                value={value.Comment}
+                                placeholder="Enter Comment"
+                                onChange={(e) =>
+                                    setValue((prev) => ({
+                                        ...prev,
+                                        Comment: e.target.value
+                                    }))
+                                }
+                                className={inputCls}
+                            />
+                        </div>
 
 
-{partyType === "nodirect" && (
-    <div>
-        <label className="text-sm font-medium">
-            Sender Location
-        </label>
-
-        <CreatableSelect
-            value={
-                value.SenderLocationName
-                    ? { label: value.SenderLocationName, value: value.SenderLocationID }
-                    : null
-            }
-            onChange={(opt) =>
-                setValue((prev) => ({
-                    ...prev,
-                    SenderLocationID: opt?.value || "",
-                    SenderLocationName: opt?.label || ""
-                }))
-            }
-            options={locationOptions}
-            placeholder="Select sender location..."
-            styles={selectStyles}
-            isClearable
-        />
-    </div>
-)}
 
                     </div>
 
