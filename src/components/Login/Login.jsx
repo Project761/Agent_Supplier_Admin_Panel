@@ -178,34 +178,81 @@ const Login = () => {
             const res = await PostWithToken("SMS/Check_Otp", payload);
             console.log("OTP Verification Response:", res);
 
+            // if (res?.[0]?.Message === "OTP verified successfully") {
+
+            //     const tempUserData = JSON.parse(
+            //         sessionStorage.getItem("TempUserData")
+            //     );
+
+            //     if (!tempUserData) {
+            //         toastifyError("User data not found");
+            //         return;
+            //     }
+
+            //     const isSuperAdmin =
+            //         tempUserData.IsSuperAdmin === true ||
+            //         tempUserData.IsSuperAdmin === "True";
+
+            //     const userData = {
+            //         ...tempUserData,
+            //         isOTPVerified: true
+            //     };
+
+            //     sessionStorage.setItem("UserData", JSON.stringify(userData));
+            //     sessionStorage.removeItem("TempUserData");
+
+            //     toastifySuccess("OTP verified successfully");
+
+            //     navigate(isSuperAdmin ? "/dashboard" : "/Userpage");
+
+            // } 
+            
+
+            
             if (res?.[0]?.Message === "OTP verified successfully") {
 
-                const tempUserData = JSON.parse(
-                    sessionStorage.getItem("TempUserData")
-                );
+    const tempUserData = JSON.parse(
+        sessionStorage.getItem("TempUserData")
+    );
 
-                if (!tempUserData) {
-                    toastifyError("User data not found");
-                    return;
-                }
+    if (!tempUserData) {
+        toastifyError("User data not found");
+        return;
+    }
 
-                const isSuperAdmin =
-                    tempUserData.IsSuperAdmin === true ||
-                    tempUserData.IsSuperAdmin === "True";
+    
+    const isOfficeEmp =
+        tempUserData.IsOfficeEmp === true ||
+        tempUserData.IsOfficeEmp === "True";
 
-                const userData = {
-                    ...tempUserData,
-                    isOTPVerified: true
-                };
 
-                sessionStorage.setItem("UserData", JSON.stringify(userData));
-                sessionStorage.removeItem("TempUserData");
+    const isSuperAdmin =
+        tempUserData.IsSuperAdmin === true ||
+        tempUserData.IsSuperAdmin === "True";
 
-                toastifySuccess("OTP verified successfully");
+    const userData = {
+        ...tempUserData,
+        isOTPVerified: true
+    };
 
-                navigate(isSuperAdmin ? "/dashboard" : "/Userpage");
+    sessionStorage.setItem("UserData", JSON.stringify(userData));
+    sessionStorage.removeItem("TempUserData");
 
-            } else {
+    toastifySuccess("OTP verified successfully");
+
+   
+    if (isOfficeEmp) {
+        navigate("/officeemployeepage");
+    } else if (isSuperAdmin) {
+        navigate("/dashboard");
+    } else {
+        navigate("/Userpage");
+    }
+}
+            
+
+
+            else {
                 toastifyError("Invalid OTP. Please try again.");
                 resetOtpInputs();
             }
