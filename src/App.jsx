@@ -32,6 +32,7 @@ import InItam from './pages/stoked/InItam';
 import OutItem from './pages/Stoked/OutItem';
 import WorkStatus from './pages/WorkStatus/WorkStatus';
 import AddOrTransferStock from './pages/PartyStock/AddOrTransferStock';
+import OfficeEmployeePage from './pages/OfficeEmployeePage/OfficeEmployeePage';
 
 
 // const PublicRoute = ({ children }) => {
@@ -53,28 +54,60 @@ import AddOrTransferStock from './pages/PartyStock/AddOrTransferStock';
 const PublicRoute = ({ children }) => {
   const userData = sessionStorage.getItem("UserData");
 
+  // if (userData) {
+  //   try {
+  //     const parsedUserData = JSON.parse(userData);
+     
+
+  //     if (parsedUserData?.access_token && parsedUserData?.isOTPVerified) {
+
+  //       const isSuperAdmin =
+  //         parsedUserData.IsSuperAdmin === true ||
+  //         parsedUserData.IsSuperAdmin === "True";
+
+  //       return (
+  //         <Navigate
+  //           to={isSuperAdmin ? "/dashboard" : "/Userpage"}
+  //           replace
+  //         />
+  //       );
+  //     }
+  //   } catch (error) {
+  //     sessionStorage.removeItem("UserData");
+  //   }
+  // }
+
   if (userData) {
-    try {
-      const parsedUserData = JSON.parse(userData);
-      // console.log(parsedUserData, "parsedUserData");
+  try {
+    const parsedUserData = JSON.parse(userData);
 
-      if (parsedUserData?.access_token && parsedUserData?.isOTPVerified) {
+    if (parsedUserData?.access_token && parsedUserData?.isOTPVerified) {
 
-        const isSuperAdmin =
-          parsedUserData.IsSuperAdmin === true ||
-          parsedUserData.IsSuperAdmin === "True";
+  
+      const isOfficeEmp =
+        parsedUserData.IsOfficeEmp === true ||
+        parsedUserData.IsOfficeEmp === "True";
 
-        return (
-          <Navigate
-            to={isSuperAdmin ? "/dashboard" : "/Userpage"}
-            replace
-          />
-        );
+      if (isOfficeEmp) {
+        return <Navigate to="/officeemployeepage" replace />;
       }
-    } catch (error) {
-      sessionStorage.removeItem("UserData");
+
+    
+      const isSuperAdmin =
+        parsedUserData.IsSuperAdmin === true ||
+        parsedUserData.IsSuperAdmin === "True";
+
+      return (
+        <Navigate
+          to={isSuperAdmin ? "/dashboard" : "/Userpage"}
+          replace
+        />
+      );
     }
+  } catch (error) {
+    sessionStorage.removeItem("UserData");
   }
+}
 
   return children;
 };
@@ -94,6 +127,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Userpage />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/OfficeEmployeePage"
+          element={
+            <ProtectedRoute>
+              <OfficeEmployeePage />
             </ProtectedRoute>
           }
         />

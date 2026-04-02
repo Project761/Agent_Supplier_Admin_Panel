@@ -55,6 +55,7 @@ const AdminUserModel = ({ open, onClose, editData, onSuccess }) => {
         CompanyID: editData.CompanyID ?? "",
         CompanyName: editData.CompanyName ?? "",
         IsSuperAdmin: editData.IsSuperAdmin ?? false,
+        IsOfficeEmp: editData.IsOfficeEmp ?? false,
       });
     }
   }, [editData]);
@@ -72,6 +73,7 @@ useEffect(() => {
       CompanyID: "",
       CompanyName: "",
       IsSuperAdmin: false,
+      IsOfficeEmp: false,
     });
     setErrors({});
   }
@@ -95,6 +97,7 @@ useEffect(() => {
     CompanyID: value.CompanyID,
     CompanyName: value.CompanyName,
     IsSuperAdmin: value.IsSuperAdmin || false,
+    IsOfficeEmp: value.IsOfficeEmp || false,
   };
 
   if (editData) {
@@ -185,6 +188,28 @@ console.log("Form value:", value);
     className="text-sm font-medium cursor-pointer"
   >
     Is Super Admin
+  </label>
+
+
+
+  <input
+    type="checkbox"
+    id="IsOfficeEmp"
+    checked={value.IsOfficeEmp || false}
+    onChange={(e) =>
+      setValue((prev) => ({
+        ...prev,
+        IsOfficeEmp: e.target.checked,
+      }))
+    }
+    className="h-4 w-4 cursor-pointer"
+  />
+
+  <label
+    htmlFor="IsOfficeEmp"
+    className="text-sm font-medium cursor-pointer"
+  >
+    Is Office Employee
   </label>
 </div>
 
