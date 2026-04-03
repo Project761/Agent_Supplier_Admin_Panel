@@ -157,6 +157,20 @@ const OfficeEmployeePage = () => {
         minWidth: 250,
         valueGetter: (params) => params.data?.Name ?? "-",
       },
+       {
+        headerName: "Area",
+        field: "Area",
+        flex: 1,
+        minWidth: 160,
+        valueGetter: (params) => params.data?.Area ?? "-",
+      },
+       {
+        headerName: "OwnerName",
+        field: "OwnerName",
+        flex: 1,
+        minWidth: 160,
+        valueGetter: (params) => params.data?.OwnerName ?? "-",
+      },
       {
         headerName: "Web. No",
         field: "WeighbridgeNo",
