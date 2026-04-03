@@ -5,8 +5,9 @@ import { toastifySuccess } from "../../Utility/Utility";
 
 const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
   const inputCls =
-    "w-full rounded-sm border border-black text-black px-4 py-2.5 text-sm " +
-    "outline-none focus:ring-1 focus:ring-black";
+    "w-full rounded-sm border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500";
+
+  const labelCls = "block mb-[4px] text-[13px] font-medium text-slate-600";
 
   const [value, setValue] = useState({
     Name: "",
@@ -34,11 +35,14 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
     SsoId: "",
     Password: "",
     CameraUrl: "",
+    CameraUrl2: "",
     TestingLive: "",
-    Software: "",
+    IsSoftware: "",
+    RawanaNo: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const [showDate, setShowDate] = useState(false);
 
   useEffect(() => {
     if (open && partyId) {
@@ -103,9 +107,9 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       <div className="relative flex items-center justify-center min-h-screen p-4">
-        <div className="bg-white w-full max-w-5xl rounded-xl p-6 max-h-[90vh] overflow-auto">
+        <div className="bg-white w-full max-w-5xl rounded-xl p-6 pt-2 max-h-[90vh] overflow-auto">
           <div className="flex justify-between mb-4">
-           <h2 className="text-lg sm:text-xl font-semibold text-slate-800">Edit Party Details</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-800">Edit Party Details</h2>
             <button
               type="button"
               onClick={onClose}
@@ -119,9 +123,9 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label> Web Name</label>
+            <div className="grid grid-cols-12 gap-3">
+              <div className="col-span-4">
+                <label className={labelCls}> Web Name</label>
                 <input
                   className={`${inputCls} disabled:bg-gray-200 disabled:text-black`}
                   value={value.Name || ""}
@@ -131,8 +135,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>Owner Name</label>
+              <div className="col-span-4">
+                <label className={labelCls}>Owner Name</label>
                 <input
                   className={inputCls}
                   value={value.OwnerName || ""}
@@ -141,8 +145,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>Owner Mobile</label>
+              <div className="col-span-4">
+                <label className={labelCls}>Owner Mobile</label>
                 <input
                   className={inputCls}
                   value={value.OwnerMobileNo || ""}
@@ -151,8 +155,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>Office Mobile</label>
+              <div className="col-span-4">
+                <label className={labelCls}>Office Mobile</label>
                 <input
                   className={inputCls}
                   value={value.OfficeMobileNo || ""}
@@ -161,18 +165,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>GST No</label>
-                <input
-                  className={inputCls}
-                  value={value.GSTNo || ""}
-                  onChange={handleChange("GSTNo")}
-                  placeholder="Enter GST number"
-                />
-              </div>
-
-              <div>
-                <label>Area</label>
+              <div className="col-span-4">
+                <label className={labelCls}>Area</label>
                 <input
                   className={inputCls}
                   value={value.Area || ""}
@@ -181,28 +175,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>District</label>
-                <input
-                  className={inputCls}
-                  value={value.District || ""}
-                  onChange={handleChange("District")}
-                  placeholder="Enter district"
-                />
-              </div>
-
-              <div>
-                <label>Address</label>
-                <input
-                  className={inputCls}
-                  value={value.Address || ""}
-                  onChange={handleChange("Address")}
-                  placeholder="Enter address"
-                />
-              </div>
-
-              <div>
-                <label>ME Office</label>
+              <div className="col-span-4">
+                <label className={labelCls}>ME Office</label>
                 <input
                   className={inputCls}
                   value={value.MEOffice || ""}
@@ -211,79 +185,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>Reference ID</label>
-                <input
-                  className={inputCls}
-                  value={value.ReferenceID || ""}
-                  onChange={handleChange("ReferenceID")}
-                  placeholder="Enter reference ID"
-                />
-              </div>
-
-              <div>
-                <label>Weighbridge No</label>
-                <input
-                  className={inputCls}
-                  value={value.WeighbridgeNo || ""}
-                  onChange={handleChange("WeighbridgeNo")}
-                  placeholder="Enter weighbridge number"
-                />
-              </div>
-
-              <div>
-                <label>Work Status</label>
-                <input
-                  className={inputCls}
-                  value={value.WorkStatus || ""}
-                  onChange={handleChange("WorkStatus")}
-                  placeholder="Enter work status"
-                />
-              </div>
-
-              <div>
-                <label>Request No</label>
-                <input
-                  className={inputCls}
-                  value={value.RequestNo || ""}
-                  onChange={handleChange("RequestNo")}
-                  placeholder="Enter request number"
-                />
-              </div>
-
-              <div>
-                <label>Reg No</label>
-                <input
-                  className={inputCls}
-                  value={value.RegNo || ""}
-                  onChange={handleChange("RegNo")}
-                  placeholder="Enter registration number"
-                />
-              </div>
-
-              <div>
-                <label>Lease No</label>
-                <input
-                  className={inputCls}
-                  value={value.LeaseNo || ""}
-                  onChange={handleChange("LeaseNo")}
-                  placeholder="Enter lease number"
-                />
-              </div>
-
-              <div>
-                <label>Lease Name</label>
-                <input
-                  className={inputCls}
-                  value={value.LeaseName || ""}
-                  onChange={handleChange("LeaseName")}
-                  placeholder="Enter lease name"
-                />
-              </div>
-
-
-              <div>
-                <label>DMG Status</label>
+              <div className="col-span-4">
+                <label className={labelCls}>DMG Status</label>
                 <input
                   className={inputCls}
                   value={value.DMGWorkStatus || ""}
@@ -292,8 +195,59 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>Status</label>
+
+              <div className="col-span-4">
+                <label className={labelCls}>Work Status</label>
+                <input
+                  className={inputCls}
+                  value={value.WorkStatus || ""}
+                  onChange={handleChange("WorkStatus")}
+                  placeholder="Enter work status"
+                />
+              </div>
+
+              <div className="col-span-4">
+                <label className={labelCls}>Reg No</label>
+                <input
+                  className={inputCls}
+                  value={value.RegNo || ""}
+                  onChange={handleChange("RegNo")}
+                  placeholder="Enter registration number"
+                />
+              </div>
+              <div className="col-span-4">
+                <label className={labelCls}>Request No</label>
+                <input
+                  className={inputCls}
+                  value={value.RequestNo || ""}
+                  onChange={handleChange("RequestNo")}
+                  placeholder="Enter request number"
+                />
+              </div>
+
+              <div className="col-span-4">
+                <label className={labelCls}>Ravana No.</label>
+                <input
+                  className={inputCls}
+                    value={value.RawanaNo || ""}
+                  onChange={handleChange("RawanaNo")}
+                  placeholder="Enter ravana number"
+                />
+              </div>
+              <div className="col-span-4">
+                <label className={labelCls}>Weighbridge No</label>
+                <input
+                  className={inputCls}
+                  value={value.WeighbridgeNo || ""}
+                  onChange={handleChange("WeighbridgeNo")}
+                  placeholder="Enter weighbridge number"
+                />
+              </div>
+
+
+
+              <div className="col-span-4">
+                <label className={labelCls}>Status</label>
                 <input
                   className={inputCls}
                   value={value.Status || ""}
@@ -302,8 +256,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>UltraViewer ID</label>
+              <div className="col-span-4">
+                <label className={labelCls}>UltraViewer ID</label>
                 <input
                   className={inputCls}
                   value={value.UltraViewerID || ""}
@@ -312,49 +266,48 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              <div>
-                <label>SSO ID</label>
+              {/* <div className="col-span-4">
+                <label className={labelCls}>IsSoftware</label>
                 <input
                   className={inputCls}
-                  value={value.SsoId || ""}
-                  onChange={handleChange("SsoId")}
-                  placeholder="Enter SSO ID"
+                  value={value.IsSoftware || ""}
+                  onChange={handleChange("IsSoftware")}
+                  placeholder="Enter IsSoftware name"
                 />
-              </div>
+              </div> */}
 
-              <div>
-                <label>Password</label>
-                <input
-                  type="password"
-                  className={inputCls}
-                  value={value.Password || ""}
-                  onChange={handleChange("Password")}
-                  placeholder="Enter password"
-                />
-              </div>
+          
 
-              <div>
-                <label>Camera URL</label>
-                <input
-                  className={inputCls}
-                  value={value.CameraUrl || ""}
-                  onChange={handleChange("CameraUrl")}
-                  placeholder="Enter camera URL"
-                />
-              </div>
+      
+              <div className="col-span-4">
+                {/* Checkbox */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                      id="IsSoftware"
+                    checked={showDate}
+                    onChange={(e) => setShowDate(e.target.checked)}
+                  />
+                    <label className={labelCls} htmlFor="IsSoftware">Is Software</label>
+                </div>
 
-              <div>
-                <label>Software</label>
-                <input
-                  className={inputCls}
-                  value={value.Software || ""}
-                  onChange={handleChange("Software")}
-                  placeholder="Enter software name"
-                />
-              </div>
+                {/* Date Picker (Conditional) */}
+                {showDate && (
+                  <div className="">
+                    <input
+                      type="date"
+                      className={inputCls}
+                      onChange={(e) => console.log("Selected Date:", e.target.value)}
+                    />
+                  </div>
+                )}
 
-              <div>
-                <label>Is Paid</label>
+              </div>
+             
+
+
+              <div className="col-span-4">
+                <label className={labelCls}>Is Paid</label>
                 <select
                   className={inputCls}
                   value={value.IsPaid || ""}
@@ -366,8 +319,8 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 </select>
               </div>
 
-              <div>
-                <label>Testing Live</label>
+              <div className="col-span-4">
+                <label className={labelCls}>Testing Live</label>
                 <select
                   className={inputCls}
                   value={value.TestingLive || ""}
@@ -379,17 +332,84 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 </select>
               </div>
 
-              <div className="col-span-1 sm:col-span-3">
-                <label>Remark</label>
+              <div className="col-span-12">
+                <label className={labelCls}>Camera URL Front</label>
+                <input
+                  className={inputCls}
+                  value={value.CameraUrl || ""}
+                  onChange={handleChange("CameraUrl")}
+                  placeholder="Enter camera URL"
+                />
+              </div>
+
+              <div className="col-span-12">
+                <label className={labelCls}>Camera URL Back</label>
+                <input
+                  className={inputCls}
+                    value={value.CameraUrl2 || ""}
+                    onChange={handleChange("CameraUrl2")}
+                  placeholder="Enter camera URL"
+                />
+              </div>
+
+
+
+              <div className="col-span-6">
+                <label className={labelCls}>SSO ID</label>
+                <input
+                  className={inputCls}
+                  value={value.SsoId || ""}
+                  onChange={handleChange("SsoId")}
+                  placeholder="Enter SSO ID"
+                />
+              </div>
+
+              <div className="col-span-6">
+                <label className={labelCls}>Password</label>
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={value.Password || ""}
+                  onChange={handleChange("Password")}
+                  placeholder="Enter password"
+                />
+              </div>
+
+              <div className="col-span-6">
+                <label className={labelCls}>Lease Name</label>
+                <input
+                  className={inputCls}
+                  value={value.LeaseName || ""}
+                  onChange={handleChange("LeaseName")}
+                  placeholder="Enter lease name"
+                />
+              </div>
+
+              <div className="col-span-6">
+                <label className={labelCls}>Lease No</label>
+                <input
+                  className={inputCls}
+                  value={value.LeaseNo || ""}
+                  onChange={handleChange("LeaseNo")}
+                  placeholder="Enter lease number"
+                />
+              </div>
+
+
+              <div className="col-span-12">
+                <label className={labelCls}>Remark</label>
                 <textarea
                   className={inputCls}
                   value={value.Remark || ""}
+                  rows={1}
                   onChange={handleChange("Remark")}
                   placeholder="Enter remark"
                 />
               </div>
+
             </div>
           )}
+
 
           <div className="flex justify-end gap-2 mt-4">
             <button
