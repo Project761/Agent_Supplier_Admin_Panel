@@ -108,16 +108,46 @@ const OfficeEmployeePage = () => {
         minWidth: 80,
         sortable: true,
       },
+        {
+        headerName: "Actions",
+        field: "actions",
+        minWidth: 120,
+        cellRenderer: (params) => {
+          const isPaid =
+            params.data?.IsPaid === true || params.data?.IsPaid === "True";
+
+          return (
+            <div className="flex gap-2">
+              <button
+                className={`rounded-md p-2 text-white ${
+                  isPaid
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                onClick={() => {
+                  if (!isPaid) {
+                    Editfunction(params.data);
+                  }
+                }}
+                disabled={isPaid}
+                title={isPaid ? "Already Paid" : "Edit"}
+              >
+                <FaEdit className="text-base" />
+              </button>
+            </div>
+          );
+        },
+      },
        {
         headerName: "Reg.No.",
         field: "RegNo",
-        minWidth: 150,
+        minWidth: 135,
         valueGetter: (p) => p.data?.RegNo ?? "-",
       },
       {
         headerName: "Rawana No.",
         field: "RawanaNo",
-        minWidth: 150,
+        minWidth: 135,
         valueGetter: (p) => p.data?.RawanaNo ?? "-",
       },
        {
@@ -195,37 +225,8 @@ const OfficeEmployeePage = () => {
       </div>
     );
   },
-},
-      {
-        headerName: "Actions",
-        field: "actions",
-        minWidth: 120,
-        cellRenderer: (params) => {
-          const isPaid =
-            params.data?.IsPaid === true || params.data?.IsPaid === "True";
-
-          return (
-            <div className="flex gap-2">
-              <button
-                className={`rounded-md p-2 text-white ${
-                  isPaid
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-                onClick={() => {
-                  if (!isPaid) {
-                    Editfunction(params.data);
-                  }
-                }}
-                disabled={isPaid}
-                title={isPaid ? "Already Paid" : "Edit"}
-              >
-                <FaEdit className="text-base" />
-              </button>
-            </div>
-          );
-        },
-      },
+}
+    
     ],
     [],
   );
