@@ -170,7 +170,32 @@ const OfficeEmployeePage = () => {
           );
         },
       },
+{
+  headerName: "Remark",
+  field: "LastRemark",
+  minWidth: 180,
+  cellRenderer: (p) => {
+    const remark = p.data?.LastRemark;
+    if (!remark) return "-";
 
+    const firstLine = remark.split("\n")[0];
+    const text = firstLine.split("]:")[1]?.trim() || "-";
+
+    return (
+      <div
+        title={text} 
+        style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "100%",
+        }}
+      >
+        {text}
+      </div>
+    );
+  },
+},
       {
         headerName: "Actions",
         field: "actions",
@@ -363,7 +388,7 @@ const OfficeEmployeePage = () => {
             </div>
           </div>
 
-          <div className="ag-theme-alpine rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+          <div style={{ height: "calc(100vh - 200px)", width: "100%" }} className="ag-theme-alpine rounded-xl overflow-hidden border border-gray-200 shadow-sm">
             <AgGridReact
               rowData={filteredItems}
               columnDefs={columnDefs}
@@ -371,7 +396,7 @@ const OfficeEmployeePage = () => {
               pagination={true}
               paginationPageSize={100}
               paginationPageSizeSelector={[5, 10, 25, 50, 100]}
-              domLayout="autoHeight"
+              // domLayout="autoHeight"
               headerHeight={45}
               rowHeight={45}
               defaultColDef={{
