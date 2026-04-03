@@ -108,44 +108,25 @@ const OfficeEmployeePage = () => {
         minWidth: 80,
         sortable: true,
       },
-
-      {
-        headerName: "Status",
-        field: "Status",
+       {
+        headerName: "Reg.No.",
+        field: "RegNo",
         minWidth: 150,
-        valueGetter: (p) => p.data?.Status ?? "-",
+        valueGetter: (p) => p.data?.RegNo ?? "-",
       },
-
       {
+        headerName: "Rawana No.",
+        field: "RawanaNo",
+        minWidth: 150,
+        valueGetter: (p) => p.data?.RawanaNo ?? "-",
+      },
+       {
         headerName: "Web.Name",
         field: "Name",
         flex: 1,
         minWidth: 250,
         valueGetter: (params) => params.data?.Name ?? "-",
       },
-
-      {
-        headerName: "Reg.No.",
-        field: "RegNo",
-        minWidth: 150,
-        valueGetter: (p) => p.data?.RegNo ?? "-",
-      },
-
-      {
-        headerName: "Lease Name",
-        field: "LeaseName",
-        flex: 1,
-        minWidth: 200,
-        valueGetter: (p) => p.data?.LeaseName ?? "-",
-      },
-
-      {
-        headerName: "ReQ. No",
-        field: "RequestNo",
-        minWidth: 135,
-        valueGetter: (p) => p.data?.RequestNo ?? "-",
-      },
-
       {
         headerName: "Web. No",
         field: "WeighbridgeNo",
@@ -154,6 +135,13 @@ const OfficeEmployeePage = () => {
         autoHeight: true,
         valueGetter: (p) => p.data?.WeighbridgeNo ?? "-",
       },
+       {
+        headerName: "ReQ. No",
+        field: "RequestNo",
+        minWidth: 135,
+        valueGetter: (p) => p.data?.RequestNo ?? "-",
+      },
+      
       {
         headerName: "DMG Status",
         field: "DMGWorkStatus",
@@ -295,18 +283,14 @@ const OfficeEmployeePage = () => {
     if (activeTab === "party") {
       formattedData = filteredItems.map((item, index) => ({
         "S.No.": index + 1,
-        Status: item.Status || "-",
-        "Web Name": item.Name || "-",
+       
         "Reg No": item.RegNo || "-",
-        "Lease No": item.LeaseNo || "-",
-        "Lease Name": item.LeaseName || "-",
-        "Request No": item.RequestNo || "-",
-        Area: item.Area || "-",
+        "Rawana No": item.RawanaNo || "-",
+        "Web Name": item.Name || "-",
         "Web. No": item.WeighbridgeNo || "-",
-        "Owner Name": item.OwnerName || "-",
-        "Owner Mobile No": item.OwnerMobileNo || "-",
-        Status: item.DMGWorkStatus || "-",
-        //  "Status": item.DMGWorkStatus || "-",
+        "Request No": item.RequestNo || "-",
+        "DMG Status": item.DMGWorkStatus || "-",
+       
       }));
 
       fileName = "Party_Details.xlsx";
