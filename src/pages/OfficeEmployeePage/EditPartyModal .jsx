@@ -39,10 +39,15 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
     TestingLive: "",
     IsSoftware: "",
     RawanaNo: "",
+    Software: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [showDate, setShowDate] = useState(false);
+
+  const [remarksList, setRemarksList] = useState([]);
+  const [newRemark, setNewRemark] = useState("");
+  const [selectdate, setSelectDate] = useState("");
 
   useEffect(() => {
     if (open && partyId) {
@@ -60,6 +65,10 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
 
       if (res && res[0]) {
         setValue(res[0]);
+        setRemarksList(parseRemarks(res[0].Remark));
+
+        setSelectDate(res[0].Software || "");
+        setShowDate(res[0].IsSoftware === true || res[0].IsSoftware === "true");
       }
     } catch (err) {
       console.error(err);
@@ -81,14 +90,33 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
 
       const auth = JSON.parse(sessionStorage.getItem("UserData"));
 
+      const username = auth?.FullName || "User";
+      const date = new Date().toLocaleString("en-GB");
+
+      let updatedRemarks = [...remarksList];
+
+      if (newRemark.trim()) {
+        updatedRemarks.push({
+          text: newRemark,
+          username,
+          date,
+        });
+      }
+
+      const finalRemark = buildRemarks(updatedRemarks);
+
       const payload = {
         ...value,
+        Remark: finalRemark,
         ModifiedByUser: auth?.UserID || "1",
+        IsSoftware: showDate,
+        Software: selectdate,
       };
 
       const res = await PostWithToken("Party/Update_PartyByEmp", payload);
 
       if (res) {
+         setNewRemark("");
         toastifySuccess("Updated Successfully");
         onClose();
         onSuccess();
@@ -100,6 +128,33 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
     }
   };
 
+  const parseRemarks = (remarkStr) => {
+    if (!remarkStr) return [];
+
+    return remarkStr.split("\n").map((line) => {
+      const match = line.match(/^\s*\[(.*?)\s*\|\s*(.*?)\]\s*:\s*(.*)$/);
+      if (match) {
+        return {
+          date: match[1] || "",
+          username: match[2] || "User",
+          text: match[3] || "",
+        };
+      }
+
+      return {
+        date: "",
+        username: "User",
+        text: line.replace(/^\d+\s*/, "").trim(),
+      };
+    });
+  };
+
+  const buildRemarks = (remarksArr) => {
+    return remarksArr
+      .map((r) => `[${r.date} | ${r.username}]: ${r.text}`)
+      .join("\n");
+  };
+
   if (!open) return null;
 
   return (
@@ -109,7 +164,9 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
       <div className="relative flex items-center justify-center min-h-screen p-4">
         <div className="bg-white w-full max-w-5xl rounded-xl p-6 pt-2 max-h-[90vh] overflow-auto">
           <div className="flex justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-slate-800">Edit Party Details</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-800">
+              Edit Party Details
+            </h2>
             <button
               type="button"
               onClick={onClose}
@@ -195,7 +252,6 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-
               <div className="col-span-4">
                 <label className={labelCls}>Work Status</label>
                 <input
@@ -229,7 +285,7 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 <label className={labelCls}>Ravana No.</label>
                 <input
                   className={inputCls}
-                    value={value.RawanaNo || ""}
+                  value={value.RawanaNo || ""}
                   onChange={handleChange("RawanaNo")}
                   placeholder="Enter ravana number"
                 />
@@ -243,8 +299,6 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                   placeholder="Enter weighbridge number"
                 />
               </div>
-
-
 
               <div className="col-span-4">
                 <label className={labelCls}>Status</label>
@@ -266,45 +320,30 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-              {/* <div className="col-span-4">
-                <label className={labelCls}>IsSoftware</label>
-                <input
-                  className={inputCls}
-                  value={value.IsSoftware || ""}
-                  onChange={handleChange("IsSoftware")}
-                  placeholder="Enter IsSoftware name"
-                />
-              </div> */}
-
-          
-
-      
               <div className="col-span-4">
-                {/* Checkbox */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                      id="IsSoftware"
+                    id="IsSoftware"
                     checked={showDate}
                     onChange={(e) => setShowDate(e.target.checked)}
                   />
-                    <label className={labelCls} htmlFor="IsSoftware">Is Software</label>
+                  <label className={labelCls} htmlFor="IsSoftware">
+                    Is Software
+                  </label>
                 </div>
 
-                {/* Date Picker (Conditional) */}
                 {showDate && (
                   <div className="">
                     <input
                       type="date"
                       className={inputCls}
-                      onChange={(e) => console.log("Selected Date:", e.target.value)}
+                      value={selectdate || ""}
+                      onChange={(e) => setSelectDate(e.target.value)}
                     />
                   </div>
                 )}
-
               </div>
-             
-
 
               <div className="col-span-4">
                 <label className={labelCls}>Is Paid</label>
@@ -346,13 +385,11 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 <label className={labelCls}>Camera URL Back</label>
                 <input
                   className={inputCls}
-                    value={value.CameraUrl2 || ""}
-                    onChange={handleChange("CameraUrl2")}
+                  value={value.CameraUrl2 || ""}
+                  onChange={handleChange("CameraUrl2")}
                   placeholder="Enter camera URL"
                 />
               </div>
-
-
 
               <div className="col-span-6">
                 <label className={labelCls}>SSO ID</label>
@@ -395,21 +432,43 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                 />
               </div>
 
-
               <div className="col-span-12">
-                <label className={labelCls}>Remark</label>
+                <label className={labelCls}>Remark History</label>
+
+                <div className="border rounded p-3 max-h-60 overflow-auto bg-gray-50 space-y-2">
+                  {remarksList.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 border-b pb-2 last:border-none"
+                    >
+                      <textarea
+                        className="flex-1 bg-transparent outline-none text-sm resize-none border rounded p-2"
+                        value={item.text}
+                        rows={2}
+                        onChange={(e) => {
+                          const updated = [...remarksList];
+                          updated[index].text = e.target.value;
+                          setRemarksList(updated);
+                        }}
+                      />
+
+                      <div className="text-xs text-gray-500 whitespace-nowrap pt-2">
+                        [{item.date} | {item.username}]
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 <textarea
-                  className={inputCls}
-                  value={value.Remark || ""}
-                  rows={1}
-                  onChange={handleChange("Remark")}
-                  placeholder="Enter remark"
+                  className={`${inputCls} mt-2`}
+                  value={newRemark}
+                  rows={3}
+                  onChange={(e) => setNewRemark(e.target.value)}
+                  placeholder="Add new remark"
                 />
               </div>
-
             </div>
           )}
-
 
           <div className="flex justify-end gap-2 mt-4">
             <button
