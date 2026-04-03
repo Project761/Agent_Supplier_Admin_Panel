@@ -48,6 +48,7 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
   const [remarksList, setRemarksList] = useState([]);
   const [newRemark, setNewRemark] = useState("");
   const [selectdate, setSelectDate] = useState("");
+  const [showAllRemarks, setShowAllRemarks] = useState(false);
 
   useEffect(() => {
     if (open && partyId) {
@@ -404,7 +405,7 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
               <div className="col-span-6">
                 <label className={labelCls}>Password</label>
                 <input
-                  type="password"
+                  type="text"
                   className={inputCls}
                   value={value.Password || ""}
                   onChange={handleChange("Password")}
@@ -435,29 +436,44 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
               <div className="col-span-12">
                 <label className={labelCls}>Remark History</label>
 
-                <div className="border rounded p-3 max-h-60 overflow-auto bg-gray-50 space-y-2">
-                  {remarksList.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-2 border-b pb-2 last:border-none"
-                    >
-                      <textarea
-                        className="flex-1 bg-transparent outline-none text-sm resize-none border rounded p-2"
-                        value={item.text}
-                        rows={2}
-                        onChange={(e) => {
-                          const updated = [...remarksList];
-                          updated[index].text = e.target.value;
-                          setRemarksList(updated);
-                        }}
-                      />
+                <div className={`border rounded p-3 bg-gray-50 space-y-2 ${!showAllRemarks ? 'max-h-60 overflow-auto' : ''}`}>
+                  {(showAllRemarks ? remarksList.slice().reverse() : remarksList.slice().reverse().slice(0, 3)).map((item, displayIndex) => {
+                    const origIndex = remarksList.length - 1 - displayIndex;
+                    return (
+                      <div
+                        key={origIndex}
+                        className="flex items-start gap-2 border-b pb-2 last:border-none"
+                      >
+                        <textarea
+                          className="flex-1 bg-transparent outline-none text-sm resize-none border rounded p-2"
+                          value={item.text}
+                          rows={2}
+                          onChange={(e) => {
+                            const updated = [...remarksList];
+                            updated[origIndex].text = e.target.value;
+                            setRemarksList(updated);
+                          }}
+                        />
 
-                      <div className="text-xs text-gray-500 whitespace-nowrap pt-2">
-                        [{item.date} | {item.username}]
+                        <div className="text-xs text-gray-500 whitespace-nowrap pt-2">
+                          [{item.date} | {item.username}]
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
+                {remarksList.length > 3 && (
+                  <div className="mt-2 col-span-12">
+                    <button
+                      type="button"
+                      className="text-sm text-blue-600 hover:underline"
+                      onClick={() => setShowAllRemarks((s) => !s)}
+                    >
+                      {showAllRemarks ? 'Show less' : `Show more (${remarksList.length - 3})`}
+                    </button>
+                  </div>
+                )}
 
                 <textarea
                   className={`${inputCls} mt-2`}
