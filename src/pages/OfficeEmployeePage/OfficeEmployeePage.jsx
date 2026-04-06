@@ -141,13 +141,13 @@ const OfficeEmployeePage = () => {
        {
         headerName: "Reg.No.",
         field: "RegNo",
-        minWidth: 135,
+        minWidth: 185,
         valueGetter: (p) => p.data?.RegNo ?? "-",
       },
       {
         headerName: "Rawana No.",
         field: "RawanaNo",
-        minWidth: 135,
+        minWidth: 185,
         valueGetter: (p) => p.data?.RawanaNo ?? "-",
       },
        {
