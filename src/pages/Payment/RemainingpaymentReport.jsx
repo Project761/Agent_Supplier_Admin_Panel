@@ -158,6 +158,7 @@ const GetData_RemainingReport = async () => {
     "Final Amount": row.FinalAmt || 0,
     "Paid Amount": row.PaidAmt || 0,
     "Remaining Amount": row.ReamaningAmt || 0,
+    "Area": row.Area || "-",
   }));
 
  
@@ -219,6 +220,7 @@ const handlePrint = () => {
       <td>₹${row.FinalAmt || 0}</td>
       <td>₹${row.PaidAmt || 0}</td>
       <td>₹${row.ReamaningAmt || 0}</td>
+       <td>${row.Area || "-"}</td>
     </tr>
   `).join("");
 
@@ -308,6 +310,7 @@ const handlePrint = () => {
               <th>Final Amt</th>
               <th>Paid Amt</th>
               <th>Remaining Amt</th>
+              <th>Area</th>
             </tr>
           </thead>
           <tbody>
