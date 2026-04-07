@@ -15,6 +15,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import EditPartyModal from "./EditPartyModal ";
+import SupportModal from "./SupportModal";
 
 const OfficeEmployeePage = () => {
   const parsedUserData = JSON.parse(sessionStorage.getItem("UserData"));
@@ -25,6 +26,7 @@ const OfficeEmployeePage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartyId, setSelectedPartyId] = useState(null);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   useEffect(() => {
     getPermissionUsers();
@@ -385,6 +387,19 @@ const OfficeEmployeePage = () => {
     <>
       <Topbar />
       <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
+
+  <div className="bg-white rounded-xl shadow-sm p-4 mb-2 flex gap-2 ">
+         
+         <button
+  onClick={() => setIsSupportOpen(true)}
+   className="rounded-md px-6 py-1.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700" 
+>
+  Support Page
+</button>
+        </div>
+
+
+
         <div className="bg-white rounded-xl shadow-sm p-4">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <input
@@ -428,6 +443,10 @@ const OfficeEmployeePage = () => {
               partyId={selectedPartyId}
               onSuccess={getPermissionUsers}
             />
+            <SupportModal
+  open={isSupportOpen}
+  onClose={() => setIsSupportOpen(false)}
+/>
           </div>
         </div>
       </div>
