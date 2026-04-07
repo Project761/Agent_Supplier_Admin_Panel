@@ -106,15 +106,22 @@ const items = [
   },
 
 
-  {
-    label: "List / Table",
-    icon: FiList,
-    children: [{ label: "Manage APIs", to: "/dashboard/listtable" }],
-  },
+ 
   {
     label: "Gps Device Payment",
     icon: FiMapPin,
     children: [{ label: "Manage GPS Device Payments", to: "/dashboard/gpsdevicepayment" }],
+  },
+ {
+    label: "Support Page",
+    icon: FiUserCheck,
+    children: [{ label: "Support Page ", to: "/dashboard/support" }],
+  },
+
+   {
+    label: "List / Table",
+    icon: FiList,
+    children: [{ label: "Manage APIs", to: "/dashboard/listtable" }],
   },
 ];
 
@@ -149,6 +156,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if(pathname.includes("/workstatus")) setOpenKey("Work Status");
     if (pathname.includes("/listtable")) setOpenKey("List / Table");
     if (pathname.includes("/gpsdevicepayment")) setOpenKey("Gps Device Payment");
+    if (pathname.includes("/support")) setOpenKey("Support Page");
 
   }, [pathname]);
 
