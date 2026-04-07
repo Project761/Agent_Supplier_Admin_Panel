@@ -448,6 +448,7 @@ const EditPartyModal = ({ open, onClose, partyId, onSuccess }) => {
                           className="flex-1 bg-transparent outline-none text-sm resize-none border rounded p-2"
                           value={item.text}
                           rows={2}
+                          disabled={true}
                           onChange={(e) => {
                             const updated = [...remarksList];
                             updated[origIndex].text = e.target.value;
