@@ -86,6 +86,10 @@ const refreshLogin = async () => {
         };
 
         // const apiBaseURL = API_BASE_URL;
+const API_BASE_URL = window.location.origin === "https://automation.arustu.com"
+    ? "https://automationapi.arustu.com/api/"
+    : "http://autoapi.arustu.com/api/";
+
         const res = await axios.post(
             `${API_BASE_URL}User/Login`,
             refreshVal
