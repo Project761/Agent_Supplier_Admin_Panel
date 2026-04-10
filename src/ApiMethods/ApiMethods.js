@@ -74,7 +74,42 @@ export const Comman_changeArrayFormat = (data, Id, Code, type, col3, col4) => {
     }
 }
 
-const refreshLogin = async () => {
+// const refreshLogin = async () => {
+//     try {
+//         const auth = JSON.parse(sessionStorage.getItem("UserData"));
+
+//         if (!auth?.refresh_token) return false;
+
+//         const refreshVal = {
+//             refresh_token: auth.refresh_token,
+//             grant_type: "refresh_token",
+//         };
+
+       
+// const API_BASE_URL = window.location.origin === "https://automation.arustu.com"
+//     ? "https://automationapi.arustu.com/api/"
+//     : "http://autoapi.arustu.com/api/";
+
+//         const res = await axios.post(
+//             `${API_BASE_URL}User/Login`,
+//             refreshVal
+//         );
+
+//         if (res?.data?.error_description == "Successfully Login" && res?.data?.error == 200) {
+
+//             sessionStorage.setItem("UserData", JSON.stringify(res.data));
+//             return true;
+//         }
+
+//         return false;
+//     } catch (err) {
+//         console.error("❌ Login refresh failed", err);
+//         return false;
+//     }
+// };
+
+
+export const refreshLogin = async () => {
     try {
         const auth = JSON.parse(sessionStorage.getItem("UserData"));
 
@@ -90,14 +125,18 @@ const API_BASE_URL = window.location.origin === "https://automation.arustu.com"
     ? "https://automationapi.arustu.com/api/"
     : "http://autoapi.arustu.com/api/";
 
-        const res = await axios.post(
-            `${API_BASE_URL}User/Login`,
-            refreshVal
-        );
+        const res = await axios.post(`${API_BASE_URL}User/Login`, refreshVal);
 
         if (res?.data?.error_description == "Successfully Login" && res?.data?.error == 200) {
+            const prevAuth = JSON.parse(sessionStorage.getItem("UserData")) || {};
 
-            sessionStorage.setItem("UserData", JSON.stringify(res.data));
+            // Preserve `isOTPVerified` (and other important flags) from previous storage
+            const merged = {
+                ...res.data,
+                isOTPVerified: prevAuth.isOTPVerified ?? res.data.isOTPVerified,
+            };
+
+            sessionStorage.setItem("UserData", JSON.stringify(merged));
             return true;
         }
 
