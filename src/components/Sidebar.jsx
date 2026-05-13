@@ -117,6 +117,11 @@ const items = [
     icon: FiUserCheck,
     children: [{ label: "Support Page ", to: "/dashboard/support" }],
   },
+  {
+    label: "Weighbridge Status",
+    icon: FiUserCheck,
+    children: [{ label: "Weighbridge Status", to: "/dashboard/servicestartstop" }],
+  },
 
    {
     label: "List / Table",

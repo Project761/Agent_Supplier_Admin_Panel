@@ -34,6 +34,7 @@ import WorkStatus from './pages/WorkStatus/WorkStatus';
 import AddOrTransferStock from './pages/PartyStock/AddOrTransferStock';
 import OfficeEmployeePage from './pages/OfficeEmployeePage/OfficeEmployeePage';
 import SupportPage from './pages/SupportPage/SupportPage';
+import ServiceStartStop from './pages/ServiceStartStop/ServiceStartStop';
 
 
 // const PublicRoute = ({ children }) => {
@@ -176,6 +177,7 @@ function App() {
           <Route path="workstatus" element={<WorkStatus />} />
           <Route path="gpsdevicepayment" element={<GpsDevicePayments />} />
           <Route path="support" element={<SupportPage />} />
+          <Route path="servicestartstop" element={<ServiceStartStop />} />
         </Route>
         {/* Catch all other routes and redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />
